@@ -11,13 +11,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = $_POST['title'];
     $body = $_POST['body'];
     $type = $_POST['type'];
-    $url = $_POST['file_url'];
+    $url = $_POST['file_url']; // fallback if no file uploaded
 
-    $stmt = $conn->prepare("INSERT INTO contents (course_id, type, title, body, file_url, position) VALUES (?, ?, ?, ?, ?, 1)");
-    $stmt->bind_param("issss", $course_id, $type, $title, $body, $url);
-    $stmt->execute();
+    // File upload handling
+    if (isset($_FILES['upload_file']) && $_FILES['upload_file']['error'] === UPLOAD_ERR_OK) {
+        $fileTmpPath = $_FILES['upload_file']['tmp_name'];
+        $fileName = basename($_FILES['upload_file']['name']);
+        $uploadFolder = './uploads/';
+        $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+        $allowedExtensions = ['pdf', 'mp4'];
 
-    $message = "✅ Content added successfully.";
+        if (!in_array($fileExtension, $allowedExtensions)) {
+            $message = "❌ Invalid file type. Only PDF and MP4 allowed.";
+        } else {
+            // Create unique file name
+            $destPath = $uploadFolder . time() . '_' . $fileName;
+
+            // Ensure uploads folder exists
+            if (!is_dir($uploadFolder)) {
+                mkdir($uploadFolder, 0755, true);
+            }
+
+            if (move_uploaded_file($fileTmpPath, $destPath)) {
+                $url = $destPath;
+            } else {
+                $message = "❌ Error uploading the file.";
+            }
+        }
+    }
+
+    if (!$message) {
+        $stmt = $conn->prepare("INSERT INTO contents (course_id, type, title, body, file_url, position) VALUES (?, ?, ?, ?, ?, 1)");
+        $stmt->bind_param("issss", $course_id, $type, $title, $body, $url);
+        $stmt->execute();
+        $message = "✅ Content added successfully.";
+    }
 }
 ?>
 
@@ -30,7 +58,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body class="bg-gray-100 text-gray-800 min-h-screen flex items-center justify-center px-4 py-8">
 
-  <div class="w-full max-w-2xl bg-white p-8 rounded-lg shadow">
+<?php include 'components/navbar.php'; ?>
+
+  <div class="w-full max-w-2xl bg-white p-8 rounded-lg shadow mt-20">
     <h2 class="text-3xl font-bold mb-6 text-center">📘 Add Content to Course ID: <?= htmlspecialchars($course_id) ?></h2>
 
     <?php if ($message): ?>
@@ -39,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </div>
     <?php endif; ?>
 
-    <form method="POST" class="space-y-6">
+    <form method="POST" enctype="multipart/form-data" class="space-y-6">
       <div>
         <label class="block font-medium mb-1">Type:</label>
         <select name="type" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-400" required>
@@ -62,8 +92,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </div>
 
       <div>
-        <label class="block font-medium mb-1">File/Video URL (optional):</label>
+        <label class="block font-medium mb-1">Manual URL (optional):</label>
         <input type="text" name="file_url" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-400" />
+      </div>
+
+      <div>
+        <label class="block font-medium mb-1">Upload File (PDF or Video):</label>
+        <input type="file" name="upload_file" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-400" />
+        <p class="text-sm text-gray-500 mt-1">Allowed types: .pdf, .mp4</p>
       </div>
 
       <div class="text-center">

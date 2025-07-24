@@ -3,51 +3,54 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SynapZ - Welcome</title>
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="icon" type="image/png" href="./images/logo.png" />
 </head>
 
-<body class="bg-white text-gray-800">
-
-<?php include 'components/navbar.php'; ?>
+<body class="bg-white text-gray-800 flex flex-col min-h-screen overflow-x-hidden">
+  
+  <!-- Navbar -->
+  <?php include 'components/navbar.php'; ?>
 
 <!-- Hero Section -->
 <section class="relative bg-[url('./images/hero-bg.jpg')] bg-cover bg-center min-h-screen flex items-center justify-center text-center overflow-hidden">
   <!-- Semi-transparent overlay -->
   <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-cyan-800 opacity-50"></div>
 
-  <!-- Decorative SVG Wave Overlay -->
-  
   <!-- Hero Content -->
   <div class="relative z-10 max-w-4xl px-6">
+    
+    <!-- Logo -->
+    <div class="mb-6 flex justify-center">
+      <img src="./images/logo.png" alt="SynapZ Logo" class="h-20 w-auto sm:h-24 md:h-28 drop-shadow-lg">
+    </div>
+
+    <!-- Title -->
     <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold block bg-gradient-to-r from-yellow-400 to-yellow-500 text-transparent bg-clip-text">
       Welcome to <span class="text-white">Synap<span class="text-yellow-300">Z</span></span>
     </h1>
-<p class="text-lg sm:text-xl text-white mb-8 mt-4">
-  Your complete <span class="font-semibold text-purple-100">Virtual Learning Environment (VLE)</span> for 
-  <span class="font-medium text-blue-500">students</span>, and  
-  <span class="font-medium text-green-500">teachers</span>,
 
-</p>
+    <!-- Subtext -->
+    <p class="text-lg sm:text-xl text-white mb-8 mt-4">
+      Your complete <span class="font-semibold text-purple-100">Virtual Learning Environment (VLE)</span> for 
+      <span class="font-medium text-blue-500">students</span>, and  
+      <span class="font-medium text-green-500">teachers</span>,
+    </p>
 
     <!-- Buttons -->
     <div class="flex justify-center flex-wrap gap-4 mb-8">
-      <a
-        href="login.php"
-        class="bg-blue-600 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105 focus:outline-none"
-      >
+      <a href="login.php" class="bg-blue-600 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
         🔐 Login
       </a>
-      <a
-        href="register.php"
-        class="bg-green-600 text-white px-6 py-3 rounded-lg shadow hover:bg-green-700 focus:ring-4 focus:ring-green-300 transition-all duration-300 transform hover:scale-105 focus:outline-none"
-      >
+      <a href="register.php" class="bg-green-600 text-white px-6 py-3 rounded-lg shadow hover:bg-green-700 focus:ring-4 focus:ring-green-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
         📝 Register
       </a>
     </div>
+
 
     <!-- Social Media Icons -->
     <div class="flex justify-center space-x-6 text-white text-2xl">
@@ -179,7 +182,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-8">
       <!-- IGCSE ICT -->
       <article class="bg-white rounded-2xl shadow hover:shadow-lg transition duration-300 overflow-hidden text-left" role="region" aria-labelledby="igcse-ict-title">
-        <img src="https://source.unsplash.com/400x250/?ict,technology" alt="IGCSE ICT" class="w-full h-48 object-cover">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFRObkO8H_uYDj0uuGJ1vlSPl4i-qFHG92YQ&s" alt="IGCSE ICT" class="w-full h-48 object-cover">
         <div class="p-5">
           <h3 id="igcse-ict-title" class="font-bold text-xl mb-2">IGCSE ICT</h3>
           <p class="text-gray-600 text-sm sm:text-base">
@@ -190,7 +193,7 @@
 
       <!-- IAL AS ICT -->
       <article class="bg-white rounded-2xl shadow hover:shadow-lg transition duration-300 overflow-hidden text-left" role="region" aria-labelledby="ial-as-ict-title">
-        <img src="https://source.unsplash.com/400x250/?ict,data" alt="IAL AS ICT" class="w-full h-48 object-cover">
+        <img src="https://aotscolombiajapon.com/wp-content/uploads/2025/01/3ra-Beca-IA-Utilizing-to-overcome-DX-related-1.jpg" alt="IAL AS ICT" class="w-full h-48 object-cover">
         <div class="p-5">
           <h3 id="ial-as-ict-title" class="font-bold text-xl mb-2">IAL AS ICT</h3>
           <p class="text-gray-600 text-sm sm:text-base">
@@ -201,7 +204,7 @@
 
       <!-- IAL AS2 ICT -->
       <article class="bg-white rounded-2xl shadow hover:shadow-lg transition duration-300 overflow-hidden text-left" role="region" aria-labelledby="ial-as2-ict-title">
-        <img src="https://source.unsplash.com/400x250/?technology,classroom" alt="IAL AS2 ICT" class="w-full h-48 object-cover">
+        <img src="https://www.ict.eu/sites/corporate/files/images/iStock-1322517295%20copy_3.jpg" alt="IAL AS2 ICT" class="w-full h-48 object-cover">
         <div class="p-5">
           <h3 id="ial-as2-ict-title" class="font-bold text-xl mb-2">IAL AS2 ICT</h3>
           <p class="text-gray-600 text-sm sm:text-base">
@@ -212,7 +215,7 @@
 
       <!-- IGCSE Computer Science -->
       <article class="bg-white rounded-2xl shadow hover:shadow-lg transition duration-300 overflow-hidden text-left" role="region" aria-labelledby="igcse-cs-title">
-        <img src="https://source.unsplash.com/400x250/?computer,coding" alt="IGCSE Computer Science" class="w-full h-48 object-cover">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTiX_sE8HNgliGkDZNJaestGinmoLUp1ab5Eg&s" alt="IGCSE Computer Science" class="w-full h-48 object-cover">
         <div class="p-5">
           <h3 id="igcse-cs-title" class="font-bold text-xl mb-2">IGCSE Computer Science</h3>
           <p class="text-gray-600 text-sm sm:text-base">
@@ -237,7 +240,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
       <!-- Educator Card -->
       <article class="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition duration-300" role="region" aria-labelledby="edu-ruwan">
-        <img src="https://via.placeholder.com/100" alt="Mr. Tanjana Chamikara" class="w-24 h-24 mx-auto rounded-full border-4 border-blue-200 mb-4" />
+        <img src="./images/tanjana-sir-image-1.png" alt="Mr. Tanjana Chamikara" class="w-24 h-24 mx-auto rounded-full border-4 border-blue-200 mb-4" />
         <h3 id="edu-ruwan" class="font-semibold text-xl text-blue-800">Mr. Tanjana Chamikara</h3>
         <span class="inline-block mt-2 px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full">
           Senior Mathematics Instructor
@@ -251,7 +254,7 @@
 
       <!-- Educator Card -->
       <article class="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition duration-300" role="region" aria-labelledby="edu-thilini">
-        <img src="https://via.placeholder.com/100" alt="Ms. Madhara Wedhage" class="w-24 h-24 mx-auto rounded-full border-4 border-green-200 mb-4" />
+        <img src="./images/madara-miss-image-600-2-1.png" alt="Ms. Madhara Wedhage" class="w-24 h-24 mx-auto rounded-full border-4 border-green-200 mb-4" />
         <h3 id="edu-thilini" class="font-semibold text-xl text-green-800">Ms. Madhara Wedhage</h3>
         <span class="inline-block mt-2 px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full">
           Computer Science Mentor
@@ -265,7 +268,7 @@
 
       <!-- Educator Card -->
       <article class="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition duration-300" role="region" aria-labelledby="edu-chamika">
-        <img src="https://via.placeholder.com/100" alt="Ms. Udara Dilshani" class="w-24 h-24 mx-auto rounded-full border-4 border-yellow-200 mb-4" />
+        <img src="./images/udara-miss-2.png" alt="Ms. Udara Dilshani" class="w-24 h-24 mx-auto rounded-full border-4 border-yellow-200 mb-4" />
         <h3 id="edu-chamika" class="font-semibold text-xl text-yellow-800">Ms. Udara Dilshani</h3>
         <span class="inline-block mt-2 px-3 py-1 bg-yellow-100 text-yellow-700 text-sm rounded-full">
           Science Educator
@@ -294,7 +297,7 @@
       <!-- Story 1 -->
       <article class="bg-gradient-to-br from-blue-100 to-white p-6 rounded-xl shadow-lg text-left hover:shadow-2xl transition duration-300">
         <div class="flex items-start gap-4">
-          <img src="https://via.placeholder.com/50" alt="Nisansala D." class="w-12 h-12 rounded-full border-2 border-blue-300" />
+          <img src="./images/Men.jpg" alt="Nisansala D." class="w-12 h-12 rounded-full border-2 border-blue-300" />
           <div>
             <p class="text-gray-700 italic">
               <svg class="inline w-5 h-5 text-blue-500 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M7.17 6.1A5 5 0 0 0 2 11v7a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1H5.92A3.01 3.01 0 0 1 9 9a1 1 0 0 0-1-1H7.17ZM20 6a5 5 0 0 0-5 5v7a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1h-3.08A3.01 3.01 0 0 1 22 9a1 1 0 0 0-1-1h-1Z"/></svg>
@@ -308,7 +311,7 @@
       <!-- Story 2 -->
       <article class="bg-gradient-to-br from-green-100 to-white p-6 rounded-xl shadow-lg text-left hover:shadow-2xl transition duration-300">
         <div class="flex items-start gap-4">
-          <img src="https://via.placeholder.com/50" alt="Kaveen R." class="w-12 h-12 rounded-full border-2 border-green-300" />
+          <img src="./images/Men.jpg" alt="Kaveen R." class="w-12 h-12 rounded-full border-2 border-green-300" />
           <div>
             <p class="text-gray-700 italic">
               <svg class="inline w-5 h-5 text-green-500 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M7.17 6.1A5 5 0 0 0 2 11v7a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1H5.92A3.01 3.01 0 0 1 9 9a1 1 0 0 0-1-1H7.17ZM20 6a5 5 0 0 0-5 5v7a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1h-3.08A3.01 3.01 0 0 1 22 9a1 1 0 0 0-1-1h-1Z"/></svg>
