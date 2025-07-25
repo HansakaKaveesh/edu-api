@@ -15,7 +15,7 @@
   <div class="bg-white/90 backdrop-blur-md rounded-lg shadow-xl p-8 w-full max-w-lg mt-16">
     <h2 class="text-3xl font-bold text-center mb-6 text-blue-800">📝 Register to SynapZ</h2>
 
-    <form method="POST" class="space-y-5">
+    <form method="POST" id="registerForm" class="space-y-5">
 
       <!-- Role -->
       <div>
@@ -100,46 +100,69 @@
         $last = $_POST['last_name'];
         $email = $_POST['email'];
 
-        $stmtUser = $conn->prepare("INSERT INTO users (username, role) VALUES (?, ?)");
-        $stmtUser->bind_param("ss", $username, $role);
+        // Check if username already exists
+        $checkStmt = $conn->prepare("SELECT * FROM users WHERE username = ?");
+        $checkStmt->bind_param("s", $username);
+        $checkStmt->execute();
+        $checkStmt->store_result();
 
-        if ($stmtUser->execute()) {
-            $user_id = $conn->insert_id;
-
-            $stmtPwd = $conn->prepare("INSERT INTO passwords (user_id, password_hash, is_current) VALUES (?, ?, 1)");
-            $stmtPwd->bind_param("is", $user_id, $password);
-            $stmtPwd->execute();
-
-            if ($role === 'student') {
-                $dob = !empty($_POST['dob']) ? $_POST['dob'] : NULL;
-                $contact = !empty($_POST['contact_number']) ? $_POST['contact_number'] : NULL;
-
-                $stmtStudent = $conn->prepare("INSERT INTO students (user_id, first_name, last_name, dob, email, contact_number)
-                                               VALUES (?, ?, ?, ?, ?, ?)");
-                $stmtStudent->bind_param("isssss", $user_id, $first, $last, $dob, $email, $contact);
-                $stmtStudent->execute();
-
-                echo "<p class='mt-4 text-green-600 font-semibold text-center'>🎉 Student registered successfully.</p>";
-
-            } elseif ($role === 'teacher') {
-                $stmtTeacher = $conn->prepare("INSERT INTO teachers (user_id, first_name, last_name, email)
-                                               VALUES (?, ?, ?, ?)");
-                $stmtTeacher->bind_param("isss", $user_id, $first, $last, $email);
-                $stmtTeacher->execute();
-
-                echo "<p class='mt-4 text-green-600 font-semibold text-center'>🎉 Teacher registered successfully.</p>";
-            }
+        if ($checkStmt->num_rows > 0) {
+            echo "<p class='mt-4 text-red-600 font-semibold text-center'>⛔ Username already exists!</p>";
         } else {
-            echo "<p class='mt-4 text-red-600 font-semibold text-center'>⛔ Username already exists or an error occurred!</p>";
+            $stmtUser = $conn->prepare("INSERT INTO users (username, role) VALUES (?, ?)");
+            $stmtUser->bind_param("ss", $username, $role);
+
+            if ($stmtUser->execute()) {
+                $user_id = $conn->insert_id;
+
+                $stmtPwd = $conn->prepare("INSERT INTO passwords (user_id, password_hash, is_current) VALUES (?, ?, 1)");
+                $stmtPwd->bind_param("is", $user_id, $password);
+                $stmtPwd->execute();
+
+                if ($role === 'student') {
+                    $dob = !empty($_POST['dob']) ? $_POST['dob'] : NULL;
+                    $contact = !empty($_POST['contact_number']) ? $_POST['contact_number'] : NULL;
+
+                    // 🧠 Validate age >= 13
+                    if ($dob) {
+                        $birthDate = new DateTime($dob);
+                        $today = new DateTime();
+                        $age = $today->diff($birthDate)->y;
+
+                        if ($age < 13) {
+                            echo "<p class='mt-4 text-red-600 font-semibold text-center'>🚫 You must be at least 13 years old to register as a student.</p>";
+                            exit;
+                        }
+                    }
+
+                    $stmtStudent = $conn->prepare("INSERT INTO students (user_id, first_name, last_name, dob, email, contact_number)
+                                                VALUES (?, ?, ?, ?, ?, ?)");
+                    $stmtStudent->bind_param("isssss", $user_id, $first, $last, $dob, $email, $contact);
+                    $stmtStudent->execute();
+
+                    echo "<p class='mt-4 text-green-600 font-semibold text-center'>🎉 Student registered successfully.</p>";
+
+                } elseif ($role === 'teacher') {
+                    $stmtTeacher = $conn->prepare("INSERT INTO teachers (user_id, first_name, last_name, email)
+                                                VALUES (?, ?, ?, ?)");
+                    $stmtTeacher->bind_param("isss", $user_id, $first, $last, $email);
+                    $stmtTeacher->execute();
+
+                    echo "<p class='mt-4 text-green-600 font-semibold text-center'>🎉 Teacher registered successfully.</p>";
+                }
+            } else {
+                echo "<p class='mt-4 text-red-600 font-semibold text-center'>⛔ Registration failed due to an error.</p>";
+            }
         }
     }
     ?>
   </div>
 
-  <!-- Script to toggle student-only fields -->
+  <!-- Script to toggle student-only fields and validate age -->
   <script>
     const roleSelect = document.getElementById('role');
     const studentFields = document.getElementById('studentFields');
+    const form = document.getElementById('registerForm');
 
     function toggleFields() {
       studentFields.classList.toggle('hidden', roleSelect.value !== 'student');
@@ -147,6 +170,26 @@
 
     roleSelect.addEventListener('change', toggleFields);
     toggleFields();
+
+    form.addEventListener('submit', function (e) {
+      if (roleSelect.value === 'student') {
+        const dob = document.getElementById('dob').value;
+        if (dob) {
+          const birthDate = new Date(dob);
+          const today = new Date();
+          let age = today.getFullYear() - birthDate.getFullYear();
+          const m = today.getMonth() - birthDate.getMonth();
+          if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+          }
+
+          if (age < 13) {
+            e.preventDefault();
+            alert("🚫 You must be at least 13 years old to register as a student.");
+          }
+        }
+      }
+    });
   </script>
 </body>
 </html>

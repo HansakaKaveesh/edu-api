@@ -13,16 +13,11 @@ $student_id = $conn->query("SELECT student_id FROM students WHERE user_id = $use
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $course_id = intval($_POST['course_id']);
 
-    // Cancel pending enrollment
     if (isset($_POST['cancel'])) {
         $conn->query("DELETE FROM enrollments WHERE user_id = $user_id AND course_id = $course_id AND status = 'pending'");
-    }
-    // Remove any enrollment (active or pending)
-    elseif (isset($_POST['remove'])) {
+    } elseif (isset($_POST['remove'])) {
         $conn->query("DELETE FROM enrollments WHERE user_id = $user_id AND course_id = $course_id");
-    }
-    // Enroll in course
-    else {
+    } else {
         $existing = $conn->query("SELECT * FROM enrollments WHERE user_id = $user_id AND course_id = $course_id");
         if ($existing->num_rows === 0) {
             $conn->query("INSERT INTO enrollments (user_id, course_id, status) VALUES ($user_id, $course_id, 'pending')");
@@ -33,10 +28,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-// Get all courses
 $courses = $conn->query("SELECT * FROM courses");
 
-// Get user's enrollments
 $enrollments = [];
 $res = $conn->query("SELECT course_id, status FROM enrollments WHERE user_id = $user_id");
 while ($row = $res->fetch_assoc()) {
@@ -51,16 +44,24 @@ while ($row = $res->fetch_assoc()) {
     <title>Enroll in Course</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50 min-h-screen py-10 px-4">
+<body class="bg-gray-50 min-h-screen font-sans text-gray-800">
 
-    <div class="max-w-6xl mx-auto">
-        <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">📚 Enroll in a Course</h2>
+<?php include 'components/navbar.php'; ?>
 
-        <div class="text-center mb-6">
+<div class="flex flex-col lg:flex-row max-w-full mx-auto px-8 py-28 gap-8">
+
+    <!-- Sidebar -->
+    <?php include 'components/sidebar_student.php'; ?>
+
+    <!-- Main Content -->
+    <main class="w-full max-w-3x2 space-y-10">
+
+        <div class="text-center">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">📚 Enroll in a Course</h2>
             <a href="student_dashboard.php" class="text-blue-600 hover:text-blue-800 underline">⬅ Back to Dashboard</a>
         </div>
 
-        <div class="overflow-x-auto bg-white rounded-lg shadow">
+        <div class="overflow-x-auto bg-white rounded-xl shadow border border-gray-200">
             <table class="min-w-full table-auto">
                 <thead class="bg-blue-100 text-gray-700">
                     <tr>
@@ -104,7 +105,10 @@ while ($row = $res->fetch_assoc()) {
                 </tbody>
             </table>
         </div>
-    </div>
 
+    </main>
+</div>
+
+<?php include 'components/footer.php'; ?>
 </body>
 </html>

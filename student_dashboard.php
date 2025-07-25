@@ -8,9 +8,11 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'student') {
 }
 
 $user_id = $_SESSION['user_id'];
-$result = $conn->query("SELECT student_id FROM students WHERE user_id = $user_id LIMIT 1");
+$result = $conn->query("SELECT student_id, first_name, last_name FROM students WHERE user_id = $user_id LIMIT 1");
 $student = $result->fetch_assoc();
 $student_id = $student['student_id'];
+$full_name = $student['first_name'] . ' ' . $student['last_name'];
+$role = ucfirst($_SESSION['role']); // Capitalize first letter
 ?>
 
 <!DOCTYPE html>
@@ -20,45 +22,11 @@ $student_id = $student['student_id'];
   <title>Student Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gradient-to-br from-blue-50 to-white min-h-screen font-sans text-gray-800">
-
-<?php include 'components/navbar.php'; ?>
-
-<div class="max-w-7xl mx-auto px-4 py-10">
-
-  <!-- Hero Section -->
-  <section class="relative bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-600 text-white rounded-3xl shadow-2xl p-6 sm:p-12 mb-16 overflow-hidden mt-16">
-    <div class="absolute inset-0 backdrop-blur-sm bg-black/10 rounded-3xl"></div>
-
-    <div class="relative z-10 max-w-5xl mx-auto text-center space-y-6 sm:space-y-8">
-      <div id="datetime" class="text-sm text-right italic opacity-90 drop-shadow-sm"></div>
-      <h1 class="text-3xl sm:text-5xl font-extrabold leading-tight drop-shadow-xl">
-        🎓 Welcome Back, <span class="underline decoration-white/30">Student</span>! <span class="inline-block animate-wave">👋</span>
-      </h1>
-      <p class="text-lg sm:text-2xl font-light text-white/90 max-w-3xl mx-auto">
-        Continue your learning journey, explore new subjects, and grow your skills.<br />
-        <span class="italic">Access your courses, take quizzes, and join discussions.</span>
-      </p>
-      <div class="flex justify-center">
-        <a href="enroll_course.php" class="inline-block bg-white text-indigo-700 font-semibold px-6 py-3 rounded-full shadow hover:bg-gray-100 transition-transform duration-300 hover:scale-105">
-          🚀 Enroll in a New Course
-        </a>
-      </div>
-    </div>
-  </section>
-
   <style>
     @keyframes wave {
-      0%, 60%, 100% {
-        transform: rotate(0deg);
-      }
-      30% {
-        transform: rotate(15deg);
-      }
-      50% {
-        transform: rotate(-10deg);
-      }
+      0%, 60%, 100% { transform: rotate(0deg); }
+      30% { transform: rotate(15deg); }
+      50% { transform: rotate(-10deg); }
     }
     .animate-wave {
       display: inline-block;
@@ -66,58 +34,39 @@ $student_id = $student['student_id'];
       transform-origin: 70% 70%;
     }
   </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-white min-h-screen font-sans text-gray-800">
 
-  <!-- Header -->
-  <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
-    <h2 class="text-2xl sm:text-3xl font-bold text-gray-700">📊 Student Dashboard</h2>
-    <a href="logout.php" class="bg-red-500 text-white px-5 py-2 rounded-full hover:bg-red-600 shadow-md transition">
-      🔒 Logout
-    </a>
+<?php include 'components/navbar.php'; ?>
+
+<div class="flex flex-col lg:flex-row max-w-8xl mx-auto px-8 py-28 gap-8">
+
+  <!-- Sidebar -->
+  <?php include 'components/sidebar_student.php'; ?>
+
+  <!-- Main Content -->
+  <main class="w-full max-w-3x2 space-y-10">
+
+<!-- Hero Section -->
+<section class="relative bg-[url('https://www.vedamo.com/wp-content/uploads/cache/2017/06/what-is-virtual-learning-1/4148946552.png')] bg-cover bg-center text-white rounded-3xl shadow-2xl p-6 sm:p-12 overflow-hidden">
+  <div class="absolute inset-0 backdrop-blur-sm bg-black/40 rounded-3xl"></div>
+
+  <div class="relative z-10 text-center space-y-6 sm:space-y-8">
+    <div id="datetime" class="text-sm text-right italic opacity-90 drop-shadow-sm"></div>
+    <h1 class="text-2xl sm:text-3xl font-extrabold leading-tight drop-shadow-xl">
+      🎓 Welcome Back, <span class="underline decoration-white/30"><?php echo htmlspecialchars($full_name); ?></span> 
+      <span class="text-sm sm:text-xl font-light italic">(<?php echo $role; ?>)</span>! 
+      <span class="inline-block animate-wave">👋</span>
+    </h1>
+    <p class="text-lg sm:text-xl font-light text-white/90 max-w-3xl mx-auto">
+      Continue your learning journey, explore new subjects, and grow your skills.<br />
+      <span class="italic">Access your courses, take quizzes, and join discussions.</span>
+    </p>
   </div>
+</section>
 
-  <!-- Dashboard Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-
-    <!-- Left Card -->
-    <div class="bg-white/80 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-xl transition hover:shadow-2xl border border-gray-100">
-      <h3 class="text-xl sm:text-2xl font-semibold mb-6 text-gray-700">✅ What would you like to do?</h3>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <a href="enroll_course.php" class="group block bg-blue-50 p-6 rounded-xl shadow hover:shadow-lg transition text-center">
-          <div class="text-3xl mb-2 group-hover:scale-110 transition">📚</div>
-          <h4 class="font-semibold text-blue-700 group-hover:text-blue-900">Enroll in New Courses</h4>
-        </a>
-
-        <a href="student_courses.php" class="group block bg-blue-50 p-6 rounded-xl shadow hover:shadow-lg transition text-center">
-          <div class="text-3xl mb-2 group-hover:scale-110 transition">📖</div>
-          <h4 class="font-semibold text-blue-700 group-hover:text-blue-900">View My Courses</h4>
-        </a>
-
-        <a href="student_quizzes.php" class="group block bg-blue-50 p-6 rounded-xl shadow hover:shadow-lg transition text-center">
-          <div class="text-3xl mb-2 group-hover:scale-110 transition">🧠</div>
-          <h4 class="font-semibold text-blue-700 group-hover:text-blue-900">Attempt Quizzes</h4>
-        </a>
-
-        <a href="attempt_assignment.php" class="group block bg-blue-50 p-6 rounded-xl shadow hover:shadow-lg transition text-center">
-          <div class="text-3xl mb-2 group-hover:scale-110 transition">📝</div>
-          <h4 class="font-semibold text-blue-700 group-hover:text-blue-900">Attempt Assignments</h4>
-        </a>
-
-        <a href="forum.php" class="group block bg-blue-50 p-6 rounded-xl shadow hover:shadow-lg transition text-center ">
-          <div class="text-3xl mb-2 group-hover:scale-110 transition">💬</div>
-          <h4 class="font-semibold text-blue-700 group-hover:text-blue-900">Join Course Discussions</h4>
-        </a>
-
-        <!-- New Account Settings Link -->
-        <a href="student_settings.php" class="group block bg-blue-50 p-6 rounded-xl shadow hover:shadow-lg transition text-center">
-          <div class="text-3xl mb-2 group-hover:scale-110 transition">⚙️</div>
-          <h4 class="font-semibold text-blue-700 group-hover:text-blue-900">Account Settings</h4>
-        </a>
-
-      </div>
-    </div>
-
-    <!-- Right Card -->
-    <div class="bg-white/80 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-xl transition hover:shadow-2xl border border-gray-100">
+    <!-- Enrolled Courses -->
+    <section class="bg-white/80 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-100">
       <h3 class="text-xl sm:text-2xl font-semibold mb-6 text-gray-700">📚 Your Enrolled Courses</h3>
       <ul class="list-disc list-inside space-y-3 text-lg text-gray-800 overflow-x-auto">
         <?php
@@ -136,9 +85,9 @@ $student_id = $student['student_id'];
         }
         ?>
       </ul>
-    </div>
+    </section>
 
-  </div>
+  </main>
 </div>
 
 <!-- Live Date & Time Script -->

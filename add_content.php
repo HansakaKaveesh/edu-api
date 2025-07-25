@@ -19,10 +19,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $fileName = basename($_FILES['upload_file']['name']);
         $uploadFolder = './uploads/';
         $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-        $allowedExtensions = ['pdf', 'mp4'];
+        $allowedExtensions = ['pdf', 'mp4', 'html'];
 
         if (!in_array($fileExtension, $allowedExtensions)) {
-            $message = "❌ Invalid file type. Only PDF and MP4 allowed.";
+            $message = "❌ Invalid file type. Only PDF, MP4, and HTML allowed.";
         } else {
             // Create unique file name
             $destPath = $uploadFolder . time() . '_' . $fileName;
@@ -97,9 +97,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </div>
 
       <div>
-        <label class="block font-medium mb-1">Upload File (PDF or Video):</label>
+        <label class="block font-medium mb-1">Upload File (PDF, Video, or HTML):</label>
         <input type="file" name="upload_file" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-400" />
-        <p class="text-sm text-gray-500 mt-1">Allowed types: .pdf, .mp4</p>
+        <p class="text-sm text-gray-500 mt-1">Allowed types: .pdf, .mp4, .html</p>
       </div>
 
       <div class="text-center">
