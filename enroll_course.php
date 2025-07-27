@@ -36,14 +36,13 @@ while ($row = $res->fetch_assoc()) {
     $enrollments[$row['course_id']] = $row['status'];
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Enroll in Course</title>
     <script src="https://cdn.tailwindcss.com"></script>
-      <link rel="icon" type="image/png" href="./images/logo.png" />
+    <link rel="icon" type="image/png" href="./images/logo.png" />
 </head>
 <body class="bg-gray-50 min-h-screen font-sans text-gray-800">
 
@@ -51,65 +50,69 @@ while ($row = $res->fetch_assoc()) {
 
 <div class="flex flex-col lg:flex-row max-w-full mx-auto px-8 py-28 gap-8">
 
-    <!-- Sidebar -->
-    <?php include 'components/sidebar_student.php'; ?>
+<!-- Sidebar -->
+<?php include 'components/sidebar_student.php'; ?>
 
-    <!-- Main Content -->
-    <main class="w-full max-w-3x2 space-y-10">
+<!-- Main Content -->
+<main class="w-full max-w-3x2 space-y-10">
 
-        <div class="text-center">
-            <h2 class="text-3xl font-bold text-gray-800 mb-2">📚 Enroll in a Course</h2>
-            <a href="student_dashboard.php" class="text-blue-600 hover:text-blue-800 underline">⬅ Back to Dashboard</a>
-        </div>
+    <div class="text-center">
+        <h2 class="text-3xl font-bold text-gray-800 mb-2">📚 Enroll in a Course</h2>
+        <a href="student_dashboard.php" class="text-blue-600 hover:text-blue-800 underline">⬅ Back to Dashboard</a>
+    </div>
 
-        <div class="overflow-x-auto bg-white rounded-xl shadow border border-gray-200">
-            <table class="min-w-full table-auto">
-                <thead class="bg-blue-100 text-gray-700">
-                    <tr>
-                        <th class="px-4 py-3 text-left text-sm font-semibold">Name</th>
-                        <th class="px-4 py-3 text-left text-sm font-semibold">Description</th>
-                        <th class="px-4 py-3 text-center text-sm font-semibold">Action</th>
+    <div class="overflow-x-auto bg-white rounded-xl shadow border border-gray-200">
+        <table class="min-w-full table-auto">
+            <thead class="bg-blue-100 text-gray-700">
+                <tr>
+                    <th class="px-4 py-3 text-left text-sm font-semibold">Name</th>
+                    <th class="px-4 py-3 text-left text-sm font-semibold">Description</th>
+                    <th class="px-4 py-3 text-right text-sm font-semibold">Price</th>
+                    <th class="px-4 py-3 text-center text-sm font-semibold">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                <?php while ($course = $courses->fetch_assoc()): 
+                    $course_id = $course['course_id'];
+                    $status = $enrollments[$course_id] ?? null;
+                    $price = isset($course['price']) ? floatval($course['price']) : 0.00;
+                ?>
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3"><?= htmlspecialchars($course['name']) ?></td>
+                        <td class="px-4 py-3"><?= htmlspecialchars($course['description']) ?></td>
+                        <td class="px-4 py-3 text-right">
+                            <?= $price == 0 ? '<span class="text-green-600 font-semibold">Free</span>' : '<span class="font-semibold text-blue-700">$' . number_format($price, 2) . '</span>' ?>
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                            <?php if ($status === 'active' || $status === 'pending'): ?>
+                                <form method="POST" class="inline-block">
+                                    <input type="hidden" name="course_id" value="<?= $course_id ?>">
+                                    <?php if ($status === 'pending'): ?>
+                                        <button type="submit" name="cancel" class="bg-yellow-500 text-white px-3 py-2 rounded hover:bg-yellow-600 transition">
+                                            Cancel
+                                        </button>
+                                    <?php endif; ?>
+                                    <button type="submit" name="remove" class="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600 transition ml-2">
+                                        Remove
+                                    </button>
+                                </form>
+                            <?php else: ?>
+                                <form method="POST" class="inline-block">
+                                    <input type="hidden" name="course_id" value="<?= $course_id ?>">
+                                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                                        Enroll & Pay
+                                    </button>
+                                </form>
+                            <?php endif; ?>
+                        </td>
                     </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200">
-                    <?php while ($course = $courses->fetch_assoc()): 
-                        $course_id = $course['course_id'];
-                        $status = $enrollments[$course_id] ?? null;
-                    ?>
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3"><?= htmlspecialchars($course['name']) ?></td>
-                            <td class="px-4 py-3"><?= htmlspecialchars($course['description']) ?></td>
-                            <td class="px-4 py-3 text-center">
-                                <?php if ($status === 'active' || $status === 'pending'): ?>
-                                    <form method="POST" class="inline-block">
-                                        <input type="hidden" name="course_id" value="<?= $course_id ?>">
-                                        <?php if ($status === 'pending'): ?>
-                                            <button type="submit" name="cancel" class="bg-yellow-500 text-white px-3 py-2 rounded hover:bg-yellow-600 transition">
-                                                Cancel
-                                            </button>
-                                        <?php endif; ?>
-                                        <button type="submit" name="remove" class="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600 transition ml-2">
-                                            Remove
-                                        </button>
-                                    </form>
-                                <?php else: ?>
-                                    <form method="POST" class="inline-block">
-                                        <input type="hidden" name="course_id" value="<?= $course_id ?>">
-                                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
-                                            Enroll & Pay
-                                        </button>
-                                    </form>
-                                <?php endif; ?>
-                            </td>
-                        </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
-        </div>
+                <?php endwhile; ?>
+            </tbody>
+        </table>
+    </div>
 
-    </main>
+</main>
 </div>
-
 <?php include 'components/footer.php'; ?>
 </body>
 </html>

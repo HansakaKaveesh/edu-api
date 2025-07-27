@@ -103,7 +103,7 @@
   <?php
   if (isset($_POST['register']) && isset($_POST['otp']) && isset($_POST['generatedOtp'])) {
       if ($_POST['otp'] !== $_POST['generatedOtp']) {
-          echo "<p class='mt-4 text-red-600 font-semibold text-center'>⛔ Invalid OTP. Please try again.</p>";
+          echo "<script>alert('⛔ Invalid OTP. Please try again.');</script>";
       } else {
           $role = $_POST['role'];
           $username = $_POST['username'];
@@ -119,7 +119,7 @@
           $checkEmailStmt->store_result();
 
           if ($checkEmailStmt->num_rows > 0) {
-              echo "<p class='mt-4 text-red-600 font-semibold text-center'>⛔ Email already exists!</p>";
+              echo "<script>alert('⛔ Email already exists!');</script>";
           } else {
               // === Username exists check ===
               $checkStmt = $conn->prepare("SELECT * FROM users WHERE username = ?");
@@ -128,7 +128,7 @@
               $checkStmt->store_result();
 
               if ($checkStmt->num_rows > 0) {
-                  echo "<p class='mt-4 text-red-600 font-semibold text-center'>⛔ Username already exists!</p>";
+                  echo "<script>alert('⛔ Username already exists!');</script>";
               } else {
                   $stmtUser = $conn->prepare("INSERT INTO users (username, role) VALUES (?, ?)");
                   $stmtUser->bind_param("ss", $username, $role);
@@ -151,7 +151,7 @@
                               $age = $today->diff($birthDate)->y;
 
                               if ($age < 13) {
-                                  echo "<p class='mt-4 text-red-600 font-semibold text-center'>🚫 You must be at least 13 years old to register as a student.</p>";
+                                  echo "<script>alert('🚫 You must be at least 13 years old to register as a student.');</script>";
                                   exit;
                               }
                           }
@@ -161,7 +161,7 @@
                           $stmtStudent->bind_param("isssss", $user_id, $first, $last, $dob, $email, $contact);
                           $stmtStudent->execute();
 
-                          echo "<p class='mt-4 text-green-600 font-semibold text-center'>🎉 Student registered successfully.</p>";
+                          echo "<script>alert('🎉 Student registered successfully.'); window.location='login.php';</script>";
 
                       } elseif ($role === 'teacher') {
                           $stmtTeacher = $conn->prepare("INSERT INTO teachers (user_id, first_name, last_name, email)
@@ -169,10 +169,10 @@
                           $stmtTeacher->bind_param("isss", $user_id, $first, $last, $email);
                           $stmtTeacher->execute();
 
-                          echo "<p class='mt-4 text-green-600 font-semibold text-center'>🎉 Teacher registered successfully.</p>";
+                          echo "<script>alert('🎉 Teacher registered successfully.'); window.location='login.php';</script>";
                       }
                   } else {
-                      echo "<p class='mt-4 text-red-600 font-semibold text-center'>⛔ Registration failed due to an error.</p>";
+                      echo "<script>alert('⛔ Registration failed due to an error.');</script>";
                   }
               }
           }
