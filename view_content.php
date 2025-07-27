@@ -51,6 +51,44 @@ if ($loggedRes->num_rows === 0) {
         ON DUPLICATE KEY UPDATE chapters_completed = chapters_completed + 1
     ");
 }
+
+// Quiz submission handler
+if ($content_type === 'quiz' && isset($_POST['submit_quiz']) && isset($_POST['quiz'])) {
+    $assignment_id = $conn->query("SELECT assignment_id FROM assignments WHERE lesson_id = $content_id")->fetch_assoc()['assignment_id'] ?? null;
+    if ($assignment_id) {
+        $student_id = $conn->query("SELECT student_id FROM students WHERE user_id = $user_id")->fetch_assoc()['student_id'];
+        // Check attempts
+        $attempts_res = $conn->query("SELECT COUNT(*) as cnt FROM student_assignment_attempts WHERE student_id = $student_id AND assignment_id = $assignment_id");
+        $attempts = $attempts_res->fetch_assoc()['cnt'];
+        if ($attempts < 2) {
+            $questions = $conn->query("SELECT * FROM assignment_questions WHERE assignment_id = $assignment_id");
+            $assignment = $conn->query("SELECT * FROM assignments WHERE assignment_id = $assignment_id")->fetch_assoc();
+            $answers = $_POST['quiz'];
+            $score = 0;
+
+            $conn->query("INSERT INTO student_assignment_attempts (student_id, assignment_id, score, passed) VALUES ($student_id, $assignment_id, 0, 0)");
+            $attempt_id = $conn->insert_id;
+
+            foreach ($questions as $q) {
+                $selected = $answers[$q['question_id']] ?? '';
+                $correct = $q['correct_option'];
+                $is_correct = ($selected === $correct) ? 1 : 0;
+                $score += $is_correct;
+
+                $stmt = $conn->prepare("INSERT INTO assignment_attempt_questions (attempt_id, question_id, selected_option, is_correct) VALUES (?, ?, ?, ?)");
+                $stmt->bind_param("iisi", $attempt_id, $q['question_id'], $selected, $is_correct);
+                $stmt->execute();
+            }
+
+            $pass = ($score >= $assignment['passing_score']) ? 1 : 0;
+            $conn->query("UPDATE student_assignment_attempts SET score = $score, passed = $pass WHERE attempt_id = $attempt_id");
+
+            echo "<script>alert('✅ Quiz submitted! Score: $score / " . $questions->num_rows . "'); location.reload();</script>";
+        } else {
+            echo "<script>alert('⛔ You have reached the maximum of 2 attempts for this quiz.'); location.reload();</script>";
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -145,35 +183,69 @@ if ($loggedRes->num_rows === 0) {
         $assignment_id = $conn->query("SELECT assignment_id FROM assignments WHERE lesson_id = $content_id")->fetch_assoc()['assignment_id'] ?? null;
         $assignment = $assignment_id ? $conn->query("SELECT * FROM assignments WHERE assignment_id = $assignment_id")->fetch_assoc() : null;
         $questions = $assignment_id ? $conn->query("SELECT * FROM assignment_questions WHERE assignment_id = $assignment_id") : [];
-
-        if (isset($_POST['submit_quiz']) && $questions):
-            $answers = $_POST['quiz'];
-            $score = 0;
-            $total = $questions->num_rows;
-            $student_id = $conn->query("SELECT student_id FROM students WHERE user_id = $user_id")->fetch_assoc()['student_id'];
-
-            $conn->query("INSERT INTO student_assignment_attempts (student_id, assignment_id, score, passed)
-                          VALUES ($student_id, $assignment_id, 0, 0)");
-            $attempt_id = $conn->insert_id;
-
-            foreach ($questions as $q) {
-                $selected = $answers[$q['question_id']] ?? '';
-                $correct = $q['correct_option'];
-                $is_correct = ($selected === $correct) ? 1 : 0;
-                $score += $is_correct;
-
-                $stmt = $conn->prepare("INSERT INTO assignment_attempt_questions (attempt_id, question_id, selected_option, is_correct)
-                                        VALUES (?, ?, ?, ?)");
-                $stmt->bind_param("iisi", $attempt_id, $q['question_id'], $selected, $is_correct);
-                $stmt->execute();
-            }
-
-            $pass = ($score >= $assignment['passing_score']) ? 1 : 0;
-            $conn->query("UPDATE student_assignment_attempts SET score = $score, passed = $pass WHERE attempt_id = $attempt_id");
-
-            echo "<p class='text-green-600 font-semibold'>✅ Quiz submitted. Score: $score / $total</p>";
-        elseif ($questions && $questions->num_rows > 0):
+        $max_attempts = 2;
+        $student_id = $conn->query("SELECT student_id FROM students WHERE user_id = $user_id")->fetch_assoc()['student_id'];
+        $attempts_res = $assignment_id ? $conn->query("SELECT COUNT(*) as cnt FROM student_assignment_attempts WHERE student_id = $student_id AND assignment_id = $assignment_id") : null;
+        $attempts = $attempts_res ? $attempts_res->fetch_assoc()['cnt'] : 0;
         ?>
+        <?php
+        // Show review if attempted at least once
+        if ($assignment_id) {
+            $latest_attempt = $conn->query("SELECT attempt_id, score, passed, attempted_at FROM student_assignment_attempts WHERE assignment_id = $assignment_id AND student_id = $student_id ORDER BY attempted_at DESC LIMIT 1")->fetch_assoc();
+            if ($latest_attempt) {
+                $attempt_id = $latest_attempt['attempt_id'];
+                $answers = [];
+                $answer_res = $conn->query("SELECT * FROM assignment_attempt_questions WHERE attempt_id = $attempt_id");
+                while ($row = $answer_res->fetch_assoc()) {
+                    $answers[$row['question_id']] = [
+                        'selected' => $row['selected_option'],
+                        'is_correct' => $row['is_correct']
+                    ];
+                }
+                // Get all questions
+                $questions_review = $conn->query("SELECT * FROM assignment_questions WHERE assignment_id = $assignment_id");
+                echo "<div class='bg-green-50 border border-green-200 rounded p-4 my-6'>";
+                echo "<h3 class='text-lg font-bold mb-2 text-green-700'>Your Last Attempt</h3>";
+                echo "<p class='mb-2'>Score: <span class='font-semibold text-blue-700'>{$latest_attempt['score']}</span> / <span class='font-semibold text-blue-700'>{$questions_review->num_rows}</span> | Result: ";
+                echo $latest_attempt['passed'] ? "<span class='text-green-600 font-bold'>Pass</span>" : "<span class='text-red-600 font-bold'>Fail</span>";
+                echo "</p>";
+                echo "<div class='space-y-4'>";
+                foreach ($questions_review as $q) {
+                    $qid = $q['question_id'];
+                    $selected = $answers[$qid]['selected'] ?? null;
+                    $is_correct = $answers[$qid]['is_correct'] ?? 0;
+                    $correct = $q['correct_option'];
+                    echo "<div class='p-3 rounded border ".($is_correct ? "border-green-400 bg-green-50" : "border-red-300 bg-red-50")."'>";
+                    echo "<div class='font-semibold mb-1'>" . htmlspecialchars($q['question_text']) . "</div>";
+                    foreach (['A', 'B', 'C', 'D'] as $opt) {
+                        $option_text = htmlspecialchars($q['option_' . strtolower($opt)]);
+                        $isUser = ($selected === $opt);
+                        $isAnswer = ($correct === $opt);
+                        echo "<div class='ml-4 flex items-center'>";
+                        if ($isUser && $isAnswer) {
+                            echo "<span class='text-green-600 font-bold mr-2'>✔</span>";
+                        } elseif ($isUser && !$isAnswer) {
+                            echo "<span class='text-red-600 font-bold mr-2'>✖</span>";
+                        } else {
+                            echo "<span class='w-5 inline-block'></span>";
+                        }
+                        echo "<span";
+                        if ($isAnswer) echo " class='font-bold underline text-green-700'";
+                        if ($isUser && !$isAnswer) echo " class='text-red-700'";
+                        echo ">$opt) $option_text</span>";
+                        if ($isUser) echo " <span class='ml-2 text-xs text-gray-500'>(Your answer)</span>";
+                        if ($isAnswer) echo " <span class='ml-2 text-xs text-green-600'>(Correct answer)</span>";
+                        echo "</div>";
+                    }
+                    echo "</div>";
+                }
+                echo "</div></div>";
+            }
+        }
+        ?>
+        <?php if ($attempts >= $max_attempts): ?>
+            <p class="text-red-600 font-semibold">⛔ You have reached the maximum of 2 attempts for this quiz.</p>
+        <?php elseif ($questions && $questions->num_rows > 0): ?>
             <form method="post" class="space-y-4">
                 <?php foreach ($questions as $q): ?>
                     <div>
@@ -188,6 +260,7 @@ if ($loggedRes->num_rows === 0) {
                 <?php endforeach ?>
                 <button type="submit" name="submit_quiz" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Submit Quiz</button>
             </form>
+            <p class="text-sm text-gray-500 mt-2">Attempt <?= $attempts + 1 ?> of 2</p>
         <?php else: ?>
             <p>No quiz questions found.</p>
         <?php endif; ?>
