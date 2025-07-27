@@ -21,6 +21,7 @@ $role = ucfirst($_SESSION['role']); // Capitalize first letter
   <title>Student Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" href="./images/logo.png" />
   <style>
     @keyframes wave {
       0%, 60%, 100% { transform: rotate(0deg); }

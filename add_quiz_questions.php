@@ -28,7 +28,9 @@ $quiz_title = $quiz_data['title'];
 
 <!DOCTYPE html>
 <html>
-<head><title>Add Quiz Questions</title></head>
+<head><title>Add Quiz Questions</title>
+  <link rel="icon" type="image/png" href="./images/logo.png" />
+</head>
 <body>
 
 <h2>🧠 Add Questions to Quiz: <?= htmlspecialchars($quiz_title) ?></h2>

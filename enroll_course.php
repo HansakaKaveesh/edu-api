@@ -43,6 +43,7 @@ while ($row = $res->fetch_assoc()) {
     <meta charset="UTF-8">
     <title>Enroll in Course</title>
     <script src="https://cdn.tailwindcss.com"></script>
+      <link rel="icon" type="image/png" href="./images/logo.png" />
 </head>
 <body class="bg-gray-50 min-h-screen font-sans text-gray-800">
 

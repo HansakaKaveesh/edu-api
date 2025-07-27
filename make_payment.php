@@ -2,8 +2,9 @@
 session_start();
 include 'db_connect.php';
 
-if ($_SESSION['role'] !== 'student') {
-    die("Access denied.");
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'student') {
+    header("Location: login.php");
+    exit;
 }
 
 $user_id = $_SESSION['user_id'];
@@ -12,9 +13,9 @@ $student_id = $conn->query("SELECT student_id FROM students WHERE user_id = $use
 $course_id = intval($_GET['course_id'] ?? 0);
 $enrollment_id = intval($_GET['enrollment_id'] ?? 0);
 
-// Simulated price or fetch from DB
-$course = $conn->query("SELECT name FROM courses WHERE course_id = $course_id")->fetch_assoc();
-$amount = 100.00;
+// Fetch course info and price from DB
+$course = $conn->query("SELECT name, price FROM courses WHERE course_id = $course_id")->fetch_assoc();
+$amount = isset($course['price']) ? floatval($course['price']) : 0.00;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $payment_method = $_POST['payment_method'];
@@ -53,8 +54,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </h2>
 
         <p class="text-lg text-gray-700 text-center mb-6">
-            Amount: <span class="font-bold text-green-600">$<?= number_format($amount, 2) ?></span>
+            Amount: <span class="font-bold text-green-600">
+                $<?= number_format($amount, 2) ?>
+            </span>
         </p>
+
+        <?php if ($amount == 0): ?>
+            <div class="bg-blue-50 text-blue-800 p-3 rounded mb-4 text-center">
+                This course is free! Click below to enroll.
+            </div>
+        <?php endif; ?>
 
         <form method="POST" class="space-y-4">
             <div>
@@ -68,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-md transition duration-200">
-                💰 Pay & Enroll
+                <?= $amount == 0 ? "Enroll for Free" : "💰 Pay & Enroll" ?>
             </button>
         </form>
     </div>

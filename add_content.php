@@ -55,6 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta charset="UTF-8">
   <title>Add Course Content</title>
   <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" href="./images/logo.png" />
 </head>
 <body class="bg-gray-100 text-gray-800 min-h-screen flex items-center justify-center px-4 py-8">
 
