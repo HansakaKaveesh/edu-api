@@ -88,7 +88,7 @@
   <div class="max-w-6xl mx-auto px-6 text-center">
     <div class="mb-8">
       <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-800 mb-4">
-        About <span class="text-blue-600">EduPortal</span>
+        About <span class="text-blue-600">SynapZ</span>
       </h2>
       <div class="w-20 h-1 mx-auto bg-blue-600 rounded mb-4" aria-hidden="true"></div>
       <p class="text-gray-600 text-base sm:text-lg max-w-3xl mx-auto leading-relaxed">
