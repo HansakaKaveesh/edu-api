@@ -41,6 +41,7 @@ while ($row = $res->fetch_assoc()) {
 <head>
     <meta charset="UTF-8">
     <title>Enroll in Course</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" type="image/png" href="./images/logo.png" />
 </head>
@@ -61,55 +62,58 @@ while ($row = $res->fetch_assoc()) {
         <a href="student_dashboard.php" class="text-blue-600 hover:text-blue-800 underline">⬅ Back to Dashboard</a>
     </div>
 
-    <div class="overflow-x-auto bg-white rounded-xl shadow border border-gray-200">
-        <table class="min-w-full table-auto">
-            <thead class="bg-blue-100 text-gray-700">
-                <tr>
-                    <th class="px-4 py-3 text-left text-sm font-semibold">Name</th>
-                    <th class="px-4 py-3 text-left text-sm font-semibold">Description</th>
-                    <th class="px-4 py-3 text-right text-sm font-semibold">Price</th>
-                    <th class="px-4 py-3 text-center text-sm font-semibold">Action</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-                <?php while ($course = $courses->fetch_assoc()): 
-                    $course_id = $course['course_id'];
-                    $status = $enrollments[$course_id] ?? null;
-                    $price = isset($course['price']) ? floatval($course['price']) : 0.00;
-                ?>
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3"><?= htmlspecialchars($course['name']) ?></td>
-                        <td class="px-4 py-3"><?= htmlspecialchars($course['description']) ?></td>
-                        <td class="px-4 py-3 text-right">
-                            <?= $price == 0 ? '<span class="text-green-600 font-semibold">Free</span>' : '<span class="font-semibold text-blue-700">$' . number_format($price, 2) . '</span>' ?>
-                        </td>
-                        <td class="px-4 py-3 text-center">
-                            <?php if ($status === 'active' || $status === 'pending'): ?>
-                                <form method="POST" class="inline-block">
-                                    <input type="hidden" name="course_id" value="<?= $course_id ?>">
-                                    <?php if ($status === 'pending'): ?>
-                                        <button type="submit" name="cancel" class="bg-yellow-500 text-white px-3 py-2 rounded hover:bg-yellow-600 transition">
-                                            Cancel
-                                        </button>
-                                    <?php endif; ?>
-                                    <button type="submit" name="remove" class="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600 transition ml-2">
-                                        Remove
-                                    </button>
-                                </form>
-                            <?php else: ?>
-                                <form method="POST" class="inline-block">
-                                    <input type="hidden" name="course_id" value="<?= $course_id ?>">
-                                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
-                                        Enroll & Pay
-                                    </button>
-                                </form>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
-    </div>
+<div class="overflow-x-auto bg-white rounded-xl shadow border border-gray-200">
+  <table class="min-w-full table-auto text-sm">
+    <thead class="bg-blue-100 text-gray-700">
+      <tr>
+        <th class="px-4 py-3 text-left font-semibold">Name</th>
+        <th class="px-4 py-3 text-left font-semibold">Description</th>
+        <th class="px-4 py-3 text-right font-semibold">Price</th>
+        <th class="px-4 py-3 text-center font-semibold">Action</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-200">
+      <?php while ($course = $courses->fetch_assoc()): 
+        $course_id = $course['course_id'];
+        $status = $enrollments[$course_id] ?? null;
+        $price = isset($course['price']) ? floatval($course['price']) : 0.00;
+      ?>
+      <tr class="hover:bg-gray-50">
+        <td class="px-4 py-3"><?= htmlspecialchars($course['name']) ?></td>
+        <td class="px-4 py-3"><?= htmlspecialchars($course['description']) ?></td>
+        <td class="px-4 py-3 text-right">
+          <?= $price == 0 
+            ? '<span class="text-green-600 font-semibold">Free</span>' 
+            : '<span class="font-semibold text-blue-700">$' . number_format($price, 2) . '</span>' ?>
+        </td>
+        <td class="px-4 py-3 text-center">
+          <?php if ($status === 'active' || $status === 'pending'): ?>
+            <form method="POST" class="flex flex-col sm:flex-row justify-center items-center gap-2">
+              <input type="hidden" name="course_id" value="<?= $course_id ?>">
+              <?php if ($status === 'pending'): ?>
+                <button type="submit" name="cancel" class="w-full sm:w-auto bg-yellow-500 text-white px-3 py-2 rounded hover:bg-yellow-600 transition">
+                  Cancel
+                </button>
+              <?php endif; ?>
+              <button type="submit" name="remove" class="w-full sm:w-auto bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600 transition">
+                Remove
+              </button>
+            </form>
+          <?php else: ?>
+            <form method="POST" class="flex justify-center">
+              <input type="hidden" name="course_id" value="<?= $course_id ?>">
+              <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                Enroll & Pay
+              </button>
+            </form>
+          <?php endif; ?>
+        </td>
+      </tr>
+      <?php endwhile; ?>
+    </tbody>
+  </table>
+</div>
+
 
 </main>
 </div>
