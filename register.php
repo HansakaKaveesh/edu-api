@@ -183,7 +183,7 @@
 <!-- Script to toggle student-only fields, validate age, and handle OTP -->
 <script>
   // EmailJS config
-  emailjs.init('Ccq9mDLsWERzsXi_I'); // <-- Replace with your EmailJS public key
+  emailjs.init('sEOkaLKSNn_N29VQb'); // <-- Replace with your EmailJS public key
   const roleSelect = document.getElementById('role');
   const studentFields = document.getElementById('studentFields');
   const form = document.getElementById('registerForm');
@@ -231,7 +231,7 @@
       // Send OTP via EmailJS
       registerBtn.disabled = true;
       registerBtn.textContent = "Sending OTP...";
-      emailjs.send('service_8du74v5', 'template_jmpudhg', {
+      emailjs.send('service_lcnrnrg', 'template_2e53yom', {
         to_email: document.getElementById('email').value,
         to_name: document.getElementById('first_name').value,
         otp: otp
