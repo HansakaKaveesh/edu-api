@@ -46,6 +46,7 @@ $full_name = $student ? $student['first_name'] . ' ' . $student['last_name'] : '
       ['📝', 'Assignments', 'attempt_assignment.php'],
       ['💬', 'Discussions', 'forum.php'],
       ['⚙️', 'Settings', 'student_settings.php'],
+      ['✉️', 'Messages', 'messages.php'],
       ['🔒', 'Logout', 'logout.php', 'bg-red-100 text-red-700 group-hover:text-red-900']
     ];
 
@@ -97,6 +98,10 @@ HTML;
       <div class="text-3xl mb-2 group-hover:scale-110 transition">⚙️</div>
       <h4 class="font-semibold text-blue-700 group-hover:text-blue-900">Account Settings</h4>
     </a>
+    <a href="messages.php" class="group block bg-blue-50 p-4 rounded-xl shadow hover:shadow-lg text-center transition">
+  <div class="text-3xl mb-2 group-hover:scale-110 transition">✉️</div>
+  <h4 class="font-semibold text-blue-700 group-hover:text-blue-900">Messages</h4>
+</a>
     <a href="logout.php" class="group block bg-red-100 p-4 rounded-xl shadow hover:shadow-lg text-center transition">
       <div class="text-3xl mb-2 group-hover:scale-110 transition">🔒</div>
       <h4 class="font-semibold text-red-700 group-hover:text-red-900">Logout</h4>

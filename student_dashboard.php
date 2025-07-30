@@ -21,7 +21,7 @@ $role = ucfirst($_SESSION['role']); // Capitalize first letter
   <title>Student Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="icon" type="image/png" href="./images/logo.png" />
+  <link rel="icon" type="image/png" href="./images/logo.png" />
   <style>
     @keyframes wave {
       0%, 60%, 100% { transform: rotate(0deg); }
@@ -66,6 +66,36 @@ $role = ucfirst($_SESSION['role']); // Capitalize first letter
           <span class="italic">Access your courses, take quizzes, and join discussions.</span>
         </p>
       </div>
+    </section>
+
+    <!-- Announcements Section -->
+    <section class="bg-white/80 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-100">
+      <h3 class="text-xl sm:text-2xl font-semibold mb-6 text-gray-700">📢 Announcements</h3>
+      <?php
+      $announcements = $conn->query("
+          SELECT title, message, created_at
+          FROM announcements
+          WHERE audience = 'students' OR audience = 'all'
+          ORDER BY created_at DESC
+          LIMIT 5
+      ");
+      if ($announcements && $announcements->num_rows > 0): ?>
+        <ul class="space-y-6">
+          <?php while ($a = $announcements->fetch_assoc()): ?>
+            <li class="bg-blue-50 border-l-4 border-blue-400 rounded-lg p-4 shadow-sm">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-semibold text-blue-700"><?= htmlspecialchars($a['title']) ?></span>
+                <span class="text-xs text-gray-500"><?= date('M d, Y', strtotime($a['created_at'])) ?></span>
+              </div>
+              <div class="text-gray-700 text-sm"><?= nl2br(htmlspecialchars($a['message'])) ?></div>
+            </li>
+          <?php endwhile; ?>
+        </ul>
+      <?php else: ?>
+        <div class="text-gray-600 text-lg">
+          No announcements at this time.
+        </div>
+      <?php endif; ?>
     </section>
 
     <!-- Enrolled Courses as Cards -->

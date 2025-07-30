@@ -1,4 +1,12 @@
-<?php include 'db_connect.php'; ?>
+<?php
+include 'db_connect.php';
+session_start();
+
+// CSRF token generation
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,6 +22,8 @@
   <h2 class="text-3xl font-bold text-center mb-6 text-blue-800">📝 Register to SynapZ</h2>
 
   <form method="POST" id="registerForm" class="space-y-5" autocomplete="off">
+    <!-- CSRF Token -->
+    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
 
     <!-- Role -->
     <div>
@@ -36,6 +46,13 @@
     <div>
       <label for="password" class="block mb-1 font-medium text-gray-700">Password:</label>
       <input type="password" id="password" name="password" required
+        class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+      <small class="text-gray-500">At least 8 characters, with upper, lower, and a number.</small>
+    </div>
+    <!-- Password Confirmation -->
+    <div>
+      <label for="password_confirm" class="block mb-1 font-medium text-gray-700">Confirm Password:</label>
+      <input type="password" id="password_confirm" name="password_confirm" required
         class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
     </div>
 
@@ -102,78 +119,111 @@
   <!-- PHP Registration Logic -->
   <?php
   if (isset($_POST['register']) && isset($_POST['otp']) && isset($_POST['generatedOtp'])) {
+      // CSRF check
+      if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+          echo "<script>alert('⛔ Invalid session. Please refresh and try again.');</script>";
+          exit;
+      }
+
+      // Validate OTP
       if ($_POST['otp'] !== $_POST['generatedOtp']) {
           echo "<script>alert('⛔ Invalid OTP. Please try again.');</script>";
+          exit;
+      }
+
+      // Sanitize and validate inputs
+      $role = $_POST['role'];
+      $username = trim($_POST['username']);
+      $password = $_POST['password'];
+      $password_confirm = $_POST['password_confirm'];
+      $first = trim($_POST['first_name']);
+      $last = trim($_POST['last_name']);
+      $email = filter_var(trim($_POST['email']), FILTER_VALIDATE_EMAIL);
+
+      // Password confirmation check
+      if ($password !== $password_confirm) {
+          echo "<script>alert('⛔ Passwords do not match.');</script>";
+          exit;
+      }
+
+      if (!$email) {
+          echo "<script>alert('⛔ Invalid email address.');</script>";
+          exit;
+      }
+      if (!preg_match('/^[a-zA-Z0-9_]{4,20}$/', $username)) {
+          echo "<script>alert('⛔ Username must be 4-20 characters, letters/numbers/underscores only.');</script>";
+          exit;
+      }
+      if (strlen($password) < 8 || !preg_match('/[A-Z]/', $password)
+          || !preg_match('/[a-z]/', $password) || !preg_match('/[0-9]/', $password)) {
+          echo "<script>alert('⛔ Password must be at least 8 characters and include upper, lower, and a number.');</script>";
+          exit;
+      }
+      $password = password_hash($password, PASSWORD_BCRYPT);
+
+      // Email exists check in both students and teachers
+      $checkEmailStmt = $conn->prepare("SELECT user_id FROM students WHERE email = ? UNION SELECT user_id FROM teachers WHERE email = ?");
+      $checkEmailStmt->bind_param("ss", $email, $email);
+      $checkEmailStmt->execute();
+      $checkEmailStmt->store_result();
+
+      if ($checkEmailStmt->num_rows > 0) {
+          echo "<script>alert('⛔ Email already exists!');</script>";
       } else {
-          $role = $_POST['role'];
-          $username = $_POST['username'];
-          $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
-          $first = $_POST['first_name'];
-          $last = $_POST['last_name'];
-          $email = $_POST['email'];
+          // Username exists check
+          $checkStmt = $conn->prepare("SELECT * FROM users WHERE username = ?");
+          $checkStmt->bind_param("s", $username);
+          $checkStmt->execute();
+          $checkStmt->store_result();
 
-          // === Email exists check in both students and teachers ===
-          $checkEmailStmt = $conn->prepare("SELECT user_id FROM students WHERE email = ? UNION SELECT user_id FROM teachers WHERE email = ?");
-          $checkEmailStmt->bind_param("ss", $email, $email);
-          $checkEmailStmt->execute();
-          $checkEmailStmt->store_result();
-
-          if ($checkEmailStmt->num_rows > 0) {
-              echo "<script>alert('⛔ Email already exists!');</script>";
+          if ($checkStmt->num_rows > 0) {
+              echo "<script>alert('⛔ Username already exists!');</script>";
           } else {
-              // === Username exists check ===
-              $checkStmt = $conn->prepare("SELECT * FROM users WHERE username = ?");
-              $checkStmt->bind_param("s", $username);
-              $checkStmt->execute();
-              $checkStmt->store_result();
+              $stmtUser = $conn->prepare("INSERT INTO users (username, role) VALUES (?, ?)");
+              $stmtUser->bind_param("ss", $username, $role);
 
-              if ($checkStmt->num_rows > 0) {
-                  echo "<script>alert('⛔ Username already exists!');</script>";
-              } else {
-                  $stmtUser = $conn->prepare("INSERT INTO users (username, role) VALUES (?, ?)");
-                  $stmtUser->bind_param("ss", $username, $role);
+              if ($stmtUser->execute()) {
+                  $user_id = $conn->insert_id;
 
-                  if ($stmtUser->execute()) {
-                      $user_id = $conn->insert_id;
+                  $stmtPwd = $conn->prepare("INSERT INTO passwords (user_id, password_hash, is_current) VALUES (?, ?, 1)");
+                  $stmtPwd->bind_param("is", $user_id, $password);
+                  $stmtPwd->execute();
 
-                      $stmtPwd = $conn->prepare("INSERT INTO passwords (user_id, password_hash, is_current) VALUES (?, ?, 1)");
-                      $stmtPwd->bind_param("is", $user_id, $password);
-                      $stmtPwd->execute();
+                  if ($role === 'student') {
+                      $dob = !empty($_POST['dob']) ? $_POST['dob'] : NULL;
+                      $contact = !empty($_POST['contact_number']) ? $_POST['contact_number'] : NULL;
 
-                      if ($role === 'student') {
-                          $dob = !empty($_POST['dob']) ? $_POST['dob'] : NULL;
-                          $contact = !empty($_POST['contact_number']) ? $_POST['contact_number'] : NULL;
+                      // Validate age >= 13
+                      if ($dob) {
+                          $birthDate = new DateTime($dob);
+                          $today = new DateTime();
+                          $age = $today->diff($birthDate)->y;
 
-                          // 🧠 Validate age >= 13
-                          if ($dob) {
-                              $birthDate = new DateTime($dob);
-                              $today = new DateTime();
-                              $age = $today->diff($birthDate)->y;
-
-                              if ($age < 13) {
-                                  echo "<script>alert('🚫 You must be at least 13 years old to register as a student.');</script>";
-                                  exit;
-                              }
+                          if ($age < 13) {
+                              echo "<script>alert('🚫 You must be at least 13 years old to register as a student.');</script>";
+                              exit;
                           }
-
-                          $stmtStudent = $conn->prepare("INSERT INTO students (user_id, first_name, last_name, dob, email, contact_number)
-                                                      VALUES (?, ?, ?, ?, ?, ?)");
-                          $stmtStudent->bind_param("isssss", $user_id, $first, $last, $dob, $email, $contact);
-                          $stmtStudent->execute();
-
-                          echo "<script>alert('🎉 Student registered successfully.'); window.location='login.php';</script>";
-
-                      } elseif ($role === 'teacher') {
-                          $stmtTeacher = $conn->prepare("INSERT INTO teachers (user_id, first_name, last_name, email)
-                                                      VALUES (?, ?, ?, ?)");
-                          $stmtTeacher->bind_param("isss", $user_id, $first, $last, $email);
-                          $stmtTeacher->execute();
-
-                          echo "<script>alert('🎉 Teacher registered successfully.'); window.location='login.php';</script>";
                       }
-                  } else {
-                      echo "<script>alert('⛔ Registration failed due to an error.');</script>";
+
+                      $stmtStudent = $conn->prepare("INSERT INTO students (user_id, first_name, last_name, dob, email, contact_number)
+                                                  VALUES (?, ?, ?, ?, ?, ?)");
+                      $stmtStudent->bind_param("isssss", $user_id, $first, $last, $dob, $email, $contact);
+                      $stmtStudent->execute();
+
+                      session_regenerate_id(true); // Session security
+                      echo "<script>alert('🎉 Student registered successfully.'); window.location='login.php';</script>";
+
+                  } elseif ($role === 'teacher') {
+                      $stmtTeacher = $conn->prepare("INSERT INTO teachers (user_id, first_name, last_name, email)
+                                                  VALUES (?, ?, ?, ?)");
+                      $stmtTeacher->bind_param("isss", $user_id, $first, $last, $email);
+                      $stmtTeacher->execute();
+
+                      session_regenerate_id(true); // Session security
+                      echo "<script>alert('🎉 Teacher registered successfully.'); window.location='login.php';</script>";
                   }
+              } else {
+                  echo "<script>alert('⛔ Registration failed due to an error.');</script>";
               }
           }
       }
@@ -197,8 +247,16 @@
   }
   roleSelect.addEventListener('change', toggleFields);
   toggleFields();
-  let otpSent = false;
   form.addEventListener('submit', function (e) {
+    // Password confirmation check (client-side)
+    const password = document.getElementById('password').value;
+    const passwordConfirm = document.getElementById('password_confirm').value;
+    if (password !== passwordConfirm) {
+      e.preventDefault();
+      alert("⛔ Passwords do not match.");
+      document.getElementById('password_confirm').focus();
+      return;
+    }
     // If OTP section is hidden, send OTP first
     if (!otpSection.classList.contains('hidden') && otpInput.value.trim() === '') {
       e.preventDefault();
@@ -245,6 +303,7 @@
         otpMsg.textContent = "Failed to send OTP. Please check your email address.";
         registerBtn.disabled = false;
         registerBtn.textContent = "✅ Register";
+        console.log("EmailJS error:", error);
       });
     }
   });

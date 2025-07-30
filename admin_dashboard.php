@@ -8,6 +8,20 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 
+// Handle announcement creation
+$announce_message = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['title'], $_POST['message'], $_POST['audience'])) {
+    $title = $conn->real_escape_string(trim($_POST['title']));
+    $message = $conn->real_escape_string(trim($_POST['message']));
+    $audience = $conn->real_escape_string($_POST['audience']);
+    if ($title && $message && in_array($audience, ['students', 'teachers', 'all'])) {
+        $conn->query("INSERT INTO announcements (title, message, audience) VALUES ('$title', '$message', '$audience')");
+        $announce_message = '<div class="mb-4 text-green-700 bg-green-100 border-l-4 border-green-500 p-3 rounded">Announcement posted!</div>';
+    } else {
+        $announce_message = '<div class="mb-4 text-red-700 bg-red-100 border-l-4 border-red-500 p-3 rounded">Please fill all fields.</div>';
+    }
+}
+
 // Fetch statistics
 $total_students = $conn->query("SELECT COUNT(*) AS count FROM students")->fetch_assoc()['count'];
 $total_teachers = $conn->query("SELECT COUNT(*) AS count FROM teachers")->fetch_assoc()['count'];
@@ -39,8 +53,30 @@ $total_revenue = $conn->query("SELECT IFNULL(SUM(amount), 0) AS total FROM stude
   </div>
 </section>
 
-<!-- Main Content -->
 <main class="container mx-auto px-4 sm:px-6 md:px-12 py-12 flex-grow">
+
+  <!-- Announcements List -->
+  <section class="bg-white/90 rounded-2xl shadow-lg p-6 mb-10">
+    <h3 class="text-xl font-bold text-indigo-700 mb-4">Recent Announcements</h3>
+    <?php
+    $announcements = $conn->query("SELECT id, title, message, audience, created_at FROM announcements ORDER BY created_at DESC LIMIT 10");
+    if ($announcements && $announcements->num_rows > 0): ?>
+      <ul class="space-y-6">
+        <?php while ($a = $announcements->fetch_assoc()): ?>
+          <li class="bg-blue-50 border-l-4 border-blue-400 rounded-lg p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-semibold text-blue-700"><?= htmlspecialchars($a['title']) ?></span>
+              <span class="text-xs text-gray-500"><?= date('M d, Y', strtotime($a['created_at'])) ?> | <?= ucfirst($a['audience']) ?></span>
+            </div>
+            <div class="text-gray-700 text-sm mb-2"><?= nl2br(htmlspecialchars($a['message'])) ?></div>
+          </li>
+        <?php endwhile; ?>
+      </ul>
+    <?php else: ?>
+      <div class="text-gray-600 text-lg">No announcements yet.</div>
+    <?php endif; ?>
+  </section>
+
   <!-- Summary Cards -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
     <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8 hover:shadow-2xl transition-shadow duration-300">
@@ -73,31 +109,50 @@ $total_revenue = $conn->query("SELECT IFNULL(SUM(amount), 0) AS total FROM stude
         <h4 class="text-xl font-semibold mb-2">➕ Register Admin</h4>
         <p class="text-sm text-gray-600">Create new admin accounts with secure access.</p>
       </a>
-
       <a href="view_users.php" class="block bg-white rounded-2xl shadow-lg p-6 hover:shadow-2xl transition-shadow duration-300 text-indigo-700 hover:text-indigo-900">
         <h4 class="text-xl font-semibold mb-2">👁️ View All Users</h4>
         <p class="text-sm text-gray-600">Browse the full list of students, teachers, and admins.</p>
       </a>
-
       <a href="view_courses.php" class="block bg-white rounded-2xl shadow-lg p-6 hover:shadow-2xl transition-shadow duration-300 text-indigo-700 hover:text-indigo-900">
         <h4 class="text-xl font-semibold mb-2">📚 View All Courses</h4>
         <p class="text-sm text-gray-600">Manage and review all available courses.</p>
       </a>
-
       <a href="admin_reports.php" class="block bg-white rounded-2xl shadow-lg p-6 hover:shadow-2xl transition-shadow duration-300 text-indigo-700 hover:text-indigo-900">
         <h4 class="text-xl font-semibold mb-2">📑 Payment & Enrollment Reports</h4>
         <p class="text-sm text-gray-600">Analyze payment statuses and enrollment trends.</p>
       </a>
-
       <a href="admin_progress_reports.php" class="block bg-white rounded-2xl shadow-lg p-6 hover:shadow-2xl transition-shadow duration-300 text-indigo-700 hover:text-indigo-900">
         <h4 class="text-xl font-semibold mb-2">📊 View Progress (Students & Teachers)</h4>
         <p class="text-sm text-gray-600">Track learning and teaching progress over time.</p>
       </a>
     </div>
   </section>
+
+  <!-- Create Announcement Form -->
+  <section class="bg-white/90 rounded-2xl shadow-lg p-6 mb-10 mt-12">
+    <h3 class="text-xl font-bold text-indigo-700 mb-4">📢 Create Announcement</h3>
+    <?= $announce_message ?>
+    <form method="post" class="space-y-4">
+      <div>
+        <label class="block font-semibold mb-1" for="title">Title</label>
+        <input type="text" id="title" name="title" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-indigo-200">
+      </div>
+      <div>
+        <label class="block font-semibold mb-1" for="message">Message</label>
+        <textarea id="message" name="message" rows="3" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-indigo-200"></textarea>
+      </div>
+      <div>
+        <label class="block font-semibold mb-1" for="audience">Audience</label>
+        <select id="audience" name="audience" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-indigo-200">
+          <option value="all">All</option>
+          <option value="students">Students</option>
+          <option value="teachers">Teachers</option>
+        </select>
+      </div>
+      <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded font-semibold hover:bg-indigo-700 transition">Post Announcement</button>
+    </form>
+  </section>
 </main>
-
-
 
 <!-- Wave Animation Style -->
 <style>
@@ -113,6 +168,6 @@ $total_revenue = $conn->query("SELECT IFNULL(SUM(amount), 0) AS total FROM stude
 }
 </style>
 
-</body>
 <?php include 'components/footer.php'; ?>
+</body>
 </html>
