@@ -51,6 +51,7 @@ function log_view_and_progress($conn, $user_id, $content_id, $course_id, $role) 
   <meta charset="UTF-8" />
   <title><?= htmlspecialchars($course['name']) ?> - Course</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <style>[x-cloak] { display: none; }</style>
     <link rel="icon" type="image/png" href="./images/logo.png" />
