@@ -64,7 +64,7 @@
     <!-- Content -->
     <div class="relative z-10 max-w-4xl px-6" id="main">
       <!-- Logo -->
-      <div class="mb-6 flex justify-center reveal">
+      <div class="mb-6 flex justify-center reveal mt-20">
         <img src="./images/logo.png" alt="SynapZ Logo" class="h-20 w-auto sm:h-24 md:h-28 drop-shadow-lg">
       </div>
 

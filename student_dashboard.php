@@ -102,12 +102,6 @@ $logs = $conn->query("
     }
     .animate-fadeUp { animation: fadeUp .5s ease-out both; }
 
-    /* Pretty scrollbars (WebKit) */
-    ::-webkit-scrollbar { width: 10px; height: 10px; }
-    ::-webkit-scrollbar-thumb {
-      background: linear-gradient(180deg,#60a5fa,#a78bfa);
-      border-radius: 9999px;
-    }
     ::-webkit-scrollbar-track { background: transparent; }
   </style>
 </head>

@@ -35,7 +35,7 @@ $navItems = [
   ['<i class="fa-solid fa-book-open text-lg text-green-600"></i>', 'Enroll', 'enroll_course.php', 'bg-green-50', 'text-green-700', 'group-hover:text-green-900'],
   ['<i class="fa-solid fa-book text-lg text-purple-600"></i>', 'My Courses', 'student_courses.php', 'bg-purple-50', 'text-purple-700', 'group-hover:text-purple-900'],
   ['<i class="fa-solid fa-brain text-lg text-orange-600"></i>', 'Quizzes', 'student_quizzes.php', 'bg-orange-50', 'text-orange-700', 'group-hover:text-orange-900'],
-  ['<i class="fa-solid fa-pen text-lg text-pink-600"></i>', 'Assignments', 'attempt_assignment.php', 'bg-pink-50', 'text-pink-700', 'group-hover:text-pink-900'],
+  
   ['<i class="fa-solid fa-comments text-lg text-yellow-600"></i>', 'Discussions', 'forum.php', 'bg-yellow-50', 'text-yellow-700', 'group-hover:text-yellow-900'],
   ['<i class="fa-solid fa-gear text-lg text-gray-700"></i>', 'Settings', 'student_settings.php', 'bg-gray-50', 'text-gray-700', 'group-hover:text-gray-900'],
   ['<i class="fa-solid fa-envelope text-lg text-indigo-600"></i>', 'Messages', 'messages.php', 'bg-indigo-50', 'text-indigo-700', 'group-hover:text-indigo-900'],
