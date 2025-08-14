@@ -130,7 +130,7 @@ $badgeByLabel = [
 </aside>
 
 <!-- Desktop Sidebar -->
-<aside class="hidden lg:block lg:w-1/5 w-full bg-white/90 backdrop-blur p-6 rounded-2xl shadow-xl border border-gray-100 h-fit">
+<aside class="sticky top-28 hidden lg:block lg:w-1/5 w-full bg-white/90 backdrop-blur p-6 rounded-2xl shadow-xl border border-gray-100 h-fit">
   <h3 class="text-sm sm:text-sm font-semibold mb-2 text-gray-700">👋 Welcome, <strong><?php echo htmlspecialchars($full_name, ENT_QUOTES, 'UTF-8'); ?></strong></h3>
   <nav class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-1 gap-4">
     <?php foreach ($navItems as $item): ?>
