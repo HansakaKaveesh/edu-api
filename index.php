@@ -5,6 +5,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SynapZ - Welcome</title>
+  <meta name="description" content="SynapZ is a modern virtual learning environment connecting students, teachers, and admins in a seamless, collaborative platform." />
+  <meta property="og:title" content="SynapZ - Learn, Grow, Succeed" />
+  <meta property="og:description" content="Your complete Virtual Learning Environment for students and teachers." />
+  <meta property="og:image" content="./images/logo.png" />
+  <meta name="theme-color" content="#2563eb" />
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -17,11 +22,16 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="./images/logo.png" />
 
+  <!-- Preload hero image -->
+  <link rel="preload" as="image" href="./images/hero-bg.jpg" imagesrcset="./images/hero-bg.jpg" />
+
   <style>
     body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; }
+
     /* Reveal on scroll */
     .reveal { opacity: 0; transform: translateY(14px); transition: opacity .6s ease, transform .6s ease; }
     .reveal.in-view { opacity: 1; transform: translateY(0); }
+
     /* Pretty blobs */
     @keyframes blob {
       0%, 100% { transform: translate(0,0) scale(1); }
@@ -31,15 +41,35 @@
     .animate-blob { animation: blob 12s infinite; }
     .animation-delay-2000 { animation-delay: 2s; }
     .animation-delay-4000 { animation-delay: 4s; }
+
     /* Reduce motion */
     @media (prefers-reduced-motion: reduce) {
       .reveal { transition: none; }
       .animate-blob { animation: none; }
+      .typed-caret { animation: none; }
     }
+
+    /* Typed headline caret */
+    .typed-caret::after {
+      content: '|';
+      margin-left: 2px;
+      color: #fff;
+      opacity: .8;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: .1; }
+      50% { opacity: 1; }
+    }
+
+    /* Waves */
+    .wave-top { transform: translateY(1px); }
+    .wave-bottom { transform: translateY(-1px); }
   </style>
 </head>
 
 <body class="bg-white text-gray-800 flex flex-col min-h-screen overflow-x-hidden">
+  <div id="top"></div>
 
   <!-- Skip link -->
   <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 bg-blue-600 text-white px-4 py-2 rounded">
@@ -52,9 +82,9 @@
   <!-- Hero -->
   <section class="relative min-h-screen flex items-center justify-center text-center overflow-hidden">
     <!-- Background image -->
-    <img src="./images/hero-bg.jpg" alt="" class="absolute inset-0 w-full h-full object-cover" />
+    <img src="./images/hero-bg.jpg" alt="" class="absolute inset-0 w-full h-full object-cover" fetchpriority="high" />
     <!-- Gradient overlay -->
-    <div class="absolute inset-0 bg-gradient-to-br from-slate-900/70 via-blue-900/60 to-cyan-800/60"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-slate-900/80 via-blue-900/70 to-cyan-800/60"></div>
 
     <!-- Decorative blobs -->
     <div class="pointer-events-none absolute -top-16 -left-20 w-80 h-80 bg-gradient-to-tr from-pink-400 to-purple-500 opacity-30 blur-3xl rounded-full animate-blob"></div>
@@ -65,33 +95,51 @@
     <div class="relative z-10 max-w-4xl px-6" id="main">
       <!-- Logo -->
       <div class="mb-6 flex justify-center reveal mt-20">
-        <img src="./images/logo.png" alt="SynapZ Logo" class="h-20 w-auto sm:h-24 md:h-28 drop-shadow-lg">
+        <img src="./images/logo.png" alt="SynapZ Logo" class="h-20 w-auto sm:h-24 md:h-28 drop-shadow-lg" loading="eager" decoding="async">
       </div>
 
       <!-- Title -->
-      <h1 class="reveal text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight mb-4">
+      <h1 class="reveal text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight mb-4 text-white">
         <span class="bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 text-transparent bg-clip-text">Welcome to</span>
-        <span class="block text-white">Synap<span class="text-yellow-300">Z</span></span>
+        <span class="block">Synap<span class="text-yellow-300">Z</span></span>
       </h1>
 
-      <!-- Subtext -->
+      <!-- Animated subheadline -->
       <p class="reveal text-lg sm:text-xl text-white/90 max-w-2xl mx-auto">
         Your complete Virtual Learning Environment for
-        <span class="font-semibold text-blue-300">students</span> and
-        <span class="font-semibold text-green-300">teachers</span>.
+        <span class="font-semibold text-blue-300 typed-caret" id="typedWords" aria-live="polite">students</span>.
       </p>
 
       <!-- CTA -->
       <div class="reveal flex justify-center flex-wrap gap-4 mt-8">
-        <a href="login.php" class="bg-blue-600 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
-          🔐 Login
-        </a>
-        <a href="register.php" class="bg-green-600 text-white px-6 py-3 rounded-lg shadow hover:bg-green-700 focus:ring-4 focus:ring-green-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
-          📝 Register
-        </a>
-        <a href="#about" class="text-white/90 hover:text-white px-6 py-3 rounded-lg border border-white/30 hover:bg-white/10 transition">
-          Learn more
-        </a>
+        <?php if (!empty($_SESSION['user_id'])): ?>
+          <?php if (($_SESSION['role'] ?? '') === 'student'): ?>
+            <a href="student_dashboard.php" class="bg-blue-600 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
+              🎒 Go to Dashboard
+            </a>
+          <?php elseif (($_SESSION['role'] ?? '') === 'teacher'): ?>
+            <a href="teacher_dashboard.php" class="bg-purple-600 text-white px-6 py-3 rounded-lg shadow hover:bg-purple-700 focus:ring-4 focus:ring-purple-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
+              📚 Go to Dashboard
+            </a>
+          <?php else: ?>
+            <a href="admin_dashboard.php" class="bg-gray-700 text-white px-6 py-3 rounded-lg shadow hover:bg-gray-800 focus:ring-4 focus:ring-gray-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
+              🛠️ Go to Dashboard
+            </a>
+          <?php endif; ?>
+          <a href="logout.php" class="text-white/90 hover:text-white px-6 py-3 rounded-lg border border-white/30 hover:bg-white/10 transition">
+            🚪 Logout
+          </a>
+        <?php else: ?>
+          <a href="login.php" class="bg-blue-600 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
+            🔐 Login
+          </a>
+          <a href="register.php" class="bg-green-600 text-white px-6 py-3 rounded-lg shadow hover:bg-green-700 focus:ring-4 focus:ring-green-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
+            📝 Register
+          </a>
+          <a href="#about" class="text-white/90 hover:text-white px-6 py-3 rounded-lg border border-white/30 hover:bg-white/10 transition">
+            Learn more
+          </a>
+        <?php endif; ?>
       </div>
 
       <!-- Socials -->
@@ -116,25 +164,27 @@
         <span aria-hidden="true">↓</span>
       </div>
     </div>
+
+    
   </section>
 
   <!-- Stats -->
-  <section class="py-12 bg-gradient-to-b from-white to-blue-50">
+  <section class="py-16 bg-gradient-to-b from-white to-blue-50">
     <div class="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="reveal bg-white rounded-2xl p-5 shadow border border-gray-100">
-        <div class="text-3xl font-extrabold text-blue-700">5k+</div>
+      <div class="reveal bg-white/90 rounded-2xl p-5 shadow border border-gray-100 text-center">
+        <div class="text-3xl font-extrabold text-blue-700"><span class="countup" data-target="5000">0</span>+</div>
         <div class="text-gray-600">Active Students</div>
       </div>
-      <div class="reveal bg-white rounded-2xl p-5 shadow border border-gray-100">
-        <div class="text-3xl font-extrabold text-emerald-600">200+</div>
+      <div class="reveal bg-white/90 rounded-2xl p-5 shadow border border-gray-100 text-center">
+        <div class="text-3xl font-extrabold text-emerald-600"><span class="countup" data-target="200">0</span>+</div>
         <div class="text-gray-600">Expert Tutors</div>
       </div>
-      <div class="reveal bg-white rounded-2xl p-5 shadow border border-gray-100">
-        <div class="text-3xl font-extrabold text-purple-700">350+</div>
+      <div class="reveal bg-white/90 rounded-2xl p-5 shadow border border-gray-100 text-center">
+        <div class="text-3xl font-extrabold text-purple-700"><span class="countup" data-target="350">0</span>+</div>
         <div class="text-gray-600">Courses</div>
       </div>
-      <div class="reveal bg-white rounded-2xl p-5 shadow border border-gray-100">
-        <div class="text-3xl font-extrabold text-rose-600">15k+</div>
+      <div class="reveal bg-white/90 rounded-2xl p-5 shadow border border-gray-100 text-center">
+        <div class="text-3xl font-extrabold text-rose-600"><span class="countup" data-target="15000">0</span>+</div>
         <div class="text-gray-600">Lessons</div>
       </div>
     </div>
@@ -155,7 +205,7 @@
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mt-12">
-        <article class="reveal bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition text-left" role="region" aria-labelledby="students-title">
+        <article class="reveal bg-white/90 p-6 rounded-2xl shadow-md hover:shadow-lg transition text-left" role="region" aria-labelledby="students-title">
           <div class="text-blue-600 text-5xl mb-4" aria-hidden="true">📚</div>
           <h3 id="students-title" class="text-xl font-semibold mb-2">For Students</h3>
           <p class="text-gray-600 text-sm sm:text-base">
@@ -163,7 +213,7 @@
           </p>
         </article>
 
-        <article class="reveal bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition text-left" role="region" aria-labelledby="teachers-title">
+        <article class="reveal bg-white/90 p-6 rounded-2xl shadow-md hover:shadow-lg transition text-left" role="region" aria-labelledby="teachers-title">
           <div class="text-green-500 text-5xl mb-4" aria-hidden="true">👩‍🏫</div>
           <h3 id="teachers-title" class="text-xl font-semibold mb-2">For Teachers</h3>
           <p class="text-gray-600 text-sm sm:text-base">
@@ -171,7 +221,7 @@
           </p>
         </article>
 
-        <article class="reveal bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition text-left" role="region" aria-labelledby="admins-title">
+        <article class="reveal bg-white/90 p-6 rounded-2xl shadow-md hover:shadow-lg transition text-left" role="region" aria-labelledby="admins-title">
           <div class="text-yellow-500 text-5xl mb-4" aria-hidden="true">🛠️</div>
           <h3 id="admins-title" class="text-xl font-semibold mb-2">For Admins</h3>
           <p class="text-gray-600 text-sm sm:text-base">
@@ -193,7 +243,7 @@
       </p>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-        <article class="reveal bg-white p-8 rounded-2xl shadow hover:shadow-lg transition text-left" role="region" aria-labelledby="live-sessions-title">
+        <article class="reveal bg-white/90 p-8 rounded-2xl shadow hover:shadow-lg transition text-left" role="region" aria-labelledby="live-sessions-title">
           <div class="text-blue-500 text-5xl mb-4" aria-hidden="true">🎥</div>
           <h3 id="live-sessions-title" class="font-semibold text-xl mb-2">Live Sessions</h3>
           <p class="text-gray-600 text-sm sm:text-base">
@@ -201,7 +251,7 @@
           </p>
         </article>
 
-        <article class="reveal bg-white p-8 rounded-2xl shadow hover:shadow-lg transition text-left" role="region" aria-labelledby="expert-guidance-title">
+        <article class="reveal bg-white/90 p-8 rounded-2xl shadow hover:shadow-lg transition text-left" role="region" aria-labelledby="expert-guidance-title">
           <div class="text-green-500 text-5xl mb-4" aria-hidden="true">🎓</div>
           <h3 id="expert-guidance-title" class="font-semibold text-xl mb-2">Expert Guidance</h3>
           <p class="text-gray-600 text-sm sm:text-base">
@@ -209,7 +259,7 @@
           </p>
         </article>
 
-        <article class="reveal bg-white p-8 rounded-2xl shadow hover:shadow-lg transition text-left" role="region" aria-labelledby="progress-tracking-title">
+        <article class="reveal bg-white/90 p-8 rounded-2xl shadow hover:shadow-lg transition text-left" role="region" aria-labelledby="progress-tracking-title">
           <div class="text-yellow-500 text-5xl mb-4" aria-hidden="true">📊</div>
           <h3 id="progress-tracking-title" class="font-semibold text-xl mb-2">Progress Tracking</h3>
           <p class="text-gray-600 text-sm sm:text-base">
@@ -234,7 +284,8 @@
         <!-- IGCSE ICT -->
         <article class="reveal bg-white rounded-2xl shadow hover:shadow-xl transition overflow-hidden text-left group" role="region" aria-labelledby="igcse-ict-title">
           <div class="relative">
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFRObkO8H_uYDj0uuGJ1vlSPl4i-qFHG92YQ&s" alt="IGCSE ICT" class="w-full h-48 object-cover group-hover:scale-[1.02] transition">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFRObkO8H_uYDj0uuGJ1vlSPl4i-qFHG92YQ&s"
+                 alt="IGCSE ICT" class="w-full h-48 object-cover group-hover:scale-[1.02] transition" loading="lazy" decoding="async">
             <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
           </div>
           <div class="p-5">
@@ -248,7 +299,8 @@
         <!-- IAL AS ICT -->
         <article class="reveal bg-white rounded-2xl shadow hover:shadow-xl transition overflow-hidden text-left group" role="region" aria-labelledby="ial-as-ict-title">
           <div class="relative">
-            <img src="https://aotscolombiajapon.com/wp-content/uploads/2025/01/3ra-Beca-IA-Utilizing-to-overcome-DX-related-1.jpg" alt="IAL AS ICT" class="w-full h-48 object-cover group-hover:scale-[1.02] transition">
+            <img src="https://aotscolombiajapon.com/wp-content/uploads/2025/01/3ra-Beca-IA-Utilizing-to-overcome-DX-related-1.jpg"
+                 alt="IAL AS ICT" class="w-full h-48 object-cover group-hover:scale-[1.02] transition" loading="lazy" decoding="async">
             <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
           </div>
           <div class="p-5">
@@ -262,7 +314,8 @@
         <!-- IAL AS2 ICT -->
         <article class="reveal bg-white rounded-2xl shadow hover:shadow-xl transition overflow-hidden text-left group" role="region" aria-labelledby="ial-as2-ict-title">
           <div class="relative">
-            <img src="https://www.ict.eu/sites/corporate/files/images/iStock-1322517295%20copy_3.jpg" alt="IAL AS2 ICT" class="w-full h-48 object-cover group-hover:scale-[1.02] transition">
+            <img src="https://www.ict.eu/sites/corporate/files/images/iStock-1322517295%20copy_3.jpg"
+                 alt="IAL AS2 ICT" class="w-full h-48 object-cover group-hover:scale-[1.02] transition" loading="lazy" decoding="async">
             <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
           </div>
           <div class="p-5">
@@ -276,7 +329,8 @@
         <!-- IGCSE Computer Science -->
         <article class="reveal bg-white rounded-2xl shadow hover:shadow-xl transition overflow-hidden text-left group" role="region" aria-labelledby="igcse-cs-title">
           <div class="relative">
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTiX_sE8HNgliGkDZNJaestGinmoLUp1ab5Eg&s" alt="IGCSE Computer Science" class="w-full h-48 object-cover group-hover:scale-[1.02] transition">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTiX_sE8HNgliGkDZNJaestGinmoLUp1ab5Eg&s"
+                 alt="IGCSE Computer Science" class="w-full h-48 object-cover group-hover:scale-[1.02] transition" loading="lazy" decoding="async">
             <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
           </div>
           <div class="p-5">
@@ -300,7 +354,7 @@
 
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
         <article class="reveal bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition" role="region" aria-labelledby="edu-ruwan">
-          <img src="./images/tanjana-sir-image-1.png" alt="Mr. Tanjana Chamikara" class="w-24 h-24 mx-auto rounded-full border-4 border-blue-200 mb-4" />
+          <img src="./images/tanjana-sir-image-1.png" alt="Mr. Tanjana Chamikara" class="w-24 h-24 mx-auto rounded-full border-4 border-blue-200 mb-4" loading="lazy" decoding="async" />
           <h3 id="edu-ruwan" class="font-semibold text-xl text-blue-800">Mr. Tanjana Chamikara</h3>
           <span class="inline-block mt-2 px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full">Senior Mathematics Instructor</span>
           <ul class="mt-3 text-sm text-gray-600 list-disc list-inside text-left">
@@ -309,7 +363,7 @@
         </article>
 
         <article class="reveal bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition" role="region" aria-labelledby="edu-thilini">
-          <img src="./images/madara-miss-image-600-2-1.png" alt="Ms. Madhara Wedhage" class="w-24 h-24 mx-auto rounded-full border-4 border-green-200 mb-4" />
+          <img src="./images/madara-miss-image-600-2-1.png" alt="Ms. Madhara Wedhage" class="w-24 h-24 mx-auto rounded-full border-4 border-green-200 mb-4" loading="lazy" decoding="async" />
           <h3 id="edu-thilini" class="font-semibold text-xl text-green-800">Ms. Madhara Wedhage</h3>
           <span class="inline-block mt-2 px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full">Computer Science Mentor</span>
           <ul class="mt-3 text-sm text-gray-600 list-disc list-inside text-left">
@@ -318,7 +372,7 @@
         </article>
 
         <article class="reveal bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition" role="region" aria-labelledby="edu-chamika">
-          <img src="./images/udara-miss-2.png" alt="Ms. Udara Dilshani" class="w-24 h-24 mx-auto rounded-full border-4 border-yellow-200 mb-4" />
+          <img src="./images/udara-miss-2.png" alt="Ms. Udara Dilshani" class="w-24 h-24 mx-auto rounded-full border-4 border-yellow-200 mb-4" loading="lazy" decoding="async" />
           <h3 id="edu-chamika" class="font-semibold text-xl text-yellow-800">Ms. Udara Dilshani</h3>
           <span class="inline-block mt-2 px-3 py-1 bg-yellow-100 text-yellow-700 text-sm rounded-full">Science Educator</span>
           <ul class="mt-3 text-sm text-gray-600 list-disc list-inside text-left">
@@ -340,7 +394,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <article class="reveal bg-gradient-to-br from-blue-100 to-white p-6 rounded-xl shadow-lg text-left hover:shadow-2xl transition">
           <div class="flex items-start gap-4">
-            <img src="./images/Men.jpg" alt="Nisansala D." class="w-12 h-12 rounded-full border-2 border-blue-300" />
+            <img src="./images/Men.jpg" alt="Nisansala D." class="w-12 h-12 rounded-full border-2 border-blue-300" loading="lazy" decoding="async" />
             <div>
               <p class="text-gray-700 italic">
                 <svg class="inline w-5 h-5 text-blue-500 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M7.17 6.1A5 5 0 0 0 2 11v7a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1H5.92A3.01 3.01 0 0 1 9 9a1 1 0 0 0-1-1H7.17ZM20 6a5 5 0 0 0-5 5v7a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1h-3.08A3.01 3.01 0 0 1 22 9a1 1 0 0 0-1-1h-1Z"/></svg>
@@ -353,7 +407,7 @@
 
         <article class="reveal bg-gradient-to-br from-green-100 to-white p-6 rounded-xl shadow-lg text-left hover:shadow-2xl transition">
           <div class="flex items-start gap-4">
-            <img src="./images/Men.jpg" alt="Kaveen R." class="w-12 h-12 rounded-full border-2 border-green-300" />
+            <img src="./images/Men.jpg" alt="Kaveen R." class="w-12 h-12 rounded-full border-2 border-green-300" loading="lazy" decoding="async" />
             <div>
               <p class="text-gray-700 italic">
                 <svg class="inline w-5 h-5 text-green-500 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M7.17 6.1A5 5 0 0 0 2 11v7a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1H5.92A3.01 3.01 0 0 1 9 9a1 1 0 0 0-1-1H7.17ZM20 6a5 5 0 0 0-5 5v7a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1h-3.08A3.01 3.01 0 0 1 22 9a1 1 0 0 0-1-1h-1Z"/></svg>
@@ -367,24 +421,57 @@
     </div>
   </section>
 
-  <!-- If logged in, show Dashboard section
-  <?php if (isset($_SESSION['user_id'])): ?>
-  <section class="bg-gray-50 py-16" aria-label="User Dashboard Navigation">
-    <div class="max-w-4xl mx-auto px-6 text-center">
-      <h2 class="text-2xl font-semibold text-gray-700 mb-6">Go to your Dashboard</h2>
-      <nav class="space-x-4" aria-label="Dashboard and logout links">
-        <?php if ($_SESSION['role'] == 'student'): ?>
-          <a href="student_dashboard.php" class="inline-block bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 transition" role="button">🎒 Student Dashboard</a>
-        <?php elseif ($_SESSION['role'] == 'teacher'): ?>
-          <a href="teacher_dashboard.php" class="inline-block bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700 transition" role="button">📚 Teacher Dashboard</a>
-        <?php elseif ($_SESSION['role'] == 'admin'): ?>
-          <a href="admin_dashboard.php" class="inline-block bg-gray-700 text-white px-6 py-2 rounded hover:bg-gray-800 transition" role="button">🛠️ Admin Dashboard</a>
-        <?php endif; ?>
-        <a href="logout.php" class="inline-block bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700 transition" role="button">🚪 Logout</a>
-      </nav>
+  <!-- FAQ -->
+  <section class="py-20 bg-gradient-to-b from-white to-blue-50" aria-label="Frequently Asked Questions">
+    <div class="max-w-5xl mx-auto px-6">
+      <h2 class="reveal text-3xl sm:text-4xl font-extrabold text-center text-gray-800 mb-8">Frequently Asked Questions</h2>
+      <div class="reveal grid grid-cols-1 md:grid-cols-2 gap-6">
+        <details class="bg-white/90 border border-gray-100 rounded-xl p-5 shadow">
+          <summary class="cursor-pointer font-semibold text-gray-800">Is SynapZ free for students?</summary>
+          <p class="mt-2 text-gray-600">Many courses are free; paid courses offer extra resources and live sessions.</p>
+        </details>
+        <details class="bg-white/90 border border-gray-100 rounded-xl p-5 shadow">
+          <summary class="cursor-pointer font-semibold text-gray-800">Can I access courses on mobile?</summary>
+          <p class="mt-2 text-gray-600">Absolutely. SynapZ works great on phones, tablets, and desktops.</p>
+        </details>
+        <details class="bg-white/90 border border-gray-100 rounded-xl p-5 shadow">
+          <summary class="cursor-pointer font-semibold text-gray-800">Do you provide progress reports?</summary>
+          <p class="mt-2 text-gray-600">Yes! Track assignments, quiz performance, and course completion rates.</p>
+        </details>
+        <details class="bg-white/90 border border-gray-100 rounded-xl p-5 shadow">
+          <summary class="cursor-pointer font-semibold text-gray-800">How do I join live sessions?</summary>
+          <p class="mt-2 text-gray-600">Enrolled students receive links and reminders directly in their dashboard.</p>
+        </details>
+      </div>
     </div>
   </section>
-  <?php endif; ?> -->
+
+  <!-- CTA band -->
+  <section class="relative py-16">
+    <div class="absolute -top-[1px] left-0 right-0 wave-top" aria-hidden="true">
+     
+    </div>
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="reveal rounded-3xl bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-500 p-8 md:p-12 text-center text-white shadow-xl">
+        <h3 class="text-2xl md:text-3xl font-extrabold">Ready to start learning with SynapZ?</h3>
+        <p class="mt-2 text-white/90">Join thousands of learners and level up your skills today.</p>
+        <div class="mt-6 flex justify-center gap-3 flex-wrap">
+          <?php if (empty($_SESSION['user_id'])): ?>
+            <a href="register.php" class="bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg shadow hover:translate-y-[-1px] transition">Get Started</a>
+            <a href="login.php" class="bg-indigo-900/30 text-white border border-white/30 px-6 py-3 rounded-lg hover:bg-indigo-900/40 transition">I already have an account</a>
+          <?php else: ?>
+            <?php if (($_SESSION['role'] ?? '') === 'student'): ?>
+              <a href="student_dashboard.php" class="bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg shadow hover:translate-y-[-1px] transition">Open Dashboard</a>
+            <?php elseif (($_SESSION['role'] ?? '') === 'teacher'): ?>
+              <a href="teacher_dashboard.php" class="bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg shadow hover:translate-y-[-1px] transition">Open Dashboard</a>
+            <?php else: ?>
+              <a href="admin_dashboard.php" class="bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg shadow hover:translate-y-[-1px] transition">Open Dashboard</a>
+            <?php endif; ?>
+          <?php endif; ?>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- Footer -->
   <?php include 'components/footer.php'; ?>
@@ -396,7 +483,7 @@
      ↑
   </a>
 
-  <!-- Scripts: reveal on scroll + back-to-top -->
+  <!-- Scripts: reveal on scroll + back-to-top + typed + countUp -->
   <script>
     // Reveal on scroll
     const observer = new IntersectionObserver((entries) => {
@@ -407,12 +494,58 @@
     // Back to top
     const backBtn = document.getElementById('backToTop');
     window.addEventListener('scroll', () => {
-      if (window.scrollY > 600) {
-        backBtn.classList.remove('hidden');
-      } else {
-        backBtn.classList.add('hidden');
-      }
+      if (window.scrollY > 600) backBtn.classList.remove('hidden'); else backBtn.classList.add('hidden');
     });
+
+    // Typed rotating words
+    (function() {
+      const el = document.getElementById('typedWords');
+      if (!el) return;
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const words = ['students', 'teachers', 'schools'];
+      let i = 0, j = 0, deleting = false;
+
+      function tick() {
+        if (prefersReduced) { el.textContent = words[0]; return; }
+        const current = words[i];
+        if (!deleting) {
+          el.textContent = current.slice(0, j + 1);
+          j++;
+          if (j === current.length) { deleting = true; setTimeout(tick, 1200); return; }
+        } else {
+          el.textContent = current.slice(0, j - 1);
+          j--;
+          if (j === 0) { deleting = false; i = (i + 1) % words.length; }
+        }
+        setTimeout(tick, deleting ? 50 : 80);
+      }
+      tick();
+    })();
+
+    // Count-up stats
+    (function() {
+      const els = document.querySelectorAll('.countup');
+      if (!els.length) return;
+      const ro = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          const el = entry.target;
+          const target = parseInt(el.dataset.target, 10) || 0;
+          const duration = 1200;
+          const start = performance.now();
+          const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          const animate = (t) => {
+            const p = Math.min(1, (t - start) / duration);
+            const val = prefersReduced ? target : Math.floor(p * target);
+            el.textContent = val.toLocaleString();
+            if (p < 1) requestAnimationFrame(animate);
+          };
+          requestAnimationFrame(animate);
+          obs.unobserve(el);
+        });
+      }, { threshold: 0.6 });
+      els.forEach(el => ro.observe(el));
+    })();
   </script>
 </body>
 </html>
