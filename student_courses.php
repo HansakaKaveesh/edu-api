@@ -8,19 +8,24 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'student') {
 
 $user_id = (int)$_SESSION['user_id'];
 
-// Fetch active enrollments with course + type via prepared statement
+// Fetch active enrollments with course + type + teacher
 $courses = [];
 $boards = [];
 $levels = [];
 
 $sql = "
-    SELECT c.course_id, c.name, ct.board, ct.level
+    SELECT c.course_id, c.name, ct.board, ct.level,
+           GROUP_CONCAT(CONCAT(t.first_name, ' ', t.last_name) SEPARATOR ', ') AS teachers
     FROM enrollments e
     JOIN courses c ON e.course_id = c.course_id
     JOIN course_types ct ON c.course_type_id = ct.course_type_id
+    LEFT JOIN teacher_courses tc ON c.course_id = tc.course_id
+    LEFT JOIN teachers t ON tc.teacher_id = t.teacher_id
     WHERE e.user_id = ? AND e.status = 'active'
+    GROUP BY c.course_id, c.name, ct.board, ct.level
     ORDER BY c.name ASC
 ";
+
 if ($stmt = $conn->prepare($sql)) {
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
@@ -30,7 +35,8 @@ if ($stmt = $conn->prepare($sql)) {
             'course_id' => (int)$row['course_id'],
             'name'      => $row['name'],
             'board'     => $row['board'],
-            'level'     => $row['level']
+            'level'     => $row['level'],
+            'teacher'   => $row['teachers'] ?? ''
         ];
         if (!empty($row['board'])) $boards[$row['board']] = true;
         if (!empty($row['level'])) $levels[$row['level']] = true;
@@ -150,6 +156,11 @@ $total = count($courses);
                 <?php if (!empty($c['level'])): ?>
                   <span class="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
                     <?= htmlspecialchars($c['level']) ?>
+                  </span>
+                <?php endif; ?>
+                <?php if (!empty($c['teacher'])): ?>
+                  <span class="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                    👨‍🏫 <?= htmlspecialchars($c['teacher']) ?>
                   </span>
                 <?php endif; ?>
                 <span class="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">

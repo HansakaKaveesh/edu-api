@@ -1,6 +1,5 @@
 <?php
 // student_sidebar.php (drop-in partial)
-// Assumes Tailwind CSS is already included in your layout.
 
 include 'db_connect.php';
 if (session_status() === PHP_SESSION_NONE) {
@@ -29,60 +28,51 @@ if ($stmt = $conn->prepare("SELECT first_name, last_name FROM students WHERE use
 // Detect current page for "active" state
 $currentPage = basename(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
 
-// Navigation items config (icon HTML, label, link, bg color, text color, hover text color)
+// Navigation items config
 $navItems = [
   ['<i class="fa-solid fa-house text-lg text-blue-600"></i>', 'Dashboard', 'student_dashboard.php', 'bg-blue-50', 'text-blue-700', 'group-hover:text-blue-900'],
   ['<i class="fa-solid fa-book-open text-lg text-green-600"></i>', 'Enroll', 'enroll_course.php', 'bg-green-50', 'text-green-700', 'group-hover:text-green-900'],
   ['<i class="fa-solid fa-book text-lg text-purple-600"></i>', 'My Courses', 'student_courses.php', 'bg-purple-50', 'text-purple-700', 'group-hover:text-purple-900'],
   ['<i class="fa-solid fa-brain text-lg text-orange-600"></i>', 'Quizzes', 'student_quizzes.php', 'bg-orange-50', 'text-orange-700', 'group-hover:text-orange-900'],
-  
   ['<i class="fa-solid fa-comments text-lg text-yellow-600"></i>', 'Discussions', 'forum.php', 'bg-yellow-50', 'text-yellow-700', 'group-hover:text-yellow-900'],
   ['<i class="fa-solid fa-gear text-lg text-gray-700"></i>', 'Settings', 'student_settings.php', 'bg-gray-50', 'text-gray-700', 'group-hover:text-gray-900'],
   ['<i class="fa-solid fa-envelope text-lg text-indigo-600"></i>', 'Messages', 'messages.php', 'bg-indigo-50', 'text-indigo-700', 'group-hover:text-indigo-900'],
   ['<i class="fa-solid fa-right-from-bracket text-lg text-red-600"></i>', 'Logout', 'logout.php', 'bg-red-100', 'text-red-700', 'group-hover:text-red-900']
 ];
 
-// Optional: badges (replace with real counts if needed)
 $badgeByLabel = [
-  'Messages'    => 0, // e.g., unread messages
-  'Assignments' => 0, // e.g., due soon
-  'Quizzes'     => 0, // e.g., upcoming
+  'Messages'    => 0,
+  'Assignments' => 0,
+  'Quizzes'     => 0,
 ];
-
-// Example to fetch counts safely (uncomment and adapt to your schema)
-// function getCount(mysqli $conn, string $sql, int $uid): int {
-//     $stmt = $conn->prepare($sql);
-//     $stmt->bind_param('i', $uid);
-//     $stmt->execute();
-//     $stmt->bind_result($count);
-//     $stmt->fetch();
-//     $stmt->close();
-//     return (int)$count;
-// }
-// $badgeByLabel['Messages'] = getCount($conn, 'SELECT COUNT(*) FROM messages WHERE receiver_id = ? AND is_read = 0', $user_id);
 ?>
 
-<!-- Font Awesome (icons) -->
+<!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-<!-- Mobile Menu Button -->
-<div class="lg:hidden flex justify-between items-center mb-4">
-  <h3 class="text-sm font-semibold text-gray-700">Menu</h3>
-  <button
-    id="sidebarToggle"
-    aria-controls="studentSidebar"
-    aria-expanded="false"
-    aria-label="Open sidebar"
-    class="p-1 rounded-md text-blue-700 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
-  >
-    <svg id="hamburgerIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-    </svg>
-    <svg id="closeIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-    </svg>
-  </button>
-</div>
+<!-- ✅ Floating Sticky Mobile Button -->
+<button
+  id="sidebarToggle"
+  aria-controls="studentSidebar"
+  aria-expanded="false"
+  aria-label="Open sidebar"
+    class="lg:hidden fixed top-24 left-4 z-50 p-3 rounded-full bg-yellow-500 text-white shadow-lg 
+         hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 
+         border border-white"
+>
+  <svg id="hamburgerIcon" xmlns="http://www.w3.org/2000/svg"
+       class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+       stroke="currentColor" aria-hidden="true">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M4 6h16M4 12h16M4 18h16" />
+  </svg>
+  <svg id="closeIcon" xmlns="http://www.w3.org/2000/svg"
+       class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24"
+       stroke="currentColor" aria-hidden="true">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M6 18L18 6M6 6l12 12" />
+  </svg>
+</button>
 
 <!-- Overlay -->
 <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-40 z-40 hidden lg:hidden" aria-hidden="true"></div>
@@ -105,7 +95,6 @@ $badgeByLabel = [
       <?php
         $isActive = (basename($item[2]) === $currentPage);
         $badge = $badgeByLabel[$item[1]] ?? 0;
-        // removed "text-center" to align icon and text inline
         $mobileClasses = "group block {$item[3]} {$item[4]} {$item[5]} p-2 rounded-xl shadow hover:shadow-lg transition";
         if ($isActive) $mobileClasses .= ' ring-2 ring-offset-2 ring-blue-300 scale-[1.01]';
       ?>
@@ -137,7 +126,6 @@ $badgeByLabel = [
       <?php
         $isActive = (basename($item[2]) === $currentPage);
         $badge = $badgeByLabel[$item[1]] ?? 0;
-        // removed "text-center" to align icon and text inline
         $desktopClasses = "group block {$item[3]} p-4 rounded-xl shadow hover:shadow-lg transition";
         if ($isActive) $desktopClasses .= ' ring-2 ring-offset-2 ring-blue-300 scale-[1.01]';
       ?>
@@ -185,7 +173,6 @@ $badgeByLabel = [
       e.preventDefault();
       closeSidebar();
     } else if (e.key === 'Tab' && sidebar.getAttribute('aria-hidden') === 'false') {
-      // cycle focus within the sidebar
       if (e.shiftKey && document.activeElement === firstFocusable) {
         e.preventDefault();
         lastFocusable.focus();
@@ -228,7 +215,14 @@ $badgeByLabel = [
     }
   }
 
-  sidebarToggle?.addEventListener('click', openSidebar);
+  sidebarToggle?.addEventListener('click', () => {
+    if (sidebar.getAttribute('aria-hidden') === 'true') {
+      openSidebar();
+    } else {
+      closeSidebar();
+    }
+  });
+
   sidebarClose?.addEventListener('click', closeSidebar);
   sidebarOverlay?.addEventListener('click', closeSidebar);
 

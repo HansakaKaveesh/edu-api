@@ -56,7 +56,7 @@ if ($isLoggedIn) {
 $initials = strtoupper(preg_replace('/[^A-Za-z]/', '', mb_substr($displayName, 0, 1, 'UTF-8') ?: 'U'));
 ?>
 <nav id="siteNav"
-     class="bg-blue-600/80 backdrop-blur-md fixed top-4 left-4 right-4 mx-auto rounded-xl z-50 text-white px-6 py-4 shadow-lg transition-colors duration-300 dark:bg-gray-900/80"
+     class="bg-blue-900/80 backdrop-blur-md fixed top-4 left-4 right-4 mx-auto rounded-xl z-50 text-white px-6 py-4 shadow-lg transition-colors duration-300"
      role="navigation" aria-label="Primary Navigation">
   <div class="relative flex items-center justify-between max-w-7xl mx-auto">
     <!-- Logo -->
@@ -87,7 +87,7 @@ $initials = strtoupper(preg_replace('/[^A-Za-z]/', '', mb_substr($displayName, 0
            class="<?= activeClass($isHome) ?> flex items-center gap-1 transition"
            <?= $isHome ? 'aria-current="page"' : '' ?>>Home</a>
       </li>
-      <li><a href="#about"   class="flex items-center gap-1 <?= activeClass(false) ?> transition" data-section-link="about">About Us</a></li>
+      <li><a href="about.php"   class="flex items-center gap-1 <?= activeClass(false) ?> transition" data-section-link="about">About Us</a></li>
       <li><a href="#courses" class="flex items-center gap-1 <?= activeClass(false) ?> transition" data-section-link="courses">Courses</a></li>
       <li><a href="#tutors"  class="flex items-center gap-1 <?= activeClass(false) ?> transition" data-section-link="tutors">Tutors</a></li>
       <li><a href="#contact" class="flex items-center gap-1 <?= activeClass(false) ?> transition" data-section-link="contact">Contact</a></li>
@@ -267,7 +267,7 @@ $initials = strtoupper(preg_replace('/[^A-Za-z]/', '', mb_substr($displayName, 0
       const nav = document.getElementById('siteNav');
       function onScroll() {
         if (window.scrollY > 8) {
-          nav.classList.add('shadow-xl','ring-blue-100','bg-white/90');
+          nav.classList.add('shadow-xl','ring-blue-100','bg-blue-900/80');
         } else {
           nav.classList.remove('shadow-xl','ring-blue-100','bg-white/90');
         }

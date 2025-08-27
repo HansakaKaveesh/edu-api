@@ -28,6 +28,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     echo json_encode(['ok' => true]);
     exit;
 }
+
+// AJAX: Email availability check
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'check_email') {
+    header('Content-Type: application/json');
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== ($_SESSION['csrf_token'] ?? '')) {
+        http_response_code(403);
+        echo json_encode(['ok' => false, 'error' => 'csrf']);
+        exit;
+    }
+    $email = filter_var($_POST['email'] ?? '', FILTER_VALIDATE_EMAIL);
+    if (!$email) {
+        http_response_code(400);
+        echo json_encode(['ok' => false, 'error' => 'bad_email']);
+        exit;
+    }
+
+    $stmt = $conn->prepare("SELECT 1 FROM students WHERE email = ? UNION SELECT 1 FROM teachers WHERE email = ? LIMIT 1");
+    $stmt->bind_param("ss", $email, $email);
+    $stmt->execute();
+    $stmt->store_result();
+    $exists = $stmt->num_rows > 0;
+    $stmt->close();
+
+    echo json_encode(['ok' => true, 'exists' => $exists]);
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -162,11 +188,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
           <div>
             <label for="email" class="block mb-1 font-medium text-gray-700">Email</label>
             <div class="relative">
-              <input type="email" id="email" name="email" x-model.trim="email" required
-                     placeholder="you@example.com"
-                     class="w-full border border-gray-300 rounded pl-3 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+              <input
+                type="email"
+                id="email"
+                name="email"
+                x-model.trim="email"
+                @blur="checkEmailAvailability()"
+                @input="emailExists=false"
+                required
+                class="w-full border rounded pl-3 pr-10 py-2 focus:outline-none"
+                :class="emailExists ? 'border-red-400 focus:ring-2 focus:ring-red-300' : 'border-gray-300 focus:ring-2 focus:ring-blue-400'"
+                placeholder="you@example.com"
+              />
               <span class="absolute right-3 top-2.5 opacity-60">✉️</span>
             </div>
+            <small x-show="checkingEmail" class="block mt-1 text-gray-500">Checking email...</small>
+            <small x-show="emailExists" class="block mt-1 text-red-600">Email already exists!</small>
           </div>
 
           <!-- Student-only -->
@@ -215,7 +252,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                   class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300">← Back</button>
           <div class="ml-auto">
             <button type="button" @click="next" x-show="step < 3"
-                    class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">Continue</button>
+                    :disabled="checkingEmail || emailExists || sending"
+                    class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50">
+              Continue
+            </button>
             <button type="submit" x-show="step === 3"
                     class="px-4 py-2 rounded bg-emerald-600 text-white hover:bg-emerald-700">
               ✅ Register
@@ -377,7 +417,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         alert: { type: '', text: '' },
         strength: { percent: 0, label: 'Strength: —', color: '#e5e7eb' },
 
-        next() {
+        // New state for email check
+        emailExists: false,
+        checkingEmail: false,
+
+        async next() {
           if (this.step === 1) {
             if (!this.role) return this.setError('Please select a role.');
             if (!/^[a-zA-Z0-9_]{4,20}$/.test(this.username)) return this.setError('Username must be 4-20 chars (letters, numbers, underscores).');
@@ -394,6 +438,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
               if (age < 13) return this.setError('You must be at least 13 to register as a student.');
             }
             if (!this.agree) return this.setError('Please agree to the Terms & Privacy Policy.');
+
+            // Check email availability before proceeding to OTP
+            await this.checkEmailAvailability(true);
+            if (this.emailExists) {
+              return this.setError('Email already exists!');
+            }
+
             this.clearAlert();
             this.sendOtpFlow();
           }
@@ -448,7 +499,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         },
 
         async onSubmit() {
-          if (this.step < 3) return this.next();
+          if (this.step < 3) { await this.next(); return; }
           if (!/^\d{6}$/.test(this.otp)) return this.setError('Please enter the 6-digit OTP.');
           this.clearAlert();
           // Programmatic submit bypasses JS handlers; hidden input "register" ensures backend sees registration intent.
@@ -479,6 +530,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
           const label = ['Very weak', 'Weak', 'Okay', 'Good', 'Strong'][score-1] || 'Strength: —';
           const color = ['#ef4444', '#f59e0b', '#eab308', '#10b981', '#059669'][score-1] || '#e5e7eb';
           this.strength = { percent, label: 'Strength: ' + label, color };
+        },
+
+        // Email availability check
+        async checkEmailAvailability(force = false) {
+          if (!this.validEmail(this.email)) {
+            this.emailExists = false;
+            return;
+          }
+          this.checkingEmail = true;
+          try {
+            const formData = new URLSearchParams();
+            formData.append('action', 'check_email');
+            formData.append('email', this.email);
+            formData.append('csrf_token', document.querySelector('input[name=csrf_token]').value);
+
+            const res = await fetch(window.location.href, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: formData.toString()
+            });
+            const data = await res.json();
+            this.emailExists = !!(data.ok && data.exists);
+          } catch (e) {
+            console.error(e);
+            this.emailExists = false; // fail open
+          } finally {
+            this.checkingEmail = false;
+          }
         },
       };
     }
