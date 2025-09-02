@@ -13,10 +13,8 @@
 
   <style>
     body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; }
-    /* Reveal on scroll */
     .reveal { opacity: 0; transform: translateY(14px); transition: opacity .6s ease, transform .6s ease; }
     .reveal.in-view { opacity: 1; transform: translateY(0); }
-    /* Pretty blobs */
     @keyframes blob {
       0%, 100% { transform: translate(0,0) scale(1); }
       33% { transform: translate(14px,-18px) scale(1.06); }
@@ -25,21 +23,17 @@
     .animate-blob { animation: blob 12s infinite; }
     .animation-delay-2000 { animation-delay: 2s; }
     .animation-delay-4000 { animation-delay: 4s; }
-    /* Gradient grid overlay */
     .bg-grid {
       background-image: radial-gradient(rgba(255,255,255,.12) 1px, transparent 1px);
       background-size: 18px 18px;
     }
-    /* Details caret */
     details[open] summary .chev { transform: rotate(180deg); }
   </style>
 </head>
 
 <body class="bg-white text-gray-800">
-  <!-- Top anchor -->
   <div id="top"></div>
 
-  <!-- Header / Nav -->
   <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
@@ -60,12 +54,9 @@
     </div>
   </header>
 
-  <!-- Hero -->
   <section class="relative overflow-hidden">
     <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-cyan-800"></div>
     <div class="absolute inset-0 bg-grid opacity-20"></div>
-
-    <!-- Blobs -->
     <div class="pointer-events-none absolute -top-16 -left-16 w-80 h-80 bg-gradient-to-tr from-pink-400 to-purple-500 opacity-30 blur-3xl rounded-full animate-blob"></div>
     <div class="pointer-events-none absolute -bottom-20 -right-16 w-96 h-96 bg-gradient-to-tr from-cyan-400 to-blue-500 opacity-30 blur-3xl rounded-full animate-blob animation-delay-2000"></div>
     <div class="pointer-events-none absolute top-1/3 right-1/4 w-72 h-72 bg-gradient-to-tr from-yellow-400 to-orange-500 opacity-20 blur-3xl rounded-full animate-blob animation-delay-4000"></div>
@@ -79,6 +70,18 @@
         A structured guide to computers, mobile devices, interfaces, performance, energy use, security, peripherals, and storage.
       </p>
 
+      <!-- HERO IMAGE -->
+      <div class="reveal mt-10 max-w-4xl mx-auto">
+        <img
+          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcScLM5x9-36gnEjTyaoBDQ_p1Zo7LfuTwgcdA&s"
+          alt="Assorted digital devices on a desk"
+          class="w-full h-64 sm:h-80 md:h-96 object-cover rounded-2xl ring-1 ring-white/20 shadow-2xl"
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+        />
+      </div>
+
       <div class="reveal mt-8 flex flex-wrap justify-center gap-3">
         <a href="#computers" class="px-5 py-2.5 rounded-lg bg-white/10 hover:bg-white/15 border border-white/20">Computers</a>
         <a href="#mobile" class="px-5 py-2.5 rounded-lg bg-white/10 hover:bg-white/15 border border-white/20">Mobile</a>
@@ -86,12 +89,9 @@
         <a href="#peripherals" class="px-5 py-2.5 rounded-lg bg-white/10 hover:bg-white/15 border border-white/20">Peripherals</a>
         <a href="#storage" class="px-5 py-2.5 rounded-lg bg-white/10 hover:bg-white/15 border border-white/20">Storage</a>
       </div>
-
-
     </div>
   </section>
 
-  <!-- Overview -->
   <section id="overview" class="py-12">
     <div class="max-w-7xl mx-auto px-6">
       <div class="reveal bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
@@ -119,33 +119,51 @@
         <p class="text-gray-700 mt-2">By size, purpose, and architecture. Types include mainframes, minicomputers, microcomputers, desktops, and workstations.</p>
       </div>
 
-      <!-- Types quick grid -->
       <div class="reveal grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <div class="p-4 rounded-xl border bg-white shadow-sm">
+          <img src="https://cacm.acm.org/wp-content/uploads/2025/02/020725.News_.Remember-the-Main2-G.jpg" alt="Mainframe datacenter racks" class="h-28 w-full object-cover rounded-lg mb-3" loading="lazy" decoding="async">
           <h3 class="font-bold">Mainframe</h3>
           <p class="text-sm text-gray-600 mt-1">Room-sized systems for massive, secure, concurrent processing.</p>
         </div>
         <div class="p-4 rounded-xl border bg-white shadow-sm">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/d/da/IBM_System3_%281%29.jpg" alt="Midrange multi-user computer in a lab" class="h-28 w-full object-cover rounded-lg mb-3" loading="lazy" decoding="async">
           <h3 class="font-bold">Minicomputer</h3>
           <p class="text-sm text-gray-600 mt-1">Midrange, multi-user systems (legacy, still seen in labs).</p>
         </div>
         <div class="p-4 rounded-xl border bg-white shadow-sm">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Raspberry-Pi-2-Bare-BR.jpg/1200px-Raspberry-Pi-2-Bare-BR.jpg" alt="Single-board microcomputer" class="h-28 w-full object-cover rounded-lg mb-3" loading="lazy" decoding="async">
           <h3 class="font-bold">Microcomputer</h3>
           <p class="text-sm text-gray-600 mt-1">Personal/home computing with microprocessors.</p>
         </div>
         <div class="p-4 rounded-xl border bg-white shadow-sm">
+          <img src="https://www.makerstations.io/content/images/2023/12/jb-bardoles-desk-setup-02.jpg" alt="Desktop PC setup on a desk" class="h-28 w-full object-cover rounded-lg mb-3" loading="lazy" decoding="async">
           <h3 class="font-bold">Desktop</h3>
           <p class="text-sm text-gray-600 mt-1">General-purpose, upgradable, non-portable PCs.</p>
         </div>
         <div class="p-4 rounded-xl border bg-white shadow-sm">
+          <img src="https://cdn.autonomous.ai/production/ecm/250614/blackdesksetup(1).webp" alt="Professional workstation with dual monitors" class="h-28 w-full object-cover rounded-lg mb-3" loading="lazy" decoding="async">
           <h3 class="font-bold">Workstation</h3>
           <p class="text-sm text-gray-600 mt-1">High-performance pro systems (CAD, video, science).</p>
         </div>
       </div>
 
+      <!-- COMPUTERS: Hierarchy Chart -->
+      <div class="reveal bg-white border rounded-2xl p-6 shadow-sm mt-6">
+        <h3 class="font-bold text-xl mb-3">Hierarchy Chart</h3>
+        <div class="overflow-x-auto">
+          <div class="mermaid">
+            graph TB;
+              A[Computers] --> B[Mainframe];
+              A --> C[Minicomputer];
+              A --> D[Microcomputer];
+              A --> E[Desktop];
+              A --> F[Workstation];
+          </div>
+        </div>
+      </div>
+
       <!-- Expandable detail cards -->
-      <div class="mt-8 grid md:grid-cols-2 gap-6">
-        <!-- Mainframe -->
+      <div class="mt-8 grid md:grid-cols-1 gap-6">
         <details class="reveal group bg-white border border-gray-200 rounded-2xl shadow-sm open:shadow-md">
           <summary class="cursor-pointer p-5 flex items-center justify-between">
             <div>
@@ -170,7 +188,6 @@
           </div>
         </details>
 
-        <!-- Minicomputer -->
         <details class="reveal group bg-white border border-gray-200 rounded-2xl shadow-sm open:shadow-md">
           <summary class="cursor-pointer p-5 flex items-center justify-between">
             <div>
@@ -195,7 +212,6 @@
           </div>
         </details>
 
-        <!-- Microcomputer -->
         <details class="reveal group bg-white border border-gray-200 rounded-2xl shadow-sm open:shadow-md">
           <summary class="cursor-pointer p-5 flex items-center justify-between">
             <div>
@@ -220,7 +236,6 @@
           </div>
         </details>
 
-        <!-- Desktop -->
         <details class="reveal group bg-white border border-gray-200 rounded-2xl shadow-sm open:shadow-md">
           <summary class="cursor-pointer p-5 flex items-center justify-between">
             <div>
@@ -245,7 +260,6 @@
           </div>
         </details>
 
-        <!-- Workstation -->
         <details class="reveal group bg-white border border-gray-200 rounded-2xl shadow-sm open:shadow-md">
           <summary class="cursor-pointer p-5 flex items-center justify-between">
             <div>
@@ -278,12 +292,34 @@
     <div class="max-w-7xl mx-auto px-6">
       <div class="reveal mb-8">
         <h2 class="text-3xl font-extrabold text-gray-900">2) Mobile Devices & Related</h2>
-        <p class="text-gray-700 mt-2">Categories, pros/cons, and real-world applications. Convergence: multiple functions in one device (e.g., smartphone = phone + camera + GPS + music + computer + gaming + organiser).</p>
+        <p class="text-gray-700 mt-2">Categories, pros/cons, and real-world applications. Convergence: multiple functions in one device.</p>
       </div>
+      <!-- MOBILE: Hierarchy Chart -->
+        <div class="reveal bg-white border rounded-2xl p-6 shadow-sm">
+          <h3 class="font-bold text-xl mb-3">Hierarchy Chart</h3>
+          <div class="overflow-x-auto">
+            <div class="mermaid">
+              graph TB;
+                A[Mobile and Related] --> S[Smartphones];
+                A --> R[Rugged or Specialist Phones];
+                A --> T[Tablets];
+                A --> C[Consumer Electronics];
+                C --> C1[Cameras and Camcorders];
+                C --> C2[Game Consoles];
+                C --> C3[Home Entertainment];
+                C --> C4[Media Players];
+                A --> N[Navigation Devices];
+                A --> M[Multifunction or Converged];
+            </div>
+          </div>
+        </div>
+      <div class="grid lg:grid-cols-3 gap-6">
 
-      <div class="grid lg:grid-cols-2 gap-6">
+  
+
         <!-- Smartphones -->
         <div class="reveal bg-white border rounded-2xl p-6 shadow-sm">
+          <img src="https://www.shutterstock.com/image-photo/point-finger-on-screen-mobile-600nw-1674345967.jpg" alt="Modern smartphone close-up" class="h-80 w-full object-cover rounded-xl mb-3" loading="lazy" decoding="async">
           <h3 class="font-bold text-xl">Smartphones</h3>
           <p class="text-gray-700 mt-2">Versatile (camera, GPS, internet, apps). Indispensable for comms, entertainment, productivity.</p>
           <ul class="mt-3 list-disc list-inside text-gray-700">
@@ -294,6 +330,7 @@
 
         <!-- Specialist Phones -->
         <div class="reveal bg-white border rounded-2xl p-6 shadow-sm">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/4/4f/Rugged_waterproof_smartphone.jpg" alt="Rugged smartphone for outdoor use" class="h-80 w-full object-cover rounded-xl mb-3" loading="lazy" decoding="async">
           <h3 class="font-bold text-xl">Specialist / Rugged Phones</h3>
           <p class="text-gray-700 mt-2">Durable, long battery, simple UI for focused tasks.</p>
           <p class="text-gray-700">Use: construction, outdoors, seniors</p>
@@ -301,6 +338,7 @@
 
         <!-- Tablets -->
         <div class="reveal bg-white border rounded-2xl p-6 shadow-sm">
+          <img src="https://m.media-amazon.com/images/I/71Mt4JAZQtL.jpg" alt="Tablet with stylus" class="h-80 w-full object-cover rounded-xl mb-3" loading="lazy" decoding="async">
           <h3 class="font-bold text-xl">Tablets</h3>
           <p class="text-gray-700 mt-2">Touch-first, portable media and productivity devices.</p>
           <p class="text-gray-700">Use: reading, e-learning, streaming, notes, casual gaming</p>
@@ -308,6 +346,7 @@
 
         <!-- Consumer Electronics -->
         <div class="reveal bg-white border rounded-2xl p-6 shadow-sm">
+          <img src="https://images.livemint.com/img/2024/07/24/original/DSLR_camera_buying_guide_1721816125038.jpg" alt="Consumer electronics including a DSLR camera" class="h-80 w-full object-cover rounded-xl mb-3" loading="lazy" decoding="async">
           <h3 class="font-bold text-xl">Consumer Electronics</h3>
           <ul class="mt-2 space-y-1 text-gray-700">
             <li><span class="font-semibold">Cameras/Camcorders:</span> pro capture; bulky/expensive vs phones</li>
@@ -319,6 +358,7 @@
 
         <!-- Navigation -->
         <div class="reveal bg-white border rounded-2xl p-6 shadow-sm">
+          <img src="https://i.pcmag.com/imagery/roundups/04LpAdc1pBMYF71CqYY607x-2..v1706284572.png" alt="In-car GPS navigation device" class="h-80 w-full object-cover rounded-xl mb-3" loading="lazy" decoding="async">
           <h3 class="font-bold text-xl">Navigation Devices</h3>
           <p class="text-gray-700 mt-2">Dedicated GPS units (Garmin, in-car). Accurate, but often replaced by phone GPS apps.</p>
           <p class="text-gray-700">Use: logistics, fleet, hiking, travel</p>
@@ -326,6 +366,7 @@
 
         <!-- Multifunctional / Converged -->
         <div class="reveal bg-white border rounded-2xl p-6 shadow-sm">
+          <img src="https://www.circuitplanet.co.uk/cdn/shop/articles/laptop-smartphone-tablets.jpg?v=1720775844&width=1920" alt="Converged devices: tablet and smartphone" class="h-80 w-full object-cover rounded-xl mb-3" loading="lazy" decoding="async">
           <h3 class="font-bold text-xl">Multifunctional / Converged Devices</h3>
           <p class="text-gray-700 mt-2">Combine several features in one (smartphone/tablet). Saves devices/cost; may be less specialized.</p>
         </div>
@@ -340,8 +381,47 @@
         <h2 class="text-3xl font-extrabold text-gray-900">3) Features of Digital Devices</h2>
       </div>
 
+      <!-- FEATURES: Hierarchy Chart -->
+      <div class="reveal bg-white border rounded-2xl p-6 shadow-sm mb-6">
+        <h3 class="font-bold text-xl mb-3">Hierarchy Chart</h3>
+        <div class="overflow-x-auto">
+          <div class="mermaid">
+            graph TB;
+              A[Features] --> P[Portability];
+              A --> Perf[Performance];
+              Perf --> CPU[CPU Speed];
+              Perf --> RAM[RAM];
+              Perf --> StorSpd[Storage Speed];
+              Perf --> SW[Software Efficiency];
+              A --> Stg[Storage];
+              Stg --> H[HDD];
+              Stg --> S[SSD];
+              Stg --> U[USB or SD];
+              Stg --> C[Cloud];
+              A --> UI[User Interfaces];
+              UI --> CLI[CLI];
+              UI --> Menu[Menu-driven];
+              UI --> GUI[GUI WIMP];
+              UI --> Voice[Voice];
+              UI --> Gesture[Gesture];
+              A --> Media[Media Support];
+              Media --> Formats[File Formats];
+              Media --> Codecs[Codecs and Drivers];
+              Media --> MedTypes[Storage Media];
+              A --> Energy[Energy Consumption];
+              Energy --> Efficient[Efficient Hardware];
+              Energy --> Sleep[Sleep or Hibernate];
+              Energy --> AutoOff[Auto Shutdown and Off];
+              A --> Exp[Expansion Capability];
+              A --> Sec[Security];
+              Sec --> SoftSec[Software Security];
+              Sec --> PhysSec[Physical Security];
+              A --> Conn[Connectivity];
+          </div>
+        </div>
+      </div>
+
       <div class="grid lg:grid-cols-2 gap-6">
-        <!-- Portability -->
         <div class="reveal bg-white border rounded-2xl p-6 shadow-sm">
           <h3 class="font-bold text-xl">Portability</h3>
           <p class="text-gray-700 mt-2">Ease of carrying/using a device in different places.</p>
@@ -366,7 +446,6 @@
           </div>
         </div>
 
-        <!-- Performance -->
         <div class="reveal bg-white border rounded-2xl p-6 shadow-sm">
           <h3 class="font-bold text-xl">Performance</h3>
           <p class="text-gray-700 mt-2">How quickly and efficiently tasks run.</p>
@@ -376,7 +455,6 @@
             <li><span class="font-semibold">Storage speed:</span> SSD faster than HDD</li>
             <li><span class="font-semibold">Software efficiency:</span> optimized code uses fewer resources</li>
           </ul>
-          <!-- Questions -->
           <div class="mt-4 space-y-3 text-sm">
             <div class="p-3 rounded-lg bg-blue-50 border border-blue-100">
               <p class="font-semibold">Q1: Processor speed</p>
@@ -404,7 +482,6 @@
           </div>
         </div>
 
-        <!-- Storage feature -->
         <div class="reveal bg-white border rounded-2xl p-6 shadow-sm">
           <h3 class="font-bold text-xl">Storage (as a feature)</h3>
           <p class="text-gray-700 mt-2">Permanent data retention (files, apps, OS).</p>
@@ -415,7 +492,6 @@
           </ul>
         </div>
 
-        <!-- User Interfaces -->
         <div class="reveal bg-white border rounded-2xl p-6 shadow-sm">
           <h3 class="font-bold text-xl">User Interfaces</h3>
           <div class="mt-3 grid sm:grid-cols-2 gap-3 text-sm">
@@ -447,7 +523,6 @@
           </div>
         </div>
 
-        <!-- Media Support -->
         <div class="reveal bg-white border rounded-2xl p-6 shadow-sm">
           <h3 class="font-bold text-xl">Media Support</h3>
           <ul class="mt-3 space-y-2 text-gray-700">
@@ -457,7 +532,6 @@
           </ul>
         </div>
 
-        <!-- Energy consumption -->
         <div class="reveal bg-white border rounded-2xl p-6 shadow-sm">
           <h3 class="font-bold text-xl">Energy Consumption</h3>
           <ul class="mt-3 list-disc list-inside text-gray-700">
@@ -468,7 +542,6 @@
           </ul>
         </div>
 
-        <!-- Expansion -->
         <div class="reveal bg-white border rounded-2xl p-6 shadow-sm">
           <h3 class="font-bold text-xl">Expansion Capability</h3>
           <ul class="mt-3 list-disc list-inside text-gray-700">
@@ -478,7 +551,6 @@
           </ul>
         </div>
 
-        <!-- Security -->
         <div class="reveal bg-white border rounded-2xl p-6 shadow-sm">
           <h3 class="font-bold text-xl">Security Features</h3>
           <div class="mt-3 grid sm:grid-cols-2 gap-3 text-sm">
@@ -501,7 +573,6 @@
           </div>
         </div>
 
-        <!-- Connectivity (link to Unit 2 placeholder) -->
         <div class="reveal bg-white border rounded-2xl p-6 shadow-sm">
           <h3 class="font-bold text-xl">Connectivity</h3>
           <p class="text-gray-700 mt-2">Networking, wired/wireless standards, internet access, device pairing (covered in Unit 2).</p>
@@ -518,8 +589,41 @@
         <p class="text-gray-700 mt-2">Grouped into Input, Output, and Storage.</p>
       </div>
 
-      <!-- Input table -->
+      <!-- PERIPHERALS: High-level -->
       <div class="reveal bg-white border rounded-2xl p-6 shadow-sm">
+        <h3 class="font-bold text-xl mb-3">Hierarchy Chart (Overview)</h3>
+        <div class="overflow-x-auto">
+          <div class="mermaid">
+            graph TB;
+              P[Peripherals] --> I[Input];
+              P --> O[Output];
+              P --> S[Storage];
+          </div>
+        </div>
+      </div>
+
+      <!-- PERIPHERALS: Input devices -->
+      <div class="reveal bg-white border rounded-2xl p-6 shadow-sm mt-6">
+        <h3 class="font-bold text-xl mb-3">Hierarchy Chart – Input Devices</h3>
+        <div class="overflow-x-auto">
+          <div class="mermaid">
+            graph TB;
+              I[Input Devices] --> K[Keyboard];
+              I --> M[Mouse];
+              I --> TS[Touchscreen];
+              I --> MIC[Microphone];
+              I --> SCN[Scanner];
+              I --> W[Webcam];
+              I --> G[Gamepad or Joystick];
+              I --> BIO[Biometric Scanner];
+              I --> CR[Card Reader];
+              I --> SEN[Sensors];
+          </div>
+        </div>
+      </div>
+
+      <!-- Input table -->
+      <div class="reveal bg-white border rounded-2xl p-6 shadow-sm mt-6">
         <h3 class="font-bold text-xl mb-3">i) Input Devices</h3>
         <div class="overflow-x-auto">
           <table class="min-w-full text-sm">
@@ -596,7 +700,6 @@
           </table>
         </div>
 
-        <!-- Selected input device notes -->
         <div class="grid md:grid-cols-2 gap-4 mt-6 text-sm">
           <div class="p-4 rounded-xl bg-gray-50 border">
             <p class="font-semibold">Keyboard</p>
@@ -629,7 +732,29 @@
         </div>
       </div>
 
-      <!-- Output devices -->
+      <!-- PERIPHERALS: Output devices chart -->
+      <div class="reveal bg-white border rounded-2xl p-6 shadow-sm mt-6">
+        <h3 class="font-bold text-xl mb-3">Hierarchy Chart – Output Devices</h3>
+        <div class="overflow-x-auto">
+          <div class="mermaid">
+            graph TB;
+              O[Output Devices] --> Mon[Monitor];
+              Mon --> LCD[LCD or LED];
+              Mon --> OLED[OLED];
+              Mon --> TouchMon[Touch];
+              O --> Prn[Printer];
+              Prn --> Inkjet[Inkjet];
+              Prn --> Laser[Laser];
+              Prn --> P3D[3D Printer];
+              O --> Plotter[Plotter];
+              O --> Projector[Projector];
+              O --> Speakers[Speakers];
+              O --> Actuators[Control Devices Actuators];
+          </div>
+        </div>
+      </div>
+
+      <!-- Output devices detail -->
       <div class="reveal bg-white border rounded-2xl p-6 shadow-sm mt-6">
         <h3 class="font-bold text-xl mb-3">ii) Output Devices</h3>
         <div class="grid md:grid-cols-2 gap-6 text-sm">
@@ -683,9 +808,44 @@
         <h2 class="text-3xl font-extrabold text-gray-900">5) Storage</h2>
       </div>
 
+      <!-- STORAGE: Types -->
+      <div class="reveal bg-white border rounded-2xl p-6 shadow-sm mb-6">
+        <h3 class="font-bold text-xl mb-3">Hierarchy Chart – Storage Types</h3>
+        <div class="overflow-x-auto">
+          <div class="mermaid">
+            graph TB;
+              S[Storage] --> Primary[Primary];
+              Primary --> RAM[RAM];
+              Primary --> ROM[ROM];
+              S --> Secondary[Secondary];
+              Secondary --> Internal[Internal HDD or SSD];
+              Secondary --> External[External USB or Optical];
+          </div>
+        </div>
+      </div>
+
+      <!-- STORAGE: Media vs Devices -->
+      <div class="reveal bg-white border rounded-2xl p-6 shadow-sm mb-6">
+        <h3 class="font-bold text-xl mb-3">Hierarchy Chart – Media vs Devices</h3>
+        <div class="overflow-x-auto">
+          <div class="mermaid">
+            graph TB;
+              A[Storage Concepts] --> Media[Media stores data];
+              Media --> Mag[Magnetic HDD or Tape];
+              Media --> Opt[Optical CD DVD BD];
+              Media --> SS[Solid state Flash];
+              A --> Devices[Devices read write];
+              Devices --> HDD[HDD or SSD];
+              Devices --> ODD[Optical Drive];
+              Devices --> USB[USB Drive];
+              Devices --> CardReader[Card Reader];
+          </div>
+        </div>
+      </div>
+
       <div class="grid lg:grid-cols-3 gap-6">
-        <!-- Primary storage -->
         <div class="reveal bg-white border rounded-2xl p-6 shadow-sm">
+          <img src="https://source.unsplash.com/600x360/?ram,memory" alt="RAM modules" class="h-28 w-full object-cover rounded-lg mb-3" loading="lazy" decoding="async">
           <h3 class="font-bold text-xl">Primary Storage</h3>
           <ul class="mt-3 space-y-2 text-gray-700">
             <li><span class="font-semibold">RAM:</span> volatile, fast read/write, holds active apps/data</li>
@@ -693,8 +853,8 @@
           </ul>
         </div>
 
-        <!-- Secondary storage -->
         <div class="reveal bg-white border rounded-2xl p-6 shadow-sm">
+          <img src="https://source.unsplash.com/600x360/?ssd,hard-drive" alt="SSD and HDD" class="h-28 w-full object-cover rounded-lg mb-3" loading="lazy" decoding="async">
           <h3 class="font-bold text-xl">Secondary Storage</h3>
           <ul class="mt-3 space-y-2 text-gray-700">
             <li>Non‑volatile; retains data when off</li>
@@ -703,8 +863,8 @@
           </ul>
         </div>
 
-        <!-- Media vs Device -->
         <div class="reveal bg-white border rounded-2xl p-6 shadow-sm">
+          <img src="https://source.unsplash.com/600x360/?usb,sd-card" alt="USB flash drive and SD card" class="h-28 w-full object-cover rounded-lg mb-3" loading="lazy" decoding="async">
           <h3 class="font-bold text-xl">Media vs Devices</h3>
           <ul class="mt-3 space-y-2 text-gray-700">
             <li><span class="font-semibold">Media (stores data):</span> magnetic (HDD/tape), optical (CD/DVD/BD), solid‑state (flash)</li>
@@ -716,14 +876,32 @@
     </div>
   </section>
 
-  <!-- Footer -->
   <footer class="py-10">
     <div class="max-w-7xl mx-auto px-6 text-center text-sm text-gray-500">
       <p>© 2025 Digital Devices – Unit 1. <a href="#top" class="text-blue-600 hover:underline">Back to top ↑</a></p>
     </div>
   </footer>
 
-  <!-- Scripts: reveal on scroll -->
+  <!-- Mermaid 10.9.3 -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.3/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({ startOnLoad: false, theme: 'default' });
+    // Ensure TB everywhere even if a block was pasted with LR/TD accidentally
+    window.addEventListener('load', () => {
+      document.querySelectorAll('.mermaid').forEach(el => {
+        el.textContent = el.textContent
+          .replace(/\bgraph\s+LR\b/g, 'graph TB')
+          .replace(/\bflowchart\s+LR\b/g, 'flowchart TB')
+          .replace(/\bgraph\s+TD\b/g, 'graph TB')
+          .replace(/\bflowchart\s+TD\b/g, 'flowchart TB');
+      });
+      try { mermaid.init(undefined, document.querySelectorAll('.mermaid')); }
+      catch (e) { console.error('Mermaid render error:', e); }
+    });
+    mermaid.parseError = (err) => console.error('Mermaid parse error:', err);
+  </script>
+
+  <!-- Reveal on scroll -->
   <script>
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in-view'); });
