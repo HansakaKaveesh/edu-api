@@ -1,7 +1,6 @@
 <?php
-// upload_image.php
+// upload_image.php — TinyMCE image upload endpoint
 session_start();
-
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -10,6 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+// CSRF header check
 $csrfHeader = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
 if (!hash_equals($_SESSION['csrf_token'] ?? '', $csrfHeader)) {
     http_response_code(403);
@@ -38,6 +38,13 @@ if (!in_array($ext, $allowed, true) || !in_array($mime, $allowedMimes, true)) {
     exit;
 }
 
+// Optional: 8MB max
+if ($file['size'] > 8 * 1024 * 1024) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Image too large (max 8MB)']);
+    exit;
+}
+
 $dir = __DIR__ . '/uploads/images/';
 if (!is_dir($dir)) { mkdir($dir, 0755, true); }
 
@@ -51,5 +58,5 @@ if (!move_uploaded_file($file['tmp_name'], $dest)) {
     exit;
 }
 
-// Return a URL TinyMCE can insert into <img src="">
+// Return URL TinyMCE inserts into <img src="">
 echo json_encode(['location' => 'uploads/images/' . $name]);

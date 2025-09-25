@@ -6,19 +6,76 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     die("Access Denied.");
 }
 
-// Handle actions (approve, suspend, delete)
-if (isset($_GET['action'], $_GET['user_id'])) {
-    $user_id = intval($_GET['user_id']);
-    if ($_GET['action'] === 'approve') {
-        $conn->query("UPDATE users SET status = 'active' WHERE user_id = $user_id");
-        $msg = "User #$user_id approved.";
-    } elseif ($_GET['action'] === 'suspend') {
-        $conn->query("UPDATE users SET status = 'suspended' WHERE user_id = $user_id");
-        $msg = "User #$user_id suspended.";
-    } elseif ($_GET['action'] === 'delete') {
-        $conn->query("DELETE FROM users WHERE user_id = $user_id");
-        $msg = "User #$user_id deleted.";
+// CSRF token
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+// Handle actions via POST (approve, suspend, delete) with CSRF and prepared statements
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['user_id'])) {
+    $action = $_POST['action'];
+    $user_id = (int)$_POST['user_id'];
+    $msg = '';
+
+    if (!hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'] ?? '')) {
+        $msg = 'Invalid session. Please refresh and try again.';
+        header("Location: view_users.php?msg=" . urlencode($msg));
+        exit;
     }
+
+    if ($action === 'approve') {
+        if ($stmt = $conn->prepare("UPDATE users SET status = 'active' WHERE user_id = ?")) {
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $stmt->close();
+            $msg = "User #$user_id approved.";
+        } else {
+            $msg = "Failed to approve user #$user_id.";
+        }
+    } elseif ($action === 'suspend') {
+        if ($stmt = $conn->prepare("UPDATE users SET status = 'suspended' WHERE user_id = ?")) {
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $stmt->close();
+            $msg = "User #$user_id suspended.";
+        } else {
+            $msg = "Failed to suspend user #$user_id.";
+        }
+    } elseif ($action === 'delete') {
+        // Manual cascade delete: students, teachers, admins, then user (in a transaction)
+        $conn->begin_transaction();
+        try {
+            if ($stmt = $conn->prepare("DELETE FROM students WHERE user_id = ?")) {
+                $stmt->bind_param("i", $user_id);
+                $stmt->execute();
+                $stmt->close();
+            }
+            if ($stmt = $conn->prepare("DELETE FROM teachers WHERE user_id = ?")) {
+                $stmt->bind_param("i", $user_id);
+                $stmt->execute();
+                $stmt->close();
+            }
+            if ($stmt = $conn->prepare("DELETE FROM admins WHERE user_id = ?")) {
+                $stmt->bind_param("i", $user_id);
+                $stmt->execute();
+                $stmt->close();
+            }
+            if ($stmt = $conn->prepare("DELETE FROM users WHERE user_id = ?")) {
+                $stmt->bind_param("i", $user_id);
+                $stmt->execute();
+                $stmt->close();
+            }
+
+            $conn->commit();
+            $msg = "User #$user_id and related records deleted.";
+        } catch (Throwable $e) {
+            $conn->rollback();
+            $msg = "Failed to delete user #$user_id. Please try again.";
+        }
+    } else {
+        $msg = "Unknown action.";
+    }
+
     header("Location: view_users.php?msg=" . urlencode($msg));
     exit;
 }
@@ -52,6 +109,7 @@ $query = $conn->query("
       html { scroll-behavior: smooth; }
       body { font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, 'Helvetica Neue', Arial; }
       th.sticky { position: sticky; top: 0; z-index: 10; }
+      form.inline-action { display: inline; }
     </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 via-white to-indigo-50 min-h-screen antialiased text-gray-800">
@@ -101,12 +159,10 @@ $query = $conn->query("
   <!-- Grid: Sidebar + Main -->
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
     <?php
-  // Optional customization before include:
-  // $adminTools = [...]; // your existing array
-  $activePath = basename(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
-  $createAnnouncementLink = '#create-announcement';
-  include 'components/admin_tools_sidebar.php';
-?>
+      $activePath = basename(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
+      $createAnnouncementLink = '#create-announcement';
+      include 'components/admin_tools_sidebar.php';
+    ?>
 
     <!-- Main column -->
     <section class="lg:col-span-9 space-y-4">
@@ -220,19 +276,35 @@ $query = $conn->query("
                 <td class="px-4 py-3 border-b border-gray-100 whitespace-nowrap">
                   <div class="flex flex-wrap gap-2">
                     <?php if ($user['status'] !== 'active'): ?>
-                      <a href="?action=approve&user_id=<?= (int)$user['user_id'] ?>"
-                         class="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-900 px-2 py-1 rounded-md ring-1 ring-emerald-200 bg-emerald-50"
-                         title="Approve">✅ Approve</a>
+                      <form method="POST" class="inline-action">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+                        <input type="hidden" name="action" value="approve">
+                        <input type="hidden" name="user_id" value="<?= (int)$user['user_id'] ?>">
+                        <button type="submit"
+                          class="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-900 px-2 py-1 rounded-md ring-1 ring-emerald-200 bg-emerald-50"
+                          title="Approve">✅ Approve</button>
+                      </form>
                     <?php endif; ?>
+
                     <?php if ($user['status'] === 'active'): ?>
-                      <a href="?action=suspend&user_id=<?= (int)$user['user_id'] ?>"
-                         class="inline-flex items-center gap-1 text-amber-700 hover:text-amber-900 px-2 py-1 rounded-md ring-1 ring-amber-200 bg-amber-50"
-                         title="Suspend">⛔ Suspend</a>
+                      <form method="POST" class="inline-action">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+                        <input type="hidden" name="action" value="suspend">
+                        <input type="hidden" name="user_id" value="<?= (int)$user['user_id'] ?>">
+                        <button type="submit"
+                          class="inline-flex items-center gap-1 text-amber-700 hover:text-amber-900 px-2 py-1 rounded-md ring-1 ring-amber-200 bg-amber-50"
+                          title="Suspend">⛔ Suspend</button>
+                      </form>
                     <?php endif; ?>
-                    <a href="?action=delete&user_id=<?= (int)$user['user_id'] ?>"
-                       onclick="return confirm('Are you sure you want to delete this user?');"
-                       class="inline-flex items-center gap-1 text-red-700 hover:text-red-900 px-2 py-1 rounded-md ring-1 ring-red-200 bg-red-50"
-                       title="Delete">❌ Delete</a>
+
+                    <form method="POST" class="inline-action" onsubmit="return confirm('Are you sure you want to delete this user and related records?');">
+                      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+                      <input type="hidden" name="action" value="delete">
+                      <input type="hidden" name="user_id" value="<?= (int)$user['user_id'] ?>">
+                      <button type="submit"
+                        class="inline-flex items-center gap-1 text-red-700 hover:text-red-900 px-2 py-1 rounded-md ring-1 ring-red-200 bg-red-50"
+                        title="Delete">❌ Delete</button>
+                    </form>
                   </div>
                 </td>
               </tr>

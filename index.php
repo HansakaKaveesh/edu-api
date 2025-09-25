@@ -19,6 +19,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 
+  <!-- Ionicons -->
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="./images/logo.png" />
 
@@ -107,37 +111,37 @@
       <!-- Animated subheadline -->
       <p class="reveal text-lg sm:text-xl text-white/90 max-w-2xl mx-auto">
         Your complete Virtual Learning Environment for
-        <span class="font-semibold text-blue-300 typed-caret" id="typedWords" aria-live="polite">students</span>.
+        <span class="font-semibold text-blue-300 typed-caret inline-flex items-center gap-1" id="typedWords" aria-live="polite">students</span>.
       </p>
 
       <!-- CTA -->
       <div class="reveal flex justify-center flex-wrap gap-4 mt-8">
         <?php if (!empty($_SESSION['user_id'])): ?>
           <?php if (($_SESSION['role'] ?? '') === 'student'): ?>
-            <a href="student_dashboard.php" class="bg-blue-600 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
-              🎒 Go to Dashboard
+            <a href="student_dashboard.php" class="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
+              <ion-icon name="school-outline" class="text-xl"></ion-icon> Go to Dashboard
             </a>
           <?php elseif (($_SESSION['role'] ?? '') === 'teacher'): ?>
-            <a href="teacher_dashboard.php" class="bg-purple-600 text-white px-6 py-3 rounded-lg shadow hover:bg-purple-700 focus:ring-4 focus:ring-purple-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
-              📚 Go to Dashboard
+            <a href="teacher_dashboard.php" class="inline-flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-lg shadow hover:bg-purple-700 focus:ring-4 focus:ring-purple-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
+              <ion-icon name="easel-outline" class="text-xl"></ion-icon> Go to Dashboard
             </a>
           <?php else: ?>
-            <a href="admin_dashboard.php" class="bg-gray-700 text-white px-6 py-3 rounded-lg shadow hover:bg-gray-800 focus:ring-4 focus:ring-gray-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
-              🛠️ Go to Dashboard
+            <a href="admin_dashboard.php" class="inline-flex items-center gap-2 bg-gray-700 text-white px-6 py-3 rounded-lg shadow hover:bg-gray-800 focus:ring-4 focus:ring-gray-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
+              <ion-icon name="shield-checkmark-outline" class="text-xl"></ion-icon> Go to Dashboard
             </a>
           <?php endif; ?>
-          <a href="logout.php" class="text-white/90 hover:text-white px-6 py-3 rounded-lg border border-white/30 hover:bg-white/10 transition">
-            🚪 Logout
+          <a href="logout.php" class="inline-flex items-center gap-2 text-white/90 hover:text-white px-6 py-3 rounded-lg border border-white/30 hover:bg-white/10 transition">
+            <ion-icon name="log-out-outline"></ion-icon> Logout
           </a>
         <?php else: ?>
-          <a href="login.php" class="bg-blue-600 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
-            🔐 Login
+          <a href="login.php" class="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
+            <ion-icon name="log-in-outline" class="text-xl"></ion-icon> Login
           </a>
-          <a href="register.php" class="bg-green-600 text-white px-6 py-3 rounded-lg shadow hover:bg-green-700 focus:ring-4 focus:ring-green-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
-            📝 Register
+          <a href="register.php" class="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg shadow hover:bg-green-700 focus:ring-4 focus:ring-green-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
+            <ion-icon name="person-add-outline" class="text-xl"></ion-icon> Register
           </a>
-          <a href="#about" class="text-white/90 hover:text-white px-6 py-3 rounded-lg border border-white/30 hover:bg-white/10 transition">
-            Learn more
+          <a href="#about" class="inline-flex items-center gap-2 text-white/90 hover:text-white px-6 py-3 rounded-lg border border-white/30 hover:bg-white/10 transition">
+            <ion-icon name="information-circle-outline"></ion-icon> Learn more
           </a>
         <?php endif; ?>
       </div>
@@ -145,45 +149,55 @@
       <!-- Socials -->
       <div class="reveal flex justify-center space-x-6 text-white text-2xl mt-10">
         <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook" class="hover:text-blue-500 transition">
-          <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24" role="img" aria-hidden="true"><path d="M22 12a10 10 0 1 0-11.5 9.8v-6.9h-2.7v-2.9h2.7v-2.2c0-2.7 1.6-4.1 4-4.1 1.2 0 2.4.2 2.4.2v2.6h-1.3c-1.3 0-1.7.8-1.7 1.6v1.9h2.9l-.5 2.9h-2.4v6.9A10 10 0 0 0 22 12z"/></svg>
+          <ion-icon name="logo-facebook" class="text-2xl"></ion-icon>
         </a>
         <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter" class="hover:text-sky-400 transition">
-          <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24" role="img" aria-hidden="true"><path d="M23 3a10.9 10.9 0 0 1-3.14.86A5.48 5.48 0 0 0 23 1.6a10.86 10.86 0 0 1-3.46 1.32A5.44 5.44 0 0 0 12 8.48a15.43 15.43 0 0 1-11-5.32A5.44 5.44 0 0 0 4.17 8.1 5.4 5.4 0 0 1 2.18 7.8v.07a5.44 5.44 0 0 0 4.36 5.33A5.5 5.5 0 0 1 3 13.1a5.41 5.41 0 0 1-1.03-.1 5.44 5.44 0 0 0 5.07 3.77A10.9 10.9 0 0 1 1 19.54a15.37 15.37 0 0 0 8.29 2.43c9.94 0 15.38-8.24 15.38-15.38 0-.23 0-.46-.02-.69A11 11 0 0 0 23 3z"/></svg>
+          <ion-icon name="logo-twitter" class="text-2xl"></ion-icon>
         </a>
         <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="hover:text-pink-500 transition">
-          <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24" role="img" aria-hidden="true"><path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2zm0 2A3.75 3.75 0 0 0 4 7.75v8.5A3.75 3.75 0 0 0 7.75 20h8.5a3.75 3.75 0 0 0 3.75-3.75v-8.5A3.75 3.75 0 0 0 16.25 4h-8.5zm8.75 1.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm-4.25 2.25a4.75 4.75 0 1 1 0 9.5 4.75 4.75 0 0 1 0-9.5zm0 2a2.75 2.75 0 1 0 0 5.5 2.75 2.75 0 0 0 0-5.5z"/></svg>
+          <ion-icon name="logo-instagram" class="text-2xl"></ion-icon>
         </a>
         <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" class="hover:text-blue-500 transition">
-          <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24" role="img" aria-hidden="true"><path d="M4.98 3.5A2.48 2.48 0 0 0 2.5 5.98v12.04a2.48 2.48 0 0 0 2.48 2.48h12.04a2.48 2.48 0 0 0 2.48-2.48V5.98a2.48 2.48 0 0 0-2.48-2.48H4.98zm3.24 14.5H6.17v-7.5h1.97v7.5zM7.14 9.48a1.13 1.13 0 1 1 0-2.26 1.13 1.13 0 0 1 0 2.26zm8.44 8.52h-1.97v-4c0-1.06-.02-2.42-1.47-2.42-1.47 0-1.7 1.15-1.7 2.34v4.08h-1.97v-7.5h1.89v1.02h.03a2.08 2.08 0 0 1 1.88-1.03c2.01 0 2.38 1.32 2.38 3.04v4.47z"/></svg>
+          <ion-icon name="logo-linkedin" class="text-2xl"></ion-icon>
         </a>
       </div>
 
       <!-- Scroll indicator -->
       <div class="reveal mt-12 text-white/80 text-sm flex items-center justify-center gap-2">
         <span>Scroll</span>
-        <span aria-hidden="true">↓</span>
+        <ion-icon name="chevron-down-outline" aria-hidden="true"></ion-icon>
       </div>
     </div>
-
-    
   </section>
 
   <!-- Stats -->
   <section class="py-16 bg-gradient-to-b from-white to-blue-50">
     <div class="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-4">
       <div class="reveal bg-white/90 rounded-2xl p-5 shadow border border-gray-100 text-center">
+        <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-50 text-blue-600 mb-2">
+          <ion-icon name="people-outline"></ion-icon>
+        </div>
         <div class="text-3xl font-extrabold text-blue-700"><span class="countup" data-target="5000">0</span>+</div>
         <div class="text-gray-600">Active Students</div>
       </div>
       <div class="reveal bg-white/90 rounded-2xl p-5 shadow border border-gray-100 text-center">
+        <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 mb-2">
+          <ion-icon name="ribbon-outline"></ion-icon>
+        </div>
         <div class="text-3xl font-extrabold text-emerald-600"><span class="countup" data-target="200">0</span>+</div>
         <div class="text-gray-600">Expert Tutors</div>
       </div>
       <div class="reveal bg-white/90 rounded-2xl p-5 shadow border border-gray-100 text-center">
+        <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-purple-50 text-purple-600 mb-2">
+          <ion-icon name="library-outline"></ion-icon>
+        </div>
         <div class="text-3xl font-extrabold text-purple-700"><span class="countup" data-target="350">0</span>+</div>
         <div class="text-gray-600">Courses</div>
       </div>
       <div class="reveal bg-white/90 rounded-2xl p-5 shadow border border-gray-100 text-center">
+        <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-rose-50 text-rose-600 mb-2">
+          <ion-icon name="document-text-outline"></ion-icon>
+        </div>
         <div class="text-3xl font-extrabold text-rose-600"><span class="countup" data-target="15000">0</span>+</div>
         <div class="text-gray-600">Lessons</div>
       </div>
@@ -206,7 +220,7 @@
 
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mt-12">
         <article class="reveal bg-white/90 p-6 rounded-2xl shadow-md hover:shadow-lg transition text-left" role="region" aria-labelledby="students-title">
-          <div class="text-blue-600 text-5xl mb-4" aria-hidden="true">📚</div>
+          <div class="text-blue-600 text-4xl mb-4" aria-hidden="true"><ion-icon name="laptop-outline"></ion-icon></div>
           <h3 id="students-title" class="text-xl font-semibold mb-2">For Students</h3>
           <p class="text-gray-600 text-sm sm:text-base">
             Access materials, submit assignments, and collaborate in real time.
@@ -214,7 +228,7 @@
         </article>
 
         <article class="reveal bg-white/90 p-6 rounded-2xl shadow-md hover:shadow-lg transition text-left" role="region" aria-labelledby="teachers-title">
-          <div class="text-green-500 text-5xl mb-4" aria-hidden="true">👩‍🏫</div>
+          <div class="text-green-500 text-4xl mb-4" aria-hidden="true"><ion-icon name="easel-outline"></ion-icon></div>
           <h3 id="teachers-title" class="text-xl font-semibold mb-2">For Teachers</h3>
           <p class="text-gray-600 text-sm sm:text-base">
             Manage classes, track progress, and provide targeted feedback.
@@ -222,7 +236,7 @@
         </article>
 
         <article class="reveal bg-white/90 p-6 rounded-2xl shadow-md hover:shadow-lg transition text-left" role="region" aria-labelledby="admins-title">
-          <div class="text-yellow-500 text-5xl mb-4" aria-hidden="true">🛠️</div>
+          <div class="text-yellow-500 text-4xl mb-4" aria-hidden="true"><ion-icon name="settings-outline"></ion-icon></div>
           <h3 id="admins-title" class="text-xl font-semibold mb-2">For Admins</h3>
           <p class="text-gray-600 text-sm sm:text-base">
             Oversee operations, generate reports, and ensure smooth learning.
@@ -244,7 +258,7 @@
 
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
         <article class="reveal bg-white/90 p-8 rounded-2xl shadow hover:shadow-lg transition text-left" role="region" aria-labelledby="live-sessions-title">
-          <div class="text-blue-500 text-5xl mb-4" aria-hidden="true">🎥</div>
+          <div class="text-blue-500 text-4xl mb-4" aria-hidden="true"><ion-icon name="videocam-outline"></ion-icon></div>
           <h3 id="live-sessions-title" class="font-semibold text-xl mb-2">Live Sessions</h3>
           <p class="text-gray-600 text-sm sm:text-base">
             Engage in interactive classes and clarify doubts in real-time.
@@ -252,7 +266,7 @@
         </article>
 
         <article class="reveal bg-white/90 p-8 rounded-2xl shadow hover:shadow-lg transition text-left" role="region" aria-labelledby="expert-guidance-title">
-          <div class="text-green-500 text-5xl mb-4" aria-hidden="true">🎓</div>
+          <div class="text-green-500 text-4xl mb-4" aria-hidden="true"><ion-icon name="school-outline"></ion-icon></div>
           <h3 id="expert-guidance-title" class="font-semibold text-xl mb-2">Expert Guidance</h3>
           <p class="text-gray-600 text-sm sm:text-base">
             Learn from certified professionals with classroom experience.
@@ -260,7 +274,7 @@
         </article>
 
         <article class="reveal bg-white/90 p-8 rounded-2xl shadow hover:shadow-lg transition text-left" role="region" aria-labelledby="progress-tracking-title">
-          <div class="text-yellow-500 text-5xl mb-4" aria-hidden="true">📊</div>
+          <div class="text-yellow-500 text-4xl mb-4" aria-hidden="true"><ion-icon name="stats-chart-outline"></ion-icon></div>
           <h3 id="progress-tracking-title" class="font-semibold text-xl mb-2">Progress Tracking</h3>
           <p class="text-gray-600 text-sm sm:text-base">
             Stay on top of your goals with built-in performance monitoring.
@@ -287,6 +301,9 @@
             <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFRObkO8H_uYDj0uuGJ1vlSPl4i-qFHG92YQ&s"
                  alt="IGCSE ICT" class="w-full h-48 object-cover group-hover:scale-[1.02] transition" loading="lazy" decoding="async">
             <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+            <div class="absolute top-3 right-3 inline-flex items-center gap-1.5 bg-white/90 text-slate-800 text-xs px-2 py-1 rounded-full">
+              <ion-icon name="layers-outline"></ion-icon> IGCSE
+            </div>
           </div>
           <div class="p-5">
             <h3 id="igcse-ict-title" class="font-bold text-xl mb-2">IGCSE ICT</h3>
@@ -302,6 +319,9 @@
             <img src="https://aotscolombiajapon.com/wp-content/uploads/2025/01/3ra-Beca-IA-Utilizing-to-overcome-DX-related-1.jpg"
                  alt="IAL AS ICT" class="w-full h-48 object-cover group-hover:scale-[1.02] transition" loading="lazy" decoding="async">
             <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+            <div class="absolute top-3 right-3 inline-flex items-center gap-1.5 bg-white/90 text-slate-800 text-xs px-2 py-1 rounded-full">
+              <ion-icon name="layers-outline"></ion-icon> IAL AS
+            </div>
           </div>
           <div class="p-5">
             <h3 id="ial-as-ict-title" class="font-bold text-xl mb-2">IAL AS ICT</h3>
@@ -317,6 +337,9 @@
             <img src="https://www.ict.eu/sites/corporate/files/images/iStock-1322517295%20copy_3.jpg"
                  alt="IAL AS2 ICT" class="w-full h-48 object-cover group-hover:scale-[1.02] transition" loading="lazy" decoding="async">
             <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+            <div class="absolute top-3 right-3 inline-flex items-center gap-1.5 bg-white/90 text-slate-800 text-xs px-2 py-1 rounded-full">
+              <ion-icon name="layers-outline"></ion-icon> IAL AS2
+            </div>
           </div>
           <div class="p-5">
             <h3 id="ial-as2-ict-title" class="font-bold text-xl mb-2">IAL AS2 ICT</h3>
@@ -332,6 +355,9 @@
             <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTiX_sE8HNgliGkDZNJaestGinmoLUp1ab5Eg&s"
                  alt="IGCSE Computer Science" class="w-full h-48 object-cover group-hover:scale-[1.02] transition" loading="lazy" decoding="async">
             <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+            <div class="absolute top-3 right-3 inline-flex items-center gap-1.5 bg-white/90 text-slate-800 text-xs px-2 py-1 rounded-full">
+              <ion-icon name="layers-outline"></ion-icon> IGCSE
+            </div>
           </div>
           <div class="p-5">
             <h3 id="igcse-cs-title" class="font-bold text-xl mb-2">IGCSE Computer Science</h3>
@@ -355,8 +381,12 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
         <article class="reveal bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition" role="region" aria-labelledby="edu-ruwan">
           <img src="./images/tanjana-sir-image-1.png" alt="Mr. Tanjana Chamikara" class="w-24 h-24 mx-auto rounded-full border-4 border-blue-200 mb-4" loading="lazy" decoding="async" />
-          <h3 id="edu-ruwan" class="font-semibold text-xl text-blue-800">Mr. Tanjana Chamikara</h3>
-          <span class="inline-block mt-2 px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full">Senior Mathematics Instructor</span>
+          <h3 id="edu-ruwan" class="font-semibold text-xl text-blue-800 flex items-center justify-center gap-2">
+            <ion-icon name="person-circle-outline" class="text-blue-600"></ion-icon> Mr. Tanjana Chamikara
+          </h3>
+          <span class="inline-flex items-center gap-2 mt-2 px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full">
+            <ion-icon name="ribbon-outline"></ion-icon> Senior Mathematics Instructor
+          </span>
           <ul class="mt-3 text-sm text-gray-600 list-disc list-inside text-left">
             <li>Pure Mathematics</li><li>Applied Mathematics</li><li>Statistics</li>
           </ul>
@@ -364,8 +394,12 @@
 
         <article class="reveal bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition" role="region" aria-labelledby="edu-thilini">
           <img src="./images/madara-miss-image-600-2-1.png" alt="Ms. Madhara Wedhage" class="w-24 h-24 mx-auto rounded-full border-4 border-green-200 mb-4" loading="lazy" decoding="async" />
-          <h3 id="edu-thilini" class="font-semibold text-xl text-green-800">Ms. Madhara Wedhage</h3>
-          <span class="inline-block mt-2 px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full">Computer Science Mentor</span>
+          <h3 id="edu-thilini" class="font-semibold text-xl text-green-800 flex items-center justify-center gap-2">
+            <ion-icon name="person-circle-outline" class="text-green-600"></ion-icon> Ms. Madhara Wedhage
+          </h3>
+          <span class="inline-flex items-center gap-2 mt-2 px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full">
+            <ion-icon name="code-slash-outline"></ion-icon> Computer Science Mentor
+          </span>
           <ul class="mt-3 text-sm text-gray-600 list-disc list-inside text-left">
             <li>Programming Fundamentals</li><li>Web Development</li><li>Database Systems</li>
           </ul>
@@ -373,8 +407,12 @@
 
         <article class="reveal bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition" role="region" aria-labelledby="edu-chamika">
           <img src="./images/udara-miss-2.png" alt="Ms. Udara Dilshani" class="w-24 h-24 mx-auto rounded-full border-4 border-yellow-200 mb-4" loading="lazy" decoding="async" />
-          <h3 id="edu-chamika" class="font-semibold text-xl text-yellow-800">Ms. Udara Dilshani</h3>
-          <span class="inline-block mt-2 px-3 py-1 bg-yellow-100 text-yellow-700 text-sm rounded-full">Science Educator</span>
+          <h3 id="edu-chamika" class="font-semibold text-xl text-yellow-800 flex items-center justify-center gap-2">
+            <ion-icon name="person-circle-outline" class="text-yellow-600"></ion-icon> Ms. Udara Dilshani
+          </h3>
+          <span class="inline-flex items-center gap-2 mt-2 px-3 py-1 bg-yellow-100 text-yellow-700 text-sm rounded-full">
+            <ion-icon name="flask-outline"></ion-icon> Science Educator
+          </span>
           <ul class="mt-3 text-sm text-gray-600 list-disc list-inside text-left">
             <li>Biology</li><li>Chemistry</li><li>Physics</li>
           </ul>
@@ -397,7 +435,7 @@
             <img src="./images/Men.jpg" alt="Nisansala D." class="w-12 h-12 rounded-full border-2 border-blue-300" loading="lazy" decoding="async" />
             <div>
               <p class="text-gray-700 italic">
-                <svg class="inline w-5 h-5 text-blue-500 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M7.17 6.1A5 5 0 0 0 2 11v7a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1H5.92A3.01 3.01 0 0 1 9 9a1 1 0 0 0-1-1H7.17ZM20 6a5 5 0 0 0-5 5v7a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1h-3.08A3.01 3.01 0 0 1 22 9a1 1 0 0 0-1-1h-1Z"/></svg>
+                <ion-icon name="chatbubble-ellipses-outline" class="text-blue-500 mr-1 align-text-top"></ion-icon>
                 “I passed my A/Ls with distinction thanks to the amazing support here.”
               </p>
               <p id="story-nisansala" class="mt-3 font-semibold text-blue-800">– Nisansala D.</p>
@@ -410,7 +448,7 @@
             <img src="./images/Men.jpg" alt="Kaveen R." class="w-12 h-12 rounded-full border-2 border-green-300" loading="lazy" decoding="async" />
             <div>
               <p class="text-gray-700 italic">
-                <svg class="inline w-5 h-5 text-green-500 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M7.17 6.1A5 5 0 0 0 2 11v7a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1H5.92A3.01 3.01 0 0 1 9 9a1 1 0 0 0-1-1H7.17ZM20 6a5 5 0 0 0-5 5v7a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1h-3.08A3.01 3.01 0 0 1 22 9a1 1 0 0 0-1-1h-1Z"/></svg>
+                <ion-icon name="chatbubble-ellipses-outline" class="text-green-500 mr-1 align-text-top"></ion-icon>
                 “The courses are clear and easy to follow. Learning is so flexible now.”
               </p>
               <p id="story-kaveen" class="mt-3 font-semibold text-green-800">– Kaveen R.</p>
@@ -426,20 +464,32 @@
     <div class="max-w-5xl mx-auto px-6">
       <h2 class="reveal text-3xl sm:text-4xl font-extrabold text-center text-gray-800 mb-8">Frequently Asked Questions</h2>
       <div class="reveal grid grid-cols-1 md:grid-cols-2 gap-6">
-        <details class="bg-white/90 border border-gray-100 rounded-xl p-5 shadow">
-          <summary class="cursor-pointer font-semibold text-gray-800">Is SynapZ free for students?</summary>
+        <details class="bg-white/90 border border-gray-100 rounded-xl p-5 shadow group">
+          <summary class="cursor-pointer font-semibold text-gray-800 flex items-center justify-between">
+            <span class="inline-flex items-center gap-2"><ion-icon name="cash-outline" class="text-blue-600"></ion-icon> Is SynapZ free for students?</span>
+            <ion-icon name="chevron-down-outline" class="text-gray-400 group-open:rotate-180 transition"></ion-icon>
+          </summary>
           <p class="mt-2 text-gray-600">Many courses are free; paid courses offer extra resources and live sessions.</p>
         </details>
-        <details class="bg-white/90 border border-gray-100 rounded-xl p-5 shadow">
-          <summary class="cursor-pointer font-semibold text-gray-800">Can I access courses on mobile?</summary>
+        <details class="bg-white/90 border border-gray-100 rounded-xl p-5 shadow group">
+          <summary class="cursor-pointer font-semibold text-gray-800 flex items-center justify-between">
+            <span class="inline-flex items-center gap-2"><ion-icon name="phone-portrait-outline" class="text-blue-600"></ion-icon> Can I access courses on mobile?</span>
+            <ion-icon name="chevron-down-outline" class="text-gray-400 group-open:rotate-180 transition"></ion-icon>
+          </summary>
           <p class="mt-2 text-gray-600">Absolutely. SynapZ works great on phones, tablets, and desktops.</p>
         </details>
-        <details class="bg-white/90 border border-gray-100 rounded-xl p-5 shadow">
-          <summary class="cursor-pointer font-semibold text-gray-800">Do you provide progress reports?</summary>
+        <details class="bg-white/90 border border-gray-100 rounded-xl p-5 shadow group">
+          <summary class="cursor-pointer font-semibold text-gray-800 flex items-center justify-between">
+            <span class="inline-flex items-center gap-2"><ion-icon name="analytics-outline" class="text-blue-600"></ion-icon> Do you provide progress reports?</span>
+            <ion-icon name="chevron-down-outline" class="text-gray-400 group-open:rotate-180 transition"></ion-icon>
+          </summary>
           <p class="mt-2 text-gray-600">Yes! Track assignments, quiz performance, and course completion rates.</p>
         </details>
-        <details class="bg-white/90 border border-gray-100 rounded-xl p-5 shadow">
-          <summary class="cursor-pointer font-semibold text-gray-800">How do I join live sessions?</summary>
+        <details class="bg-white/90 border border-gray-100 rounded-xl p-5 shadow group">
+          <summary class="cursor-pointer font-semibold text-gray-800 flex items-center justify-between">
+            <span class="inline-flex items-center gap-2"><ion-icon name="videocam-outline" class="text-blue-600"></ion-icon> How do I join live sessions?</span>
+            <ion-icon name="chevron-down-outline" class="text-gray-400 group-open:rotate-180 transition"></ion-icon>
+          </summary>
           <p class="mt-2 text-gray-600">Enrolled students receive links and reminders directly in their dashboard.</p>
         </details>
       </div>
@@ -448,8 +498,11 @@
 
   <!-- CTA band -->
   <section class="relative py-16">
+    <!-- Wave top -->
     <div class="absolute -top-[1px] left-0 right-0 wave-top" aria-hidden="true">
-     
+      <svg viewBox="0 0 1440 40" class="w-full h-10 text-blue-50 fill-current">
+        <path d="M0,32L80,26.7C160,21,320,11,480,8C640,5,800,11,960,16C1120,21,1280,27,1360,29.3L1440,32L1440,0L1360,0C1280,0,1120,0,960,0C800,0,640,0,480,0C320,0,160,0,80,0L0,0Z"></path>
+      </svg>
     </div>
     <div class="max-w-6xl mx-auto px-6">
       <div class="reveal rounded-3xl bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-500 p-8 md:p-12 text-center text-white shadow-xl">
@@ -457,15 +510,25 @@
         <p class="mt-2 text-white/90">Join thousands of learners and level up your skills today.</p>
         <div class="mt-6 flex justify-center gap-3 flex-wrap">
           <?php if (empty($_SESSION['user_id'])): ?>
-            <a href="register.php" class="bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg shadow hover:translate-y-[-1px] transition">Get Started</a>
-            <a href="login.php" class="bg-indigo-900/30 text-white border border-white/30 px-6 py-3 rounded-lg hover:bg-indigo-900/40 transition">I already have an account</a>
+            <a href="register.php" class="inline-flex items-center gap-2 bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg shadow hover:translate-y-[-1px] transition">
+              <ion-icon name="person-add-outline"></ion-icon> Get Started
+            </a>
+            <a href="login.php" class="inline-flex items-center gap-2 bg-indigo-900/30 text-white border border-white/30 px-6 py-3 rounded-lg hover:bg-indigo-900/40 transition">
+              <ion-icon name="log-in-outline"></ion-icon> I already have an account
+            </a>
           <?php else: ?>
             <?php if (($_SESSION['role'] ?? '') === 'student'): ?>
-              <a href="student_dashboard.php" class="bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg shadow hover:translate-y-[-1px] transition">Open Dashboard</a>
+              <a href="student_dashboard.php" class="inline-flex items-center gap-2 bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg shadow hover:translate-y-[-1px] transition">
+                <ion-icon name="open-outline"></ion-icon> Open Dashboard
+              </a>
             <?php elseif (($_SESSION['role'] ?? '') === 'teacher'): ?>
-              <a href="teacher_dashboard.php" class="bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg shadow hover:translate-y-[-1px] transition">Open Dashboard</a>
+              <a href="teacher_dashboard.php" class="inline-flex items-center gap-2 bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg shadow hover:translate-y-[-1px] transition">
+                <ion-icon name="open-outline"></ion-icon> Open Dashboard
+              </a>
             <?php else: ?>
-              <a href="admin_dashboard.php" class="bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg shadow hover:translate-y-[-1px] transition">Open Dashboard</a>
+              <a href="admin_dashboard.php" class="inline-flex items-center gap-2 bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg shadow hover:translate-y-[-1px] transition">
+                <ion-icon name="open-outline"></ion-icon> Open Dashboard
+              </a>
             <?php endif; ?>
           <?php endif; ?>
         </div>
@@ -476,14 +539,92 @@
   <!-- Footer -->
   <?php include 'components/footer.php'; ?>
 
+  <!-- Cookie Consent Banner -->
+  <div id="cookieBanner" class="fixed inset-x-0 bottom-0 sm:bottom-6 px-4 sm:px-6 hidden z-[60]">
+    <div class="mx-auto max-w-4xl rounded-2xl border border-gray-200 bg-white/95 backdrop-blur shadow-lg p-4 sm:p-5">
+      <div class="flex items-start gap-4">
+        <div class="shrink-0 mt-1 text-blue-600" aria-hidden="true"><ion-icon name="cookie-outline" class="text-xl"></ion-icon></div>
+        <div class="text-sm text-gray-700">
+          <p class="font-medium text-gray-900">We use cookies</p>
+          <p class="mt-1">
+            We use essential cookies to make our site work. With your consent, we may also use analytics cookies to
+            understand how you use SynapZ and improve your experience. See our
+            <a href="privacy.php" class="text-blue-600 underline hover:text-blue-700">Privacy Policy</a>.
+          </p>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <button id="cc-accept" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300">
+              <ion-icon name="checkmark-circle-outline"></ion-icon> Accept all
+            </button>
+            <button id="cc-reject" class="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-gray-800 text-sm font-medium hover:bg-gray-200 focus:outline-none focus:ring-4 focus:ring-gray-200">
+              <ion-icon name="close-circle-outline"></ion-icon> Reject non‑essential
+            </button>
+            <button id="cc-settings" class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none">
+              <ion-icon name="options-outline"></ion-icon> Manage settings
+            </button>
+          </div>
+        </div>
+        <button id="cc-close" aria-label="Close" class="ml-auto text-gray-500 hover:text-gray-700">
+          <ion-icon name="close-outline"></ion-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cookie Settings Modal -->
+  <div id="cookieModal" class="fixed inset-0 hidden items-end sm:items-center justify-center p-4 z-[70]">
+    <div class="absolute inset-0 bg-black/40" aria-hidden="true"></div>
+    <div role="dialog" aria-modal="true" aria-labelledby="cookieModalTitle"
+         class="relative w-full max-w-lg rounded-2xl bg-white shadow-xl border border-gray-200 p-6">
+      <h3 id="cookieModalTitle" class="text-lg font-semibold text-gray-900">Cookie preferences</h3>
+      <p class="mt-1 text-sm text-gray-600">
+        Control which cookies we use. Necessary cookies are always on—they’re required for the site to function.
+      </p>
+
+      <div class="mt-4 space-y-3">
+        <label class="flex items-start gap-3">
+          <input type="checkbox" checked disabled class="mt-0.5 h-4 w-4 text-blue-600 border-gray-300 rounded">
+          <span>
+            <span class="block font-medium text-gray-900">Necessary</span>
+            <span class="block text-sm text-gray-600">Required for core features like login and security.</span>
+          </span>
+        </label>
+
+        <label class="flex items-start gap-3">
+          <input id="cc-analytics" type="checkbox" class="mt-0.5 h-4 w-4 text-blue-600 border-gray-300 rounded">
+          <span>
+            <span class="block font-medium text-gray-900">Analytics</span>
+            <span class="block text-sm text-gray-600">Helps us understand usage to improve SynapZ.</span>
+          </span>
+        </label>
+
+        <label class="flex items-start gap-3">
+          <input id="cc-marketing" type="checkbox" class="mt-0.5 h-4 w-4 text-blue-600 border-gray-300 rounded">
+          <span>
+            <span class="block font-medium text-gray-900">Marketing (optional)</span>
+            <span class="block text-sm text-gray-600">Used to personalize content across services.</span>
+          </span>
+        </label>
+      </div>
+
+      <div class="mt-6 flex items-center justify-end gap-2">
+        <button id="cc-cancel" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-gray-900">
+          <ion-icon name="close-outline"></ion-icon> Cancel
+        </button>
+        <button id="cc-save" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700">
+          <ion-icon name="save-outline"></ion-icon> Save preferences
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Back to top button -->
   <a href="#top" id="backToTop"
      class="hidden fixed bottom-6 right-6 z-50 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition"
      aria-label="Back to top">
-     ↑
+     <ion-icon name="arrow-up-outline" class="text-xl"></ion-icon>
   </a>
 
-  <!-- Scripts: reveal on scroll + back-to-top + typed + countUp -->
+  <!-- Scripts: reveal on scroll + back-to-top + typed + countUp + cookie consent -->
   <script>
     // Reveal on scroll
     const observer = new IntersectionObserver((entries) => {
@@ -545,6 +686,99 @@
         });
       }, { threshold: 0.6 });
       els.forEach(el => ro.observe(el));
+    })();
+
+    // Cookie Consent
+    (function() {
+      const KEY = 'synapz_cookie_consent_v1';
+      const SIX_MONTHS = 15552000 * 1000; // ms
+
+      const banner = document.getElementById('cookieBanner');
+      const modal  = document.getElementById('cookieModal');
+      const btnAccept  = document.getElementById('cc-accept');
+      const btnReject  = document.getElementById('cc-reject');
+      const btnClose   = document.getElementById('cc-close');
+      const btnSettings= document.getElementById('cc-settings');
+      const btnSave    = document.getElementById('cc-save');
+      const btnCancel  = document.getElementById('cc-cancel');
+      const chkAnalytics = document.getElementById('cc-analytics');
+      const chkMarketing = document.getElementById('cc-marketing');
+
+      function readConsent() {
+        try {
+          const raw = localStorage.getItem(KEY);
+          if (!raw) return null;
+          const data = JSON.parse(raw);
+          if (!data || !data.updatedAt) return null;
+          if (Date.now() - data.updatedAt > SIX_MONTHS) return null;
+          return data;
+        } catch (_) { return null; }
+      }
+
+      function saveConsent(consent) {
+        const payload = {
+          necessary: true,
+          analytics: !!consent.analytics,
+          marketing: !!consent.marketing,
+          updatedAt: Date.now()
+        };
+        localStorage.setItem(KEY, JSON.stringify(payload));
+        // Lightweight cookie record (boolean) for server-side checks if needed
+        document.cookie = "cookie_consent=1; Max-Age=15552000; Path=/; SameSite=Lax";
+        applyConsent(payload);
+      }
+
+      function showBanner() { banner && banner.classList.remove('hidden'); }
+      function hideBanner() { banner && banner.classList.add('hidden'); }
+      function openModal() {
+        if (!modal) return;
+        const current = readConsent() || { analytics: false, marketing: false };
+        if (chkAnalytics) chkAnalytics.checked = !!current.analytics;
+        if (chkMarketing) chkMarketing.checked = !!current.marketing;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+      function closeModal() {
+        if (!modal) return;
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+
+      // Apply consent choices (load/unload non-essential scripts here)
+      function applyConsent(c) {
+        // Example: conditionally load Analytics (placeholder)
+        if (c.analytics) {
+          // loadAnalyticsOnce(); // implement if you use GA/other
+        } else {
+          // disableAnalytics();
+        }
+        if (c.marketing) {
+          // loadMarketingPixels();
+        } else {
+          // disableMarketingPixels();
+        }
+      }
+
+      // Wire up events
+      btnAccept && btnAccept.addEventListener('click', () => { saveConsent({ analytics: true, marketing: true }); hideBanner(); });
+      btnReject && btnReject.addEventListener('click', () => { saveConsent({ analytics: false, marketing: false }); hideBanner(); });
+      btnClose && btnClose.addEventListener('click', hideBanner);
+      btnSettings && btnSettings.addEventListener('click', openModal);
+      btnCancel && btnCancel.addEventListener('click', closeModal);
+      btnSave && btnSave.addEventListener('click', () => {
+        saveConsent({ analytics: chkAnalytics?.checked, marketing: chkMarketing?.checked });
+        closeModal(); hideBanner();
+      });
+
+      // Init
+      const existing = readConsent();
+      if (existing) applyConsent(existing); else showBanner();
+
+      // Close modal on backdrop click
+      modal && modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+      // ESC to close modal
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
     })();
   </script>
 </body>

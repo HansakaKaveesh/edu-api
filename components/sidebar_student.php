@@ -1,5 +1,5 @@
 <?php
-// student_sidebar.php (drop-in partial)
+// student_sidebar.php (compact variant)
 
 include 'db_connect.php';
 if (session_status() === PHP_SESSION_NONE) {
@@ -24,126 +24,165 @@ if ($stmt = $conn->prepare("SELECT first_name, last_name FROM students WHERE use
   }
   $stmt->close();
 }
+$initials = strtoupper(mb_substr($full_name, 0, 1)) ?: 'S';
 
-// Detect current page for "active" state
+// Detect current page
 $currentPage = basename(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
 
-// Navigation items config
-$navItems = [
-  ['<i class="fa-solid fa-house text-lg text-blue-600"></i>', 'Dashboard', 'student_dashboard.php', 'bg-blue-50', 'text-blue-700', 'group-hover:text-blue-900'],
-  ['<i class="fa-solid fa-book-open text-lg text-green-600"></i>', 'Enroll', 'enroll_course.php', 'bg-green-50', 'text-green-700', 'group-hover:text-green-900'],
-  ['<i class="fa-solid fa-book text-lg text-purple-600"></i>', 'My Courses', 'student_courses.php', 'bg-purple-50', 'text-purple-700', 'group-hover:text-purple-900'],
-  ['<i class="fa-solid fa-brain text-lg text-orange-600"></i>', 'Quizzes', 'student_quizzes.php', 'bg-orange-50', 'text-orange-700', 'group-hover:text-orange-900'],
-  ['<i class="fa-solid fa-comments text-lg text-yellow-600"></i>', 'Discussions', 'forum.php', 'bg-yellow-50', 'text-yellow-700', 'group-hover:text-yellow-900'],
-  ['<i class="fa-solid fa-gear text-lg text-gray-700"></i>', 'Settings', 'student_settings.php', 'bg-gray-50', 'text-gray-700', 'group-hover:text-gray-900'],
-  ['<i class="fa-solid fa-envelope text-lg text-indigo-600"></i>', 'Messages', 'messages.php', 'bg-indigo-50', 'text-indigo-700', 'group-hover:text-indigo-900'],
-  ['<i class="fa-solid fa-right-from-bracket text-lg text-red-600"></i>', 'Logout', 'logout.php', 'bg-red-100', 'text-red-700', 'group-hover:text-red-900']
-];
-
+// Simple badges (plug real counts if available)
 $badgeByLabel = [
   'Messages'    => 0,
-  'Assignments' => 0,
   'Quizzes'     => 0,
+  'Assignments' => 0,
+];
+
+// Navigation items (Ionicons + theme)
+$navItems = [
+  ['icon' => 'home-outline',           'label' => 'Dashboard',   'href' => 'student_dashboard.php', 'theme' => 'indigo'],
+  ['icon' => 'library-outline',        'label' => 'Enroll',      'href' => 'enroll_course.php',     'theme' => 'emerald'],
+  ['icon' => 'book-outline',           'label' => 'My Courses',  'href' => 'student_courses.php',   'theme' => 'purple'],
+  ['icon' => 'reader-outline',         'label' => 'Quizzes',     'href' => 'student_quizzes.php',   'theme' => 'amber'],
+  ['icon' => 'chatbubbles-outline',    'label' => 'Discussions', 'href' => 'forum.php',             'theme' => 'yellow'],
+  ['icon' => 'settings-outline',       'label' => 'Settings',    'href' => 'student_settings.php',  'theme' => 'slate'],
+  ['icon' => 'mail-unread-outline',    'label' => 'Messages',    'href' => 'messages.php',          'theme' => 'sky'],
+  ['icon' => 'log-out-outline',        'label' => 'Logout',      'href' => 'logout.php',            'theme' => 'rose'],
+];
+
+// Theme utility map (compact palette)
+$themes = [
+  'indigo' => ['bg'=>'bg-indigo-50', 'text'=>'text-indigo-700', 'hover'=>'group-hover:text-indigo-900', 'ring'=>'ring-indigo-300'],
+  'emerald'=> ['bg'=>'bg-emerald-50','text'=>'text-emerald-700','hover'=>'group-hover:text-emerald-900','ring'=>'ring-emerald-300'],
+  'purple' => ['bg'=>'bg-purple-50','text'=>'text-purple-700','hover'=>'group-hover:text-purple-900','ring'=>'ring-purple-300'],
+  'amber'  => ['bg'=>'bg-amber-50', 'text'=>'text-amber-700', 'hover'=>'group-hover:text-amber-900', 'ring'=>'ring-amber-300'],
+  'yellow' => ['bg'=>'bg-yellow-50','text'=>'text-yellow-700','hover'=>'group-hover:text-yellow-900','ring'=>'ring-yellow-300'],
+  'slate'  => ['bg'=>'bg-slate-50', 'text'=>'text-slate-700', 'hover'=>'group-hover:text-slate-900', 'ring'=>'ring-slate-300'],
+  'sky'    => ['bg'=>'bg-sky-50',   'text'=>'text-sky-700',   'hover'=>'group-hover:text-sky-900',   'ring'=>'ring-sky-300'],
+  'rose'   => ['bg'=>'bg-rose-50',  'text'=>'text-rose-700',  'hover'=>'group-hover:text-rose-900',  'ring'=>'ring-rose-300'],
 ];
 ?>
+<!-- Ionicons -->
+<script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 
-<!-- Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-<!-- ✅ Floating Sticky Mobile Button -->
+<!-- Compact Mobile FAB -->
 <button
   id="sidebarToggle"
   aria-controls="studentSidebar"
   aria-expanded="false"
   aria-label="Open sidebar"
-    class="lg:hidden fixed top-24 left-4 z-50 p-3 rounded-full bg-yellow-500 text-white shadow-lg 
-         hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 
-         border border-white"
+  class="lg:hidden fixed bottom-4 left-3 z-50 p-2.5 rounded-full bg-indigo-600 text-white shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400"
 >
-  <svg id="hamburgerIcon" xmlns="http://www.w3.org/2000/svg"
-       class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-       stroke="currentColor" aria-hidden="true">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M4 6h16M4 12h16M4 18h16" />
-  </svg>
-  <svg id="closeIcon" xmlns="http://www.w3.org/2000/svg"
-       class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24"
-       stroke="currentColor" aria-hidden="true">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M6 18L18 6M6 6l12 12" />
-  </svg>
+  <ion-icon id="hamburgerIcon" name="menu-outline" class="text-xl"></ion-icon>
+  <ion-icon id="closeIcon" name="close-outline" class="text-xl hidden"></ion-icon>
 </button>
 
 <!-- Overlay -->
-<div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-40 z-40 hidden lg:hidden" aria-hidden="true"></div>
+<div id="sidebarOverlay" class="fixed inset-0 bg-black/40 z-40 hidden lg:hidden" aria-hidden="true"></div>
 
-<!-- Mobile Sidebar -->
+<!-- Mobile Sidebar (compact) -->
 <aside
   id="studentSidebar"
-  class="fixed top-0 left-0 z-50 w-4/5 max-w-[280px] h-full bg-white/95 backdrop-blur p-2 rounded-r-2xl shadow-xl border-r border-gray-100 transform -translate-x-full transition-transform duration-200 ease-in-out lg:hidden overflow-y-auto hidden"
+  class="fixed top-0 left-0 z-50 w-[80%] max-w-[260px] h-full bg-white/95 backdrop-blur p-2 rounded-r-xl shadow-lg border-r border-gray-100 transform -translate-x-full transition-transform duration-200 ease-in-out lg:hidden overflow-y-auto hidden"
   role="dialog"
   aria-modal="true"
   aria-labelledby="sidebarTitle"
   aria-hidden="true"
 >
-  <div class="flex justify-between items-center mb-2">
-    <h3 id="sidebarTitle" class="text-sm font-semibold text-gray-700">👋 <strong><?php echo htmlspecialchars($full_name, ENT_QUOTES, 'UTF-8'); ?></strong></h3>
-    <button id="sidebarClose" class="text-xl text-gray-400 hover:text-gray-700" aria-label="Close sidebar">&times;</button>
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-2">
+    <div class="flex items-center gap-2">
+      <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-100 text-indigo-700 ring-1 ring-indigo-200 text-xs font-semibold">
+        <?= htmlspecialchars($initials, ENT_QUOTES, 'UTF-8') ?>
+      </span>
+      <h3 id="sidebarTitle" class="text-xs font-semibold text-gray-700 truncate max-w-[150px]">
+        <span class="text-slate-500">Hi,</span> <strong><?= htmlspecialchars($full_name, ENT_QUOTES, 'UTF-8') ?></strong>
+      </h3>
+    </div>
+    <button id="sidebarClose" class="text-lg text-gray-400 hover:text-gray-700" aria-label="Close sidebar">
+      <ion-icon name="close-outline"></ion-icon>
+    </button>
   </div>
-  <nav class="grid gap-2 text-xs">
+
+  <!-- Quick link -->
+  <a href="student_settings.php" class="mb-2 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-indigo-100 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 text-[11px]">
+    <ion-icon name="settings-outline" class="text-sm"></ion-icon> Settings
+  </a>
+
+  <!-- Nav -->
+  <nav class="grid gap-1.5 text-xs">
     <?php foreach ($navItems as $item): ?>
       <?php
-        $isActive = (basename($item[2]) === $currentPage);
-        $badge = $badgeByLabel[$item[1]] ?? 0;
-        $mobileClasses = "group block {$item[3]} {$item[4]} {$item[5]} p-2 rounded-xl shadow hover:shadow-lg transition";
-        if ($isActive) $mobileClasses .= ' ring-2 ring-offset-2 ring-blue-300 scale-[1.01]';
+        $isActive = (basename($item['href']) === $currentPage);
+        $th = $themes[$item['theme']] ?? $themes['slate'];
+        $badge = $badgeByLabel[$item['label']] ?? 0;
+
+        $mobileClasses = "group flex items-center gap-2 {$th['bg']} {$th['text']} {$th['hover']} p-1.5 rounded-lg shadow-sm hover:shadow transition";
+        if ($isActive) $mobileClasses .= " ring-2 ring-offset-1 {$th['ring']}";
       ?>
       <a
-        href="<?= htmlspecialchars($item[2], ENT_QUOTES, 'UTF-8') ?>"
+        href="<?= htmlspecialchars($item['href'], ENT_QUOTES, 'UTF-8') ?>"
         class="<?= $mobileClasses ?>"
-        aria-label="<?= htmlspecialchars($item[1], ENT_QUOTES, 'UTF-8') ?>"
+        aria-label="<?= htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') ?>"
         <?= $isActive ? 'aria-current="page"' : '' ?>
       >
-        <div class="flex items-center gap-3">
-          <span class="shrink-0 leading-none group-hover:scale-110 transition" aria-hidden="true"><?= $item[0] ?></span>
-          <span class="flex items-center gap-2 font-semibold <?= htmlspecialchars($item[4], ENT_QUOTES, 'UTF-8') ?> <?= htmlspecialchars($item[5], ENT_QUOTES, 'UTF-8') ?>">
-            <?= htmlspecialchars($item[1], ENT_QUOTES, 'UTF-8') ?>
-            <?php if ($badge > 0): ?>
-              <span class="inline-flex items-center justify-center min-w-[1.1rem] h-4 px-1 rounded-full bg-red-500 text-white text-[10px]"><?= (int)$badge ?></span>
-            <?php endif; ?>
-          </span>
-        </div>
+        <span class="shrink-0 inline-flex h-6 w-6 items-center justify-center rounded-md bg-white text-slate-700 ring-1 ring-white/60 group-hover:scale-110 transition" aria-hidden="true">
+          <ion-icon name="<?= htmlspecialchars($item['icon']) ?>" class="text-[14px] leading-none"></ion-icon>
+        </span>
+        <span class="flex items-center gap-1.5 font-medium">
+          <?= htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') ?>
+          <?php if ($badge > 0): ?>
+            <span class="inline-flex items-center justify-center min-w-[1rem] h-4 px-1 rounded-full bg-rose-500 text-white text-[10px]"><?= (int)$badge ?></span>
+          <?php endif; ?>
+        </span>
       </a>
     <?php endforeach; ?>
   </nav>
 </aside>
 
-<!-- Desktop Sidebar -->
-<aside class="sticky top-28 hidden lg:block lg:w-1/5 w-full bg-white/90 backdrop-blur p-6 rounded-2xl shadow-xl border border-gray-100 h-fit">
-  <h3 class="text-sm sm:text-sm font-semibold mb-2 text-gray-700">👋 Welcome, <strong><?php echo htmlspecialchars($full_name, ENT_QUOTES, 'UTF-8'); ?></strong></h3>
-  <nav class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+<!-- Desktop Sidebar (compact) -->
+<aside class="sticky top-28 hidden lg:block lg:w-1/5 w-full bg-white/90 backdrop-blur p-4 rounded-xl shadow-lg border border-gray-100 h-fit">
+  <!-- Profile small -->
+  <div class="flex items-center justify-between mb-3">
+    <div class="flex items-center gap-2">
+      <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-indigo-700 ring-1 ring-indigo-200 text-sm font-semibold">
+        <?= htmlspecialchars($initials, ENT_QUOTES, 'UTF-8') ?>
+      </span>
+      <div class="text-xs">
+        <div class="text-gray-700 font-semibold leading-tight truncate max-w-[140px]"><?= htmlspecialchars($full_name, ENT_QUOTES, 'UTF-8') ?></div>
+        <div class="text-[11px] text-slate-500">Student</div>
+      </div>
+    </div>
+    <a href="student_settings.php" class="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded border border-slate-200 hover:bg-slate-50">
+      <ion-icon name="settings-outline" class="text-slate-600 text-sm"></ion-icon> Edit
+    </a>
+  </div>
+
+  <!-- Nav -->
+  <nav class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-1 gap-3">
     <?php foreach ($navItems as $item): ?>
       <?php
-        $isActive = (basename($item[2]) === $currentPage);
-        $badge = $badgeByLabel[$item[1]] ?? 0;
-        $desktopClasses = "group block {$item[3]} p-4 rounded-xl shadow hover:shadow-lg transition";
-        if ($isActive) $desktopClasses .= ' ring-2 ring-offset-2 ring-blue-300 scale-[1.01]';
+        $isActive = (basename($item['href']) === $currentPage);
+        $th = $themes[$item['theme']] ?? $themes['slate'];
+        $badge = $badgeByLabel[$item['label']] ?? 0;
+
+        $desktopClasses = "group flex items-center gap-2 {$th['bg']} p-3 rounded-lg shadow-sm hover:shadow transition";
+        if ($isActive) $desktopClasses .= " ring-2 ring-offset-1 {$th['ring']}";
       ?>
       <a
-        href="<?= htmlspecialchars($item[2], ENT_QUOTES, 'UTF-8') ?>"
+        href="<?= htmlspecialchars($item['href'], ENT_QUOTES, 'UTF-8') ?>"
         class="<?= $desktopClasses ?>"
-        aria-label="<?= htmlspecialchars($item[1], ENT_QUOTES, 'UTF-8') ?>"
+        aria-label="<?= htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') ?>"
         <?= $isActive ? 'aria-current="page"' : '' ?>
       >
-        <div class="flex items-center gap-3">
-          <span class="shrink-0 leading-none group-hover:scale-110 transition" aria-hidden="true"><?= $item[0] ?></span>
-          <span class="flex items-center gap-2 font-semibold <?= htmlspecialchars($item[4], ENT_QUOTES, 'UTF-8') ?> <?= htmlspecialchars($item[5], ENT_QUOTES, 'UTF-8') ?>">
-            <?= htmlspecialchars($item[1], ENT_QUOTES, 'UTF-8') ?>
-            <?php if ($badge > 0): ?>
-              <span class="inline-flex items-center justify-center min-w-[1.1rem] h-4 px-1 rounded-full bg-red-500 text-white text-[10px]"><?= (int)$badge ?></span>
-            <?php endif; ?>
-          </span>
-        </div>
+        <span class="shrink-0 inline-flex h-8 w-8 items-center justify-center rounded-md bg-white text-slate-700 ring-1 ring-white/70 group-hover:scale-110 transition">
+          <ion-icon name="<?= htmlspecialchars($item['icon']) ?>" class="text-[15px] leading-none"></ion-icon>
+        </span>
+        <span class="flex items-center gap-1.5 text-[13px] font-medium <?= htmlspecialchars($th['text']) ?> <?= htmlspecialchars($th['hover']) ?>">
+          <?= htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') ?>
+          <?php if ($badge > 0): ?>
+            <span class="inline-flex items-center justify-center min-w-[1rem] h-4 px-1 rounded-full bg-rose-500 text-white text-[10px]"><?= (int)$badge ?></span>
+          <?php endif; ?>
+        </span>
       </a>
     <?php endforeach; ?>
   </nav>
@@ -151,12 +190,12 @@ $badgeByLabel = [
 
 <!-- Sidebar Script -->
 <script>
-  const sidebarToggle = document.getElementById('sidebarToggle');
-  const sidebar = document.getElementById('studentSidebar');
-  const sidebarOverlay = document.getElementById('sidebarOverlay');
-  const sidebarClose = document.getElementById('sidebarClose');
-  const hamburgerIcon = document.getElementById('hamburgerIcon');
-  const closeIcon = document.getElementById('closeIcon');
+  const sidebarToggle   = document.getElementById('sidebarToggle');
+  const sidebar         = document.getElementById('studentSidebar');
+  const sidebarOverlay  = document.getElementById('sidebarOverlay');
+  const sidebarClose    = document.getElementById('sidebarClose');
+  const hamburgerIcon   = document.getElementById('hamburgerIcon');
+  const closeIcon       = document.getElementById('closeIcon');
 
   let previouslyFocused = null;
   const focusableSelectors = 'a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])';
@@ -169,17 +208,10 @@ $badgeByLabel = [
   }
 
   function handleKeydown(e) {
-    if (e.key === 'Escape') {
-      e.preventDefault();
-      closeSidebar();
-    } else if (e.key === 'Tab' && sidebar.getAttribute('aria-hidden') === 'false') {
-      if (e.shiftKey && document.activeElement === firstFocusable) {
-        e.preventDefault();
-        lastFocusable.focus();
-      } else if (!e.shiftKey && document.activeElement === lastFocusable) {
-        e.preventDefault();
-        firstFocusable.focus();
-      }
+    if (e.key === 'Escape') { e.preventDefault(); closeSidebar(); }
+    else if (e.key === 'Tab' && sidebar.getAttribute('aria-hidden') === 'false') {
+      if (e.shiftKey && document.activeElement === firstFocusable) { e.preventDefault(); lastFocusable.focus(); }
+      else if (!e.shiftKey && document.activeElement === lastFocusable) { e.preventDefault(); firstFocusable.focus(); }
     }
   }
 
@@ -192,10 +224,8 @@ $badgeByLabel = [
     document.body.style.overflow = 'hidden';
     sidebar.setAttribute('aria-hidden', 'false');
     sidebarToggle.setAttribute('aria-expanded', 'true');
-
     setFocusTrap();
     (firstFocusable || sidebarClose).focus();
-
     document.addEventListener('keydown', handleKeydown);
   }
 
@@ -208,21 +238,14 @@ $badgeByLabel = [
     document.body.style.overflow = '';
     sidebar.setAttribute('aria-hidden', 'true');
     sidebarToggle.setAttribute('aria-expanded', 'false');
-
     document.removeEventListener('keydown', handleKeydown);
-    if (previouslyFocused && typeof previouslyFocused.focus === 'function') {
-      previouslyFocused.focus();
-    }
+    if (previouslyFocused && typeof previouslyFocused.focus === 'function') previouslyFocused.focus();
   }
 
   sidebarToggle?.addEventListener('click', () => {
-    if (sidebar.getAttribute('aria-hidden') === 'true') {
-      openSidebar();
-    } else {
-      closeSidebar();
-    }
+    if (sidebar.getAttribute('aria-hidden') === 'true') openSidebar();
+    else closeSidebar();
   });
-
   sidebarClose?.addEventListener('click', closeSidebar);
   sidebarOverlay?.addEventListener('click', closeSidebar);
 

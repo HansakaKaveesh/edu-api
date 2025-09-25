@@ -123,6 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Fetch courses
 $courses = $conn->query("SELECT course_id, name, description, price FROM courses ORDER BY name ASC");
+$totalCourses = $courses ? $courses->num_rows : 0;
 
 // Fetch user's enrollments
 $enrollments = [];
@@ -149,6 +150,9 @@ if ($stmt = $conn->prepare("SELECT enrollment_id, course_id, status FROM enrollm
     <link rel="icon" type="image/png" href="./images/logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Ionicons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <style>
       html, body { font-family: "Inter", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
       @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -161,6 +165,17 @@ if ($stmt = $conn->prepare("SELECT enrollment_id, course_id, status FROM enrollm
       ::-webkit-scrollbar { width: 10px; height: 10px; }
       ::-webkit-scrollbar-thumb { background: linear-gradient(180deg,#60a5fa,#a78bfa); border-radius: 9999px; }
       ::-webkit-scrollbar-track { background: transparent; }
+
+      /* Pretty chips */
+      .chip { display: inline-flex; align-items: center; gap: .4rem; padding: .25rem .6rem; border-radius: 9999px; font-size: .75rem; font-weight: 600; border-width: 1px; }
+      .chip-gray { background:#f8fafc; color:#334155; border-color:#e2e8f0; }
+      .chip-green { background:#ecfdf5; color:#065f46; border-color:#a7f3d0; }
+      .chip-amber { background:#fffbeb; color:#92400e; border-color:#fde68a; }
+      .chip-indigo { background:#eef2ff; color:#3730a3; border-color:#c7d2fe; }
+
+      /* Card hover */
+      .card { transition: box-shadow .2s ease, transform .2s ease; }
+      .card:hover { box-shadow: 0 12px 24px rgba(15,23,42,.08); transform: translateY(-1px); }
     </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-sky-50 via-white to-indigo-50 text-gray-800 antialiased">
@@ -177,14 +192,19 @@ if ($stmt = $conn->prepare("SELECT enrollment_id, course_id, status FROM enrollm
   <main class="w-full space-y-8 animate-fadeUp">
 
     <div class="text-center space-y-2">
-        <h2 class="text-3xl font-extrabold text-gray-800">📚 Enroll in a Course</h2>
+        <h2 class="text-3xl font-extrabold text-gray-800 inline-flex items-center gap-2">
+          <ion-icon name="library-outline" class="text-indigo-600 text-2xl"></ion-icon>
+          Enroll in a Course
+        </h2>
         <a href="student_dashboard.php" class="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-800 font-medium">
-          ← Back to Dashboard
+          <ion-icon name="arrow-back-outline" class="text-base"></ion-icon>
+          Back to Dashboard
         </a>
     </div>
 
     <?php if ($flash): ?>
-      <div class="max-w-3xl mx-auto bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-xl shadow-sm">
+      <div class="max-w-3xl mx-auto bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-xl shadow-sm inline-flex items-center gap-2">
+        <ion-icon name="checkmark-circle-outline" class="text-lg"></ion-icon>
         <?= htmlspecialchars($flash) ?>
       </div>
     <?php endif; ?>
@@ -193,104 +213,145 @@ if ($stmt = $conn->prepare("SELECT enrollment_id, course_id, status FROM enrollm
     <div class="max-w-3xl mx-auto">
       <div class="relative">
         <input id="searchInput" type="text" placeholder="Search courses by name or description..."
-               class="w-full rounded-full bg-white/80 border border-gray-200 px-5 py-3 pl-12 shadow-sm focus:ring-2 focus:ring-indigo-500/40 focus:outline-none">
-        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">🔎</span>
+               class="w-full rounded-full bg-white/80 border border-gray-200 px-5 py-3 pl-12 shadow-sm focus:ring-2 focus:ring-indigo-500/40 focus:outline-none" aria-label="Search courses">
+        <ion-icon name="search-outline" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl"></ion-icon>
       </div>
     </div>
 
-    <div class="overflow-x-auto bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100/80">
-      <table class="min-w-full table-auto text-sm">
-        <thead class="bg-gradient-to-r from-blue-50 to-indigo-50 text-gray-700 sticky top-0 z-10">
-          <tr>
-            <th class="px-4 py-3 text-left font-semibold">Name</th>
-            <th class="px-4 py-3 text-left font-semibold">Description</th>
-            <th class="px-4 py-3 text-right font-semibold">Price</th>
-            <th class="px-4 py-3 text-center font-semibold">Status</th>
-            <th class="px-4 py-3 text-center font-semibold">Action</th>
-          </tr>
-        </thead>
-        <tbody id="coursesBody" class="divide-y divide-gray-200">
+    <!-- Cards Grid -->
+    <section class="max-w-6xl mx-auto w-full">
+      <?php if ($totalCourses === 0): ?>
+        <div class="flex items-center justify-center gap-2 text-gray-600 bg-white/70 border border-gray-100 rounded-2xl p-8 shadow-sm">
+          <ion-icon name="information-circle-outline" class="text-2xl text-slate-500"></ion-icon>
+          No courses available right now. Please check back later.
+        </div>
+      <?php else: ?>
+        <div id="noResults" class="hidden text-center text-gray-600 bg-white/70 border border-gray-100 rounded-2xl p-6 shadow-sm mb-4">
+          <div class="inline-flex items-center gap-2">
+            <ion-icon name="search-circle-outline" class="text-2xl text-slate-500"></ion-icon>
+            No courses match your search.
+          </div>
+        </div>
+
+        <div id="coursesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <?php while ($course = $courses->fetch_assoc()):
             $cid   = (int)$course['course_id'];
-            $name  = $course['name'];
-            $desc  = $course['description'];
+            $name  = $course['name'] ?? '';
+            $desc  = $course['description'] ?? '';
             $price = isset($course['price']) ? (float)$course['price'] : 0.0;
             $en    = $enrollments[$cid] ?? null;
             $status = $en['status'] ?? null;
             $enrollmentId = $en['enrollment_id'] ?? null;
+
+            $searchText = strtolower(($name ?? '') . ' ' . ($desc ?? ''));
           ?>
-          <tr class="hover:bg-gray-50">
-            <td class="px-4 py-3 font-medium text-gray-900"><?= htmlspecialchars($name) ?></td>
-            <td class="px-4 py-3 text-gray-700"><?= htmlspecialchars($desc) ?></td>
-            <td class="px-4 py-3 text-right">
-              <?php if ($price <= 0): ?>
-                <span class="text-green-600 font-semibold">Free</span>
-              <?php else: ?>
-                <span class="font-semibold text-indigo-700">$<?= number_format($price, 2) ?></span>
-              <?php endif; ?>
-            </td>
-            <td class="px-4 py-3 text-center">
-              <?php if ($status === 'active'): ?>
-                <span class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200">Active</span>
-              <?php elseif ($status === 'pending'): ?>
-                <span class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-semibold bg-yellow-50 text-yellow-700 border border-yellow-200">Pending</span>
-              <?php else: ?>
-                <span class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-50 text-gray-600 border border-gray-200">Not enrolled</span>
-              <?php endif; ?>
-            </td>
-            <td class="px-4 py-3">
-              <div class="flex flex-col sm:flex-row justify-center items-center gap-2">
+            <article
+              class="course-card card group relative flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white/80 backdrop-blur-sm shadow-sm"
+              data-card
+              data-search="<?= htmlspecialchars($searchText, ENT_QUOTES) ?>">
+
+              <!-- Status badge -->
+              <div class="absolute top-4 right-4">
                 <?php if ($status === 'active'): ?>
-                  <a href="course.php?course_id=<?= $cid ?>" class="w-full sm:w-auto inline-flex items-center justify-center bg-white text-indigo-700 border border-indigo-200 px-3 py-2 rounded hover:bg-indigo-50 transition">
-                    View Course
-                  </a>
-                  <form method="POST">
-                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
-                    <input type="hidden" name="course_id" value="<?= $cid ?>">
-                    <button type="submit" name="remove" class="w-full sm:w-auto bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600 transition">
-                      Remove
-                    </button>
-                  </form>
-
+                  <span class="chip chip-green">
+                    <ion-icon name="checkmark-circle-outline" class="text-base"></ion-icon> Active
+                  </span>
                 <?php elseif ($status === 'pending'): ?>
-                  <?php if ($enrollmentId): ?>
-                    <a href="make_payment.php?course_id=<?= $cid ?>&enrollment_id=<?= $enrollmentId ?>"
-                       class="w-full sm:w-auto inline-flex items-center justify-center bg-indigo-600 text-white px-3 py-2 rounded hover:bg-indigo-700 transition">
-                      Pay Now
-                    </a>
-                  <?php endif; ?>
-                  <form method="POST">
-                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
-                    <input type="hidden" name="course_id" value="<?= $cid ?>">
-                    <button type="submit" name="cancel" class="w-full sm:w-auto bg-yellow-500 text-white px-3 py-2 rounded hover:bg-yellow-600 transition">
-                      Cancel
-                    </button>
-                  </form>
-                  <form method="POST">
-                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
-                    <input type="hidden" name="course_id" value="<?= $cid ?>">
-                    <button type="submit" name="remove" class="w-full sm:w-auto bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600 transition">
-                      Remove
-                    </button>
-                  </form>
-
+                  <span class="chip chip-amber">
+                    <ion-icon name="time-outline" class="text-base"></ion-icon> Pending
+                  </span>
                 <?php else: ?>
-                  <form method="POST" class="flex justify-center">
-                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
-                    <input type="hidden" name="course_id" value="<?= $cid ?>">
-                    <button type="submit"
-                      class="w-full sm:w-auto bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition">
-                      <?= $price > 0 ? 'Enroll & Pay' : 'Enroll (Free)' ?>
-                    </button>
-                  </form>
+                  <span class="chip chip-gray">
+                    <ion-icon name="ellipse-outline" class="text-base"></ion-icon> Not enrolled
+                  </span>
                 <?php endif; ?>
               </div>
-            </td>
-          </tr>
+
+              <!-- Body -->
+              <div class="p-5 space-y-3 flex-1">
+                <h3 class="text-lg font-semibold text-gray-900 inline-flex items-center gap-2">
+                  <ion-icon name="book-outline" class="text-indigo-600"></ion-icon>
+                  <?= htmlspecialchars($name) ?>
+                </h3>
+                <p class="text-sm text-gray-700 leading-relaxed">
+                  <?= htmlspecialchars($desc) ?>
+                </p>
+              </div>
+
+              <!-- Footer / actions -->
+              <div class="px-5 pb-5 pt-4 border-t border-gray-100">
+                <div class="flex items-center justify-between gap-3 mb-3">
+                  <div class="text-sm inline-flex items-center gap-1">
+                    <?php if ($price <= 0): ?>
+                      <span class="chip chip-green"><ion-icon name="pricetag-outline" class="text-base"></ion-icon> Free</span>
+                    <?php else: ?>
+                      <span class="chip chip-indigo"><ion-icon name="cash-outline" class="text-base"></ion-icon> $<?= number_format($price, 2) ?></span>
+                    <?php endif; ?>
+                  </div>
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                  <?php if ($status === 'active'): ?>
+                    <a href="course.php?course_id=<?= $cid ?>"
+                       class="inline-flex items-center justify-center bg-white text-indigo-700 border border-indigo-200 px-3 py-2 rounded hover:bg-indigo-50 transition">
+                      <ion-icon name="open-outline" class="text-base mr-1"></ion-icon>
+                      View Course
+                    </a>
+                    <form method="POST" class="inline" onsubmit="return confirm('Remove this enrollment?');">
+                      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
+                      <input type="hidden" name="course_id" value="<?= $cid ?>">
+                      <button type="submit" name="remove"
+                              class="inline-flex items-center bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600 transition">
+                        <ion-icon name="trash-outline" class="text-base mr-1"></ion-icon>
+                        Remove
+                      </button>
+                    </form>
+
+                  <?php elseif ($status === 'pending'): ?>
+                    <?php if ($enrollmentId): ?>
+                      <a href="make_payment.php?course_id=<?= $cid ?>&enrollment_id=<?= $enrollmentId ?>"
+                         class="inline-flex items-center justify-center bg-indigo-600 text-white px-3 py-2 rounded hover:bg-indigo-700 transition">
+                        <ion-icon name="card-outline" class="text-base mr-1"></ion-icon>
+                        Pay Now
+                      </a>
+                    <?php endif; ?>
+                    <form method="POST" class="inline" onsubmit="return confirm('Cancel pending enrollment?');">
+                      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
+                      <input type="hidden" name="course_id" value="<?= $cid ?>">
+                      <button type="submit" name="cancel"
+                              class="inline-flex items-center bg-yellow-500 text-white px-3 py-2 rounded hover:bg-yellow-600 transition">
+                        <ion-icon name="close-circle-outline" class="text-base mr-1"></ion-icon>
+                        Cancel
+                      </button>
+                    </form>
+                    <form method="POST" class="inline" onsubmit="return confirm('Remove this enrollment record?');">
+                      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
+                      <input type="hidden" name="course_id" value="<?= $cid ?>">
+                      <button type="submit" name="remove"
+                              class="inline-flex items-center bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600 transition">
+                        <ion-icon name="trash-outline" class="text-base mr-1"></ion-icon>
+                        Remove
+                      </button>
+                    </form>
+
+                  <?php else: ?>
+                    <form method="POST" class="inline">
+                      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
+                      <input type="hidden" name="course_id" value="<?= $cid ?>">
+                      <button type="submit"
+                              class="inline-flex items-center bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition">
+                        <ion-icon name="add-circle-outline" class="text-base mr-1"></ion-icon>
+                        <?= $price > 0 ? 'Enroll & Pay' : 'Enroll (Free)' ?>
+                      </button>
+                    </form>
+                  <?php endif; ?>
+                </div>
+              </div>
+            </article>
           <?php endwhile; ?>
-        </tbody>
-      </table>
-    </div>
+        </div>
+      <?php endif; ?>
+    </section>
 
   </main>
 </div>
@@ -298,18 +359,27 @@ if ($stmt = $conn->prepare("SELECT enrollment_id, course_id, status FROM enrollm
 <?php include 'components/footer.php'; ?>
 
 <script>
-  // Client-side search (filters by name + description)
+  // Client-side search (filters cards by name + description)
   const input = document.getElementById('searchInput');
-  const tbody = document.getElementById('coursesBody');
+  const grid  = document.getElementById('coursesGrid');
+  const noRes = document.getElementById('noResults');
 
-  input?.addEventListener('input', () => {
-    const q = input.value.toLowerCase().trim();
-    for (const row of tbody.rows) {
-      const name = row.cells[0]?.innerText.toLowerCase() || '';
-      const desc = row.cells[1]?.innerText.toLowerCase() || '';
-      row.style.display = (name.includes(q) || desc.includes(q)) ? '' : 'none';
-    }
-  });
+  function applyFilter() {
+    if (!grid) return;
+    const q = (input?.value || '').toLowerCase().trim();
+    let visible = 0;
+    grid.querySelectorAll('[data-card]').forEach(card => {
+      const hay = (card.dataset.search || card.innerText.toLowerCase());
+      const show = hay.includes(q);
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    if (noRes) noRes.classList.toggle('hidden', visible !== 0);
+  }
+
+  input?.addEventListener('input', applyFilter);
+  // Initial (in case of prefilled search by browser)
+  applyFilter();
 </script>
 </body>
 </html>

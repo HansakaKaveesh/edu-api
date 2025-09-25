@@ -34,52 +34,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['newsletter_email'])) 
   <div class="relative z-10 max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-sm md:text-base">
 
     <!-- About -->
-    <div class="rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 p-6 shadow-xl shadow-blue-900/20 hover:bg-white/7 transition">
-      <h4 class="text-yellow-400 text-lg font-semibold mb-3">About SynapZ</h4>
+    <div class="rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 p-6 shadow-xl shadow-blue-900/20 hover:bg-white/10 transition">
+      <h4 class="text-yellow-400 text-lg font-semibold mb-3 inline-flex items-center gap-2">
+        <ion-icon name="sparkles-outline" class="text-yellow-300"></ion-icon>
+        About SynapZ
+      </h4>
       <p class="text-gray-200 leading-relaxed">
         SynapZ is an all-in-one learning platform empowering students, teachers, and admins to collaborate and grow in a smart digital space.
       </p>
       <div class="mt-4 flex items-center gap-3 text-gray-300">
         <span class="inline-flex items-center gap-1 rounded-full bg-white/10 border border-white/10 px-2.5 py-1 text-xs">
-          ⭐ 4.9/5 by learners
+          <ion-icon name="star-outline" class="text-yellow-300"></ion-icon>
+          4.9/5 by learners
         </span>
-        <span class="hidden md:inline-block text-xs text-gray-400">Trusted by schools and tutors</span>
+        <span class="hidden md:inline-flex items-center gap-1 text-xs text-gray-400">
+          <ion-icon name="shield-checkmark-outline"></ion-icon>
+          Trusted by schools and tutors
+        </span>
       </div>
     </div>
 
     <!-- Quick Links -->
-    <div class="rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 p-6 shadow-xl shadow-blue-900/20 hover:bg-white/7 transition">
-      <h4 class="text-yellow-400 text-lg font-semibold mb-3">Quick Links</h4>
+    <div class="rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 p-6 shadow-xl shadow-blue-900/20 hover:bg-white/10 transition">
+      <h4 class="text-yellow-400 text-lg font-semibold mb-3 inline-flex items-center gap-2">
+        <ion-icon name="flash-outline" class="text-yellow-300"></ion-icon>
+        Quick Links
+      </h4>
       <ul class="space-y-2">
         <li>
           <a href="/index.php" class="group flex items-center gap-2 hover:text-yellow-300 transition">
-            <span class="text-yellow-300">🏠</span> Home
-            <i class="fa fa-arrow-right ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition"></i>
+            <ion-icon name="home-outline" class="text-yellow-300"></ion-icon> Home
+            <ion-icon name="chevron-forward-outline" class="ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition"></ion-icon>
           </a>
         </li>
         <li>
           <a href="#courses" class="group flex items-center gap-2 hover:text-yellow-300 transition">
-            <span class="text-yellow-300">📚</span> Courses
-            <i class="fa fa-arrow-right ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition"></i>
+            <ion-icon name="library-outline" class="text-yellow-300"></ion-icon> Courses
+            <ion-icon name="chevron-forward-outline" class="ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition"></ion-icon>
           </a>
         </li>
         <li>
           <a href="#tutors" class="group flex items-center gap-2 hover:text-yellow-300 transition">
-            <span class="text-yellow-300">👨‍🏫</span> Tutors
-            <i class="fa fa-arrow-right ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition"></i>
+            <ion-icon name="people-outline" class="text-yellow-300"></ion-icon> Tutors
+            <ion-icon name="chevron-forward-outline" class="ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition"></ion-icon>
           </a>
         </li>
         <li>
           <a href="#contact" class="group flex items-center gap-2 hover:text-yellow-300 transition">
-            <span class="text-yellow-300">📬</span> Contact
-            <i class="fa fa-arrow-right ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition"></i>
+            <ion-icon name="mail-outline" class="text-yellow-300"></ion-icon> Contact
+            <ion-icon name="chevron-forward-outline" class="ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition"></ion-icon>
           </a>
         </li>
         <?php if (!isset($_SESSION['user_id'])): ?>
           <li>
             <a href="/login.php" class="group flex items-center gap-2 hover:text-yellow-300 transition">
-              <span class="text-yellow-300">🔐</span> Login
-              <i class="fa fa-arrow-right ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition"></i>
+              <ion-icon name="log-in-outline" class="text-yellow-300"></ion-icon> Login
+              <ion-icon name="chevron-forward-outline" class="ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition"></ion-icon>
             </a>
           </li>
         <?php endif; ?>
@@ -87,25 +97,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['newsletter_email'])) 
     </div>
 
     <!-- Newsletter -->
-    <div id="newsletter" class="rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 p-6 shadow-xl shadow-blue-900/20 hover:bg-white/7 transition">
-      <h4 class="text-yellow-400 text-lg font-semibold mb-3">Newsletter</h4>
+    <div id="newsletter" class="rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 p-6 shadow-xl shadow-blue-900/20 hover:bg-white/10 transition">
+      <h4 class="text-yellow-400 text-lg font-semibold mb-3 inline-flex items-center gap-2">
+        <ion-icon name="paper-plane-outline" class="text-yellow-300"></ion-icon>
+        Newsletter
+      </h4>
       <p class="text-gray-200 mb-3">Stay updated with our latest courses and news.</p>
 
       <?php if (!empty($_SESSION['newsletter_success'])): ?>
-        <div class="mb-3 rounded-md border border-emerald-400/30 bg-emerald-400/10 text-emerald-200 px-3 py-2">
-          <i class="fa fa-check-circle mr-1.5"></i> <?= $_SESSION['newsletter_success']; ?>
+        <div class="mb-3 rounded-md border border-emerald-400/30 bg-emerald-400/10 text-emerald-200 px-3 py-2 inline-flex items-center gap-1">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+          <?= $_SESSION['newsletter_success']; ?>
         </div>
         <?php unset($_SESSION['newsletter_success']); ?>
       <?php elseif (!empty($_SESSION['newsletter_error'])): ?>
-        <div class="mb-3 rounded-md border border-red-400/30 bg-red-400/10 text-red-200 px-3 py-2">
-          <i class="fa fa-exclamation-triangle mr-1.5"></i> <?= $_SESSION['newsletter_error']; ?>
+        <div class="mb-3 rounded-md border border-red-400/30 bg-red-400/10 text-red-200 px-3 py-2 inline-flex items-center gap-1">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          <?= $_SESSION['newsletter_error']; ?>
         </div>
         <?php unset($_SESSION['newsletter_error']); ?>
       <?php endif; ?>
 
       <form method="POST" action="#newsletter" class="space-y-2">
         <div class="relative">
-          <i class="fa fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-yellow-300"></i>
+          <ion-icon name="mail-open-outline" class="absolute left-3 top-1/2 -translate-y-1/2 text-yellow-300"></ion-icon>
           <input
             type="email"
             name="newsletter_email"
@@ -115,8 +130,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['newsletter_email'])) 
             aria-label="Email address"
           >
         </div>
-        <button type="submit" class="w-full bg-yellow-400 text-black font-semibold px-3 py-2 rounded-md hover:bg-yellow-300 active:scale-[0.99] transition">
-          ✉️ Subscribe
+        <button type="submit" class="w-full bg-yellow-400 text-black font-semibold px-3 py-2 rounded-md hover:bg-yellow-300 active:scale-[0.99] transition inline-flex items-center justify-center gap-2">
+          <ion-icon name="send-outline"></ion-icon> Subscribe
         </button>
         <p class="text-xs text-gray-300/80">
           By subscribing, you agree to our
@@ -126,33 +141,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['newsletter_email'])) 
     </div>
 
     <!-- Contact Us -->
-    <div class="rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 p-6 shadow-xl shadow-blue-900/20 hover:bg-white/7 transition">
-      <h4 class="text-yellow-400 text-lg font-semibold mb-3">Contact Us</h4>
+    <div class="rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 p-6 shadow-xl shadow-blue-900/20 hover:bg-white/10 transition" id="contact">
+      <h4 class="text-yellow-400 text-lg font-semibold mb-3 inline-flex items-center gap-2">
+        <ion-icon name="call-outline" class="text-yellow-300"></ion-icon>
+        Contact Us
+      </h4>
       <ul class="text-gray-200 space-y-2">
-        <li class="flex items-start gap-2"><span>📍</span> <span>123 SynapZ Lane, Colombo, Sri Lanka</span></li>
-        <li class="flex items-start gap-2"><span>📞</span> <a href="tel:+94712345678" class="hover:text-yellow-300 transition">+94 71 234 5678</a></li>
-        <li class="flex items-start gap-2"><span>✉️</span> <a href="mailto:support@synapz.lk" class="hover:text-yellow-300 transition">support@synapz.lk</a></li>
+        <li class="flex items-start gap-2">
+          <ion-icon name="location-outline" class="text-yellow-300 mt-0.5"></ion-icon>
+          <span>123 SynapZ Lane, Colombo, Sri Lanka</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <ion-icon name="call-outline" class="text-yellow-300 mt-0.5"></ion-icon>
+          <a href="tel:+94712345678" class="hover:text-yellow-300 transition">+94 71 234 5678</a>
+        </li>
+        <li class="flex items-start gap-2">
+          <ion-icon name="mail-outline" class="text-yellow-300 mt-0.5"></ion-icon>
+          <a href="mailto:support@synapz.lk" class="hover:text-yellow-300 transition">support@synapz.lk</a>
+        </li>
       </ul>
 
       <div class="flex gap-3 text-xl mt-4">
         <a href="https://facebook.com" target="_blank" rel="noopener" class="group hover:text-yellow-300 transition" aria-label="Facebook">
           <span class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 group-hover:bg-white/10 transition">
-            <i class="fab fa-facebook-f"></i>
+            <ion-icon name="logo-facebook"></ion-icon>
           </span>
         </a>
         <a href="https://twitter.com" target="_blank" rel="noopener" class="group hover:text-yellow-300 transition" aria-label="Twitter">
           <span class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 group-hover:bg-white/10 transition">
-            <i class="fab fa-twitter"></i>
+            <ion-icon name="logo-twitter"></ion-icon>
           </span>
         </a>
         <a href="https://linkedin.com" target="_blank" rel="noopener" class="group hover:text-yellow-300 transition" aria-label="LinkedIn">
           <span class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 group-hover:bg-white/10 transition">
-            <i class="fab fa-linkedin-in"></i>
+            <ion-icon name="logo-linkedin"></ion-icon>
           </span>
         </a>
         <a href="https://youtube.com" target="_blank" rel="noopener" class="group hover:text-yellow-300 transition" aria-label="YouTube">
           <span class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 group-hover:bg-white/10 transition">
-            <i class="fab fa-youtube"></i>
+            <ion-icon name="logo-youtube"></ion-icon>
           </span>
         </a>
       </div>
@@ -166,14 +193,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['newsletter_email'])) 
         &copy; <?= date("Y") ?> <span class="text-white font-semibold">Synap<span class="text-yellow-400">Z</span></span>. All rights reserved.
       </div>
       <ul class="flex items-center gap-5 text-gray-400">
-        <li><a href="/privacy.php" class="hover:text-yellow-300 transition">Privacy</a></li>
-        <li><a href="/terms.php" class="hover:text-yellow-300 transition">Terms</a></li>
-        <li><a href="/cookies.php" class="hover:text-yellow-300 transition">Cookies</a></li>
-        <li><a href="#" class="hover:text-yellow-300 transition">Back to top ↑</a></li>
+        <li><a href="/privacy.php" class="hover:text-yellow-300 transition inline-flex items-center gap-1"><ion-icon name="lock-closed-outline"></ion-icon> Privacy</a></li>
+        <li><a href="/terms.php" class="hover:text-yellow-300 transition inline-flex items-center gap-1"><ion-icon name="document-text-outline"></ion-icon> Terms</a></li>
+        <li><a href="/cookies.php" class="hover:text-yellow-300 transition inline-flex items-center gap-1"><ion-icon name="cookie-outline"></ion-icon> Cookies</a></li>
+        <li><a href="#top" class="hover:text-yellow-300 transition inline-flex items-center gap-1"><ion-icon name="arrow-up-outline"></ion-icon> Back to top</a></li>
       </ul>
     </div>
   </div>
 </footer>
 
-<!-- Font Awesome Icons -->
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<!-- Ionicons (icons) -->
+<script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>

@@ -1,5 +1,5 @@
 <?php
-// components/navbar.php (light-only, accessible, mobile drawer + user dropdown)
+// components/navbar.php
 
 if (session_status() === PHP_SESSION_NONE) session_start();
 
@@ -8,7 +8,7 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 
 $isLoggedIn = isset($_SESSION['user_id']);
 $role       = $_SESSION['role'] ?? null;
-$userId     = (int)($_SESSION['user_id'] ?? 0);
+$userId     = (int)($_SESSION['user_id'] ?? 0); // <-- fixed: avoid undefined array key
 
 // Current path (for active link)
 $currentPath = basename(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
@@ -31,43 +31,45 @@ function activeClass(bool $isActive, string $extra = '') {
 // Display name + initials
 $displayName = 'Account';
 if ($isLoggedIn) {
-  // Prefer cached session values if you set them elsewhere:
   $displayName = $_SESSION['full_name'] ?? $_SESSION['username'] ?? ucfirst($role ?? 'User');
 
-  // If DB available, try to fetch name from respective table (based on provided schema)
   if (isset($conn) && $conn instanceof mysqli) {
     $tbl = $role === 'student' ? 'students' : ($role === 'teacher' ? 'teachers' : ($role === 'admin' ? 'admins' : null));
-    if ($tbl) {
-      if ($stmt = $conn->prepare("SELECT first_name, last_name FROM {$tbl} WHERE user_id = ? LIMIT 1")) {
-        $stmt->bind_param('i', $userId);
-        $stmt->execute();
-        $res = $stmt->get_result();
-        if ($res && ($row = $res->fetch_assoc())) {
-          $fn = trim((string)($row['first_name'] ?? ''));
-          $ln = trim((string)($row['last_name']  ?? ''));
-          $name = trim("$fn $ln");
-          if ($name !== '') $displayName = $name;
-        }
-        $stmt->close();
+    if ($tbl && $stmt = $conn->prepare("SELECT first_name, last_name FROM {$tbl} WHERE user_id = ? LIMIT 1")) {
+      $stmt->bind_param('i', $userId);
+      $stmt->execute();
+      $res = $stmt->get_result();
+      if ($res && ($row = $res->fetch_assoc())) {
+        $fn = trim((string)($row['first_name'] ?? ''));
+        $ln = trim((string)($row['last_name']  ?? ''));
+        $name = trim("$fn $ln");
+        if ($name !== '') $displayName = $name;
       }
+      $stmt->close();
     }
   }
 }
 $initials = strtoupper(preg_replace('/[^A-Za-z]/', '', mb_substr($displayName, 0, 1, 'UTF-8') ?: 'U'));
 ?>
+
+<!-- Ionicons (icons) -->
+<script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
 <nav id="siteNav"
-     class="bg-blue-900/80 backdrop-blur-md fixed top-4 left-4 right-4 mx-auto rounded-xl z-50 text-white px-6 py-4 shadow-lg transition-colors duration-300"
+     class="bg-blue-900/80 backdrop-blur-md fixed top-4 left-4 right-4 mx-auto rounded-xl z-50 text-white px-6 py-3.5 shadow-lg transition-colors duration-300"
      role="navigation" aria-label="Primary Navigation">
   <div class="relative flex items-center justify-between max-w-7xl mx-auto">
     <!-- Logo -->
-    <a href="index.php" class="text-2xl md:text-3xl font-extrabold tracking-tight hover:scale-105 transition-transform duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 rounded">
+    <a href="index.php" class="inline-flex items-center gap-2 text-2xl md:text-3xl font-extrabold tracking-tight hover:scale-105 transition-transform duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 rounded">
+      
       Synap<span class="text-yellow-400">Z</span>
     </a>
 
     <!-- Hamburger (mobile) -->
     <div class="md:hidden flex items-center">
       <button id="mobileToggle"
-              class="p-2 rounded-lg text-blue-700 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
+              class="p-2 rounded-lg text-white/90 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
               aria-label="Toggle menu" aria-expanded="false" aria-controls="mobileMenu">
         <svg id="hamburgerIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -84,13 +86,31 @@ $initials = strtoupper(preg_replace('/[^A-Za-z]/', '', mb_substr($displayName, 0
     <ul class="hidden md:flex items-center space-x-6 font-medium text-[15px]">
       <li>
         <a href="index.php"
-           class="<?= activeClass($isHome) ?> flex items-center gap-1 transition"
-           <?= $isHome ? 'aria-current="page"' : '' ?>>Home</a>
+           class="<?= activeClass($isHome) ?> flex items-center gap-2 transition"
+           <?= $isHome ? 'aria-current="page"' : '' ?>>
+           <ion-icon name="home-outline" class="text-yellow-300/80"></ion-icon> Home
+        </a>
       </li>
-      <li><a href="about.php"   class="flex items-center gap-1 <?= activeClass(false) ?> transition" data-section-link="about">About Us</a></li>
-      <li><a href="#courses" class="flex items-center gap-1 <?= activeClass(false) ?> transition" data-section-link="courses">Courses</a></li>
-      <li><a href="#tutors"  class="flex items-center gap-1 <?= activeClass(false) ?> transition" data-section-link="tutors">Tutors</a></li>
-      <li><a href="#contact" class="flex items-center gap-1 <?= activeClass(false) ?> transition" data-section-link="contact">Contact</a></li>
+      <li>
+        <a href="about.php" class="flex items-center gap-2 <?= activeClass(false) ?> transition" data-section-link="about">
+          <ion-icon name="information-circle-outline" class="text-yellow-300/80"></ion-icon> About Us
+        </a>
+      </li>
+      <li>
+        <a href="#courses" class="flex items-center gap-2 <?= activeClass(false) ?> transition" data-section-link="courses">
+          <ion-icon name="library-outline" class="text-yellow-300/80"></ion-icon> Courses
+        </a>
+      </li>
+      <li>
+        <a href="#tutors" class="flex items-center gap-2 <?= activeClass(false) ?> transition" data-section-link="tutors">
+          <ion-icon name="people-outline" class="text-yellow-300/80"></ion-icon> Tutors
+        </a>
+      </li>
+      <li>
+        <a href="#contact" class="flex items-center gap-2 <?= activeClass(false) ?> transition" data-section-link="contact">
+          <ion-icon name="mail-outline" class="text-yellow-300/80"></ion-icon> Contact
+        </a>
+      </li>
     </ul>
 
     <!-- Right Section (Desktop) -->
@@ -99,15 +119,13 @@ $initials = strtoupper(preg_replace('/[^A-Za-z]/', '', mb_substr($displayName, 0
         <!-- User dropdown -->
         <div class="relative" id="userMenuWrapper">
           <button id="userMenuButton"
-                  class="inline-flex items-center gap-3 px-2 py-1 rounded-full hover:bg-yellow-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
+                  class="inline-flex items-center gap-3 px-2 py-1 rounded-full hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
                   aria-haspopup="menu" aria-expanded="false" aria-controls="userMenu">
             <div class="h-9 w-9 rounded-full bg-blue-600 text-white grid place-items-center font-bold ring-2 ring-blue-100">
               <?= htmlspecialchars($initials, ENT_QUOTES, 'UTF-8') ?>
             </div>
             <span class="hidden lg:block text-sm font-semibold truncate max-w-[140px]"><?= htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8') ?></span>
-            <svg class="w-4 h-4 opacity-80 hidden lg:block" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M7 10l5 5 5-5z"></path>
-            </svg>
+            <ion-icon name="chevron-down-outline" class="hidden lg:block"></ion-icon>
           </button>
 
           <div id="userMenu"
@@ -123,23 +141,32 @@ $initials = strtoupper(preg_replace('/[^A-Za-z]/', '', mb_substr($displayName, 0
               </div>
             </div>
             <div class="py-1">
-              <a href="<?= htmlspecialchars($profileLink) ?>"  class="flex items-center gap-2 px-4 py-2 hover:bg-gray-50" role="menuitem">Profile</a>
-              <a href="<?= htmlspecialchars($settingsLink) ?>" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-50" role="menuitem">Settings</a>
-              <a href="<?= htmlspecialchars($dashboardLink) ?>" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-50" role="menuitem">Dashboard</a>
+              <a href="<?= htmlspecialchars($profileLink) ?>"  class="flex items-center gap-2 px-4 py-2 hover:bg-gray-50" role="menuitem">
+                <ion-icon name="person-circle-outline" class="text-slate-600"></ion-icon> Profile
+              </a>
+              <a href="<?= htmlspecialchars($settingsLink) ?>" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-50" role="menuitem">
+                <ion-icon name="settings-outline" class="text-slate-600"></ion-icon> Settings
+              </a>
+              <a href="<?= htmlspecialchars($dashboardLink) ?>" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-50" role="menuitem">
+                <ion-icon name="speedometer-outline" class="text-slate-600"></ion-icon> Dashboard
+              </a>
             </div>
             <div class="py-1 border-t border-gray-100">
-              <a href="logout.php" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 text-red-600" role="menuitem">Logout</a>
+              <a href="logout.php" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 text-red-600" role="menuitem">
+                <ion-icon name="log-out-outline"></ion-icon> Logout
+              </a>
             </div>
           </div>
         </div>
       <?php else: ?>
+        <!-- Smaller Login/Register buttons -->
         <a href="login.php"
-           class="px-5 py-2 bg-yellow-400 text-black font-semibold rounded-full shadow-md hover:bg-yellow-300 transition">
-          Login
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm bg-yellow-400 text-black font-semibold rounded-lg shadow-md hover:bg-yellow-300 transition">
+          <ion-icon name="log-in-outline" class="text-base"></ion-icon> Login
         </a>
         <a href="register.php"
-           class="px-5 py-2 bg-white text-blue-700 font-semibold rounded-full shadow-md ring-1 ring-blue-200 hover:bg-blue-50 transition">
-          Register
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm bg-white text-blue-700 font-semibold rounded-lg shadow-md ring-1 ring-blue-200 hover:bg-blue-50 transition">
+          <ion-icon name="person-add-outline" class="text-base"></ion-icon> Register
         </a>
       <?php endif; ?>
     </div>
@@ -150,7 +177,7 @@ $initials = strtoupper(preg_replace('/[^A-Za-z]/', '', mb_substr($displayName, 0
 
   <!-- Mobile Menu -->
   <div id="mobileMenu"
-       class="hidden md:hidden mt-4 bg-white text-blue-900 rounded-xl shadow-xl p-4 space-y-2 origin-top transition-all duration-200 scale-95 opacity-0"
+       class="hidden md:hidden mt-3 bg-white text-blue-900 rounded-xl shadow-xl p-3 space-y-1 origin-top transition-all duration-200 scale-95 opacity-0"
        role="menu" aria-labelledby="mobileToggle">
     <?php if ($isLoggedIn && $dashboardLink): ?>
       <div class="flex items-center gap-3 p-3 rounded-lg bg-blue-50 mb-2">
@@ -164,22 +191,44 @@ $initials = strtoupper(preg_replace('/[^A-Za-z]/', '', mb_substr($displayName, 0
       </div>
     <?php endif; ?>
 
-    <a href="index.php" class="block px-3 py-2 rounded hover:bg-blue-50" role="menuitem">Home</a>
-    <a href="#about" class="block px-3 py-2 rounded hover:bg-blue-50" role="menuitem">About Us</a>
-    <a href="#courses" class="block px-3 py-2 rounded hover:bg-blue-50" role="menuitem">Courses</a>
-    <a href="#tutors" class="block px-3 py-2 rounded hover:bg-blue-50" role="menuitem">Tutors</a>
-    <a href="#contact" class="block px-3 py-2 rounded hover:bg-blue-50" role="menuitem">Contact</a>
+    <a href="index.php" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50" role="menuitem">
+      <ion-icon name="home-outline"></ion-icon> Home
+    </a>
+    <a href="#about" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50" role="menuitem">
+      <ion-icon name="information-circle-outline"></ion-icon> About Us
+    </a>
+    <a href="#courses" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50" role="menuitem">
+      <ion-icon name="library-outline"></ion-icon> Courses
+    </a>
+    <a href="#tutors" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50" role="menuitem">
+      <ion-icon name="people-outline"></ion-icon> Tutors
+    </a>
+    <a href="#contact" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50" role="menuitem">
+      <ion-icon name="mail-outline"></ion-icon> Contact
+    </a>
 
     <hr class="my-2 border-blue-100" />
 
     <?php if ($isLoggedIn && $dashboardLink): ?>
-      <a href="<?= htmlspecialchars($dashboardLink) ?>" class="block px-3 py-2 rounded hover:bg-blue-50" role="menuitem">🚀 Dashboard</a>
-      <a href="<?= htmlspecialchars($profileLink) ?>" class="block px-3 py-2 rounded hover:bg-blue-50" role="menuitem">👤 Profile</a>
-      <a href="<?= htmlspecialchars($settingsLink) ?>" class="block px-3 py-2 rounded hover:bg-blue-50" role="menuitem">⚙️ Settings</a>
-      <a href="logout.php" class="block px-3 py-2 rounded hover:bg-blue-50 text-red-600" role="menuitem">🚪 Logout</a>
+      <a href="<?= htmlspecialchars($dashboardLink) ?>" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50" role="menuitem">
+        <ion-icon name="rocket-outline"></ion-icon> Dashboard
+      </a>
+      <a href="<?= htmlspecialchars($profileLink) ?>" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50" role="menuitem">
+        <ion-icon name="person-circle-outline"></ion-icon> Profile
+      </a>
+      <a href="<?= htmlspecialchars($settingsLink) ?>" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50" role="menuitem">
+        <ion-icon name="settings-outline"></ion-icon> Settings
+      </a>
+      <a href="logout.php" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50 text-red-600" role="menuitem">
+        <ion-icon name="log-out-outline"></ion-icon> Logout
+      </a>
     <?php else: ?>
-      <a href="login.php" class="block px-3 py-2 rounded hover:bg-blue-50" role="menuitem">🔐 Sign In</a>
-      <a href="register.php" class="block px-3 py-2 rounded hover:bg-blue-50" role="menuitem">📝 Register</a>
+      <a href="login.php" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50" role="menuitem">
+        <ion-icon name="log-in-outline"></ion-icon> Sign In
+      </a>
+      <a href="register.php" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50" role="menuitem">
+        <ion-icon name="person-add-outline"></ion-icon> Register
+      </a>
     <?php endif; ?>
   </div>
 
@@ -262,14 +311,14 @@ $initials = strtoupper(preg_replace('/[^A-Za-z]/', '', mb_substr($displayName, 0
       menu.addEventListener('click', (e) => { if (e.target.closest('a')) hide(); });
     })();
 
-    // Scroll style: subtle ring when scrolled
+    // Scroll style: add subtle ring & stronger shadow on scroll
     (function() {
       const nav = document.getElementById('siteNav');
       function onScroll() {
         if (window.scrollY > 8) {
-          nav.classList.add('shadow-xl','ring-blue-100','bg-blue-900/80');
+          nav.classList.add('shadow-xl','ring-1','ring-blue-300/40');
         } else {
-          nav.classList.remove('shadow-xl','ring-blue-100','bg-white/90');
+          nav.classList.remove('shadow-xl','ring-1','ring-blue-300/40');
         }
       }
       onScroll();
