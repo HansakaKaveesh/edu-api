@@ -97,7 +97,7 @@ $initials = strtoupper(preg_replace('/[^A-Za-z]/', '', mb_substr($displayName, 0
         </a>
       </li>
       <li>
-        <a href="#courses" class="flex items-center gap-2 <?= activeClass(false) ?> transition" data-section-link="courses">
+        <a href="courseus.php" class="flex items-center gap-2 <?= activeClass(false) ?> transition" data-section-link="courses">
           <ion-icon name="library-outline" class="text-yellow-300/80"></ion-icon> Courses
         </a>
       </li>

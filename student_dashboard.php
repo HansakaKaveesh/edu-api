@@ -14,35 +14,56 @@ $stmt = $conn->prepare("SELECT student_id, first_name, last_name FROM students W
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $student = $stmt->get_result()->fetch_assoc();
+$stmt->close();
 
 $student_id = $student['student_id'] ?? null;
-$full_name = $student ? $student['first_name'] . ' ' . $student['last_name'] : 'Student';
+$full_name = $student ? ($student['first_name'] . ' ' . $student['last_name']) : 'Student';
 $role = ucfirst($_SESSION['role']);
 
-// Pull data
-$announcements = $conn->query("
+// Pull data with prepared statements
+$announcements = [];
+$annStmt = $conn->prepare("
   SELECT title, message, created_at
   FROM announcements
   WHERE audience IN ('students','all')
   ORDER BY created_at DESC
   LIMIT 5
 ");
+$annStmt->execute();
+$announcements = $annStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$annStmt->close();
 
-$courses = $conn->query("
+$coursesArr = [];
+$coursesStmt = $conn->prepare("
   SELECT c.course_id, c.name, c.description
   FROM enrollments e
   JOIN courses c ON e.course_id = c.course_id
-  WHERE e.user_id = $user_id AND e.status = 'active'
+  WHERE e.user_id = ? AND e.status = 'active'
 ");
+$coursesStmt->bind_param("i", $user_id);
+$coursesStmt->execute();
+$coursesArr = $coursesStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$coursesStmt->close();
 
-$logs = $conn->query("
+$logsArr = [];
+$logsStmt = $conn->prepare("
   SELECT a.action, a.timestamp, c.title 
   FROM activity_logs a
   JOIN contents c ON a.content_id = c.content_id
-  WHERE a.user_id = $user_id
+  WHERE a.user_id = ?
   ORDER BY a.timestamp DESC
   LIMIT 10
 ");
+$logsStmt->bind_param("i", $user_id);
+$logsStmt->execute();
+$logsArr = $logsStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$logsStmt->close();
+
+// Quick metrics
+$coursesCount = count($coursesArr);
+$annCount     = count($announcements);
+$activityCount= count($logsArr);
+$lastActivity = $activityCount ? date('M j, Y g:i A', strtotime($logsArr[0]['timestamp'])) : null;
 ?>
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
@@ -56,32 +77,18 @@ $logs = $conn->query("
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    html, body { font-family: "Inter", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
-
-    /* Emoji wave */
+    html, body { font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
     @keyframes wave { 0%, 60%, 100% { transform: rotate(0deg); } 30% { transform: rotate(15deg); } 50% { transform: rotate(-10deg); } }
     .animate-wave { display: inline-block; animation: wave 2s infinite; transform-origin: 70% 70%; }
-
-    /* Text clamp */
     .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-
-    /* Fancy background bubbles */
-    .bg-bubbles::before,
-    .bg-bubbles::after { content: ""; position: absolute; border-radius: 9999px; filter: blur(40px); opacity: .25; z-index: 0; pointer-events: none; }
+    .bg-bubbles::before,.bg-bubbles::after { content: ""; position: absolute; border-radius: 9999px; filter: blur(40px); opacity: .25; z-index: 0; pointer-events: none; }
     .bg-bubbles::before { width: 420px; height: 420px; background: radial-gradient(closest-side, #60a5fa, transparent 70%); top: -80px; left: -80px; }
     .bg-bubbles::after  { width: 500px; height: 500px; background: radial-gradient(closest-side, #a78bfa, transparent 70%); bottom: -120px; right: -120px; }
-
-    /* Soft fade-in */
     @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     .animate-fadeUp { animation: fadeUp .5s ease-out both; }
-
-    /* Hover lift */
     .hover-raise { transition: transform .2s ease, box-shadow .2s ease; }
     .hover-raise:hover { transform: translateY(-2px); box-shadow: 0 12px 22px rgba(2,6,23,.08); }
-
-    /* Gradient text */
     .text-gradient { background: linear-gradient(90deg,#4338ca,#2563eb,#06b6d4); -webkit-background-clip: text; background-clip: text; color: transparent; }
-
     ::-webkit-scrollbar-track { background: transparent; }
   </style>
 </head>
@@ -101,8 +108,8 @@ $logs = $conn->query("
     <!-- Hero Section -->
     <section class="relative overflow-hidden rounded-3xl shadow-2xl">
       <div class="absolute inset-0">
-        <img src="https://akm-img-a-in.tosshub.com/indiatoday/images/story/202409/how-ai-is-shaping-future-of-international-education-for-study-abroad-students-183406714-16x9_0.jpg?VersionId=3jWEgo7Hq0HT0K_Y5MqP1FVpZYhq4aiJ&size=690:388"
-             alt="Campus" class="w-full h-full object-cover object-center">
+        <img src="https://akm-img-a-in.tosshub.com/indiatoday/images/story/202409/how-ai-is-shaping-future-of-international-education-for-study-abroad-students-183406714-16x9_0.jpg?size=1200:675"
+             alt="Campus" class="w-full h-full object-cover object-center" loading="eager" decoding="async">
         <div class="absolute inset-0 bg-gradient-to-br from-indigo-900/70 via-blue-800/60 to-cyan-700/50"></div>
         <div class="absolute -top-24 -left-24 w-80 h-80 bg-cyan-400/30 blur-3xl rounded-full"></div>
         <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-indigo-400/30 blur-3xl rounded-full"></div>
@@ -112,7 +119,7 @@ $logs = $conn->query("
         <div class="flex items-center justify-between gap-4">
           <div id="datetime" class="text-xs sm:text-sm italic opacity-90 drop-shadow-sm" aria-live="polite"></div>
           <span class="inline-flex items-center gap-2 bg-white/10 ring-1 ring-white/20 px-3 py-1 rounded-full text-xs">
-            <i data-lucide="graduation-cap" class="w-4 h-4"></i> Student Dashboard
+            <i data-lucide="graduation-cap" class="w-4 h-4" aria-hidden="true"></i> Student Dashboard
           </span>
         </div>
 
@@ -120,7 +127,7 @@ $logs = $conn->query("
           <h1 class="text-2xl sm:text-3xl font-extrabold leading-tight drop-shadow-xl">
             Welcome back, <span class="underline decoration-white/30"><?php echo htmlspecialchars($full_name); ?></span>
             <span class="text-sm sm:text-xl font-light italic">(<?php echo $role; ?>)</span>!
-            <span class="inline-block animate-wave">👋</span>
+            <span class="inline-block animate-wave" aria-hidden="true">👋</span>
           </h1>
           <p class="text-base sm:text-lg font-light text-white/95 max-w-3xl mx-auto">
             Pick up where you left off, explore new topics, and stay on top of your goals.
@@ -130,16 +137,40 @@ $logs = $conn->query("
           <div class="flex items-center justify-center gap-3 mt-3">
             <a href="enroll_course.php"
                class="inline-flex items-center gap-2 rounded-full bg-white/90 text-indigo-700 font-semibold px-5 py-2.5 shadow hover:shadow-lg hover-raise">
-              <i data-lucide="plus-circle" class="w-5 h-5"></i> Enroll in a course
+              <i data-lucide="plus-circle" class="w-5 h-5" aria-hidden="true"></i> Enroll in a course
             </a>
             <a href="#courses"
                class="inline-flex items-center gap-2 rounded-full bg-indigo-900/30 text-white font-medium px-5 py-2.5 ring-1 ring-white/30 hover:bg-indigo-900/40 hover-raise">
-              <i data-lucide="compass" class="w-5 h-5"></i> Browse your courses
+              <i data-lucide="compass" class="w-5 h-5" aria-hidden="true"></i> Browse your courses
             </a>
+          </div>
+        </div>
+
+        <!-- Quick metrics -->
+        <div class="mt-8 grid grid-cols-3 gap-3 max-w-3xl mx-auto">
+          <div class="rounded-xl bg-white/10 ring-1 ring-white/20 p-4 backdrop-blur">
+            <div class="text-xs text-white/85 inline-flex items-center gap-1">
+              <i data-lucide="book-open" class="w-4 h-4"></i> Courses
+            </div>
+            <div class="mt-1 text-2xl font-semibold"><?php echo (int)$coursesCount; ?></div>
+          </div>
+          <div class="rounded-xl bg-white/10 ring-1 ring-white/20 p-4 backdrop-blur">
+            <div class="text-xs text-white/85 inline-flex items-center gap-1">
+              <i data-lucide="megaphone" class="w-4 h-4"></i> Announcements
+            </div>
+            <div class="mt-1 text-2xl font-semibold"><?php echo (int)$annCount; ?></div>
+          </div>
+          <div class="rounded-xl bg-white/10 ring-1 ring-white/20 p-4 backdrop-blur">
+            <div class="text-xs text-white/85 inline-flex items-center gap-1">
+              <i data-lucide="activity" class="w-4 h-4"></i> Recent
+            </div>
+            <div class="mt-1 text-sm font-medium"><?php echo $lastActivity ? htmlspecialchars($lastActivity) : 'No activity'; ?></div>
           </div>
         </div>
       </div>
     </section>
+
+    
 
     <!-- Announcements -->
     <section class="bg-white/80 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-100/80">
@@ -147,11 +178,12 @@ $logs = $conn->query("
         <h3 class="text-xl sm:text-2xl font-semibold text-gray-700 flex items-center gap-2">
           <i data-lucide="megaphone" class="w-6 h-6 text-indigo-600"></i> Announcements
         </h3>
+        
       </div>
 
-      <?php if ($announcements && $announcements->num_rows > 0): ?>
+      <?php if (!empty($announcements)): ?>
         <ul class="space-y-4">
-          <?php while ($a = $announcements->fetch_assoc()): ?>
+          <?php foreach ($announcements as $a): ?>
             <li class="rounded-xl p-4 bg-gradient-to-r from-blue-50/80 to-indigo-50/70 border border-blue-200/50 shadow-sm hover:shadow-md transition hover-raise">
               <div class="flex items-start justify-between gap-4">
                 <div class="flex-1">
@@ -169,7 +201,7 @@ $logs = $conn->query("
                 </span>
               </div>
             </li>
-          <?php endwhile; ?>
+          <?php endforeach; ?>
         </ul>
       <?php else: ?>
         <div class="text-gray-600 text-base sm:text-lg flex items-center gap-2">
@@ -184,16 +216,22 @@ $logs = $conn->query("
         <h3 class="text-xl sm:text-2xl font-semibold text-gray-700 flex items-center gap-2">
           <i data-lucide="book-open" class="w-6 h-6 text-indigo-600"></i> Your Enrolled Courses
         </h3>
-        <form action="courses.php" method="get" class="relative">
-          <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-          <input name="q" type="text" placeholder="Search your courses..."
-                 class="w-full sm:w-72 rounded-full bg-white/70 border border-gray-200/70 px-4 py-2.5 pl-10 focus:ring-2 focus:ring-indigo-500/40 focus:outline-none text-sm">
-        </form>
+        <div class="flex items-center gap-2">
+          <form action="courses.php" method="get" class="relative">
+            <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+            <input name="q" type="text" placeholder="Search your courses..."
+                   class="w-full sm:w-72 rounded-full bg-white/70 border border-gray-200/70 px-4 py-2.5 pl-10 focus:ring-2 focus:ring-indigo-500/40 focus:outline-none text-sm">
+          </form>
+          <div class="hidden sm:flex items-center gap-1 rounded-full border border-gray-200/70 px-1">
+            <button id="gridView" class="px-2 py-1 text-xs rounded-full bg-indigo-600 text-white">Grid</button>
+            <button id="listView" class="px-2 py-1 text-xs rounded-full text-gray-700 hover:bg-gray-100">List</button>
+          </div>
+        </div>
       </div>
 
-      <?php if ($courses && $courses->num_rows > 0): ?>
-        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <?php while ($course = $courses->fetch_assoc()): ?>
+      <?php if (!empty($coursesArr)): ?>
+        <div id="courseContainer" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <?php foreach ($coursesArr as $course): ?>
             <a href="course.php?course_id=<?= (int)$course['course_id'] ?>"
                class="group block rounded-2xl p-6 bg-white/80 border border-indigo-100/60 shadow hover:shadow-2xl hover:-translate-y-0.5 transition relative overflow-hidden hover-raise">
               <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition bg-gradient-to-br from-indigo-500/5 via-transparent to-cyan-500/10"></div>
@@ -216,7 +254,7 @@ $logs = $conn->query("
                 </span>
               </div>
             </a>
-          <?php endwhile; ?>
+          <?php endforeach; ?>
         </div>
       <?php else: ?>
         <div class="text-gray-600 text-base sm:text-lg">
@@ -234,11 +272,10 @@ $logs = $conn->query("
         <i data-lucide="activity" class="w-6 h-6 text-indigo-600"></i> Your Recent Activity
       </h3>
 
-      <?php if ($logs && $logs->num_rows > 0): ?>
+      <?php if (!empty($logsArr)): ?>
         <ul class="space-y-4">
-          <?php while ($log = $logs->fetch_assoc()):
-            $when = date('F j, Y, g:i A', strtotime($log['timestamp']));
-          ?>
+          <?php foreach ($logsArr as $log): ?>
+            <?php $when = date('F j, Y, g:i A', strtotime($log['timestamp'])); ?>
             <li class="relative pl-6">
               <span class="absolute left-0 top-2 h-3 w-3 rounded-full bg-indigo-500 ring-4 ring-indigo-200/50"></span>
               <div class="border-l-2 border-indigo-200/70 pl-4">
@@ -249,11 +286,11 @@ $logs = $conn->query("
                   <span class="font-medium"><?= htmlspecialchars($log['title']) ?></span>
                 </div>
                 <div class="text-xs text-gray-500 italic flex items-center gap-1 mt-0.5">
-                  <i data-lucide="clock" class="w-3.5 h-3.5"></i><?= $when ?>
+                  <i data-lucide="clock" class="w-3.5 h-3.5"></i><?= htmlspecialchars($when) ?>
                 </div>
               </div>
             </li>
-          <?php endwhile; ?>
+          <?php endforeach; ?>
         </ul>
       <?php else: ?>
         <div class="text-gray-600 text-base sm:text-lg flex items-center gap-2">
@@ -273,13 +310,29 @@ $logs = $conn->query("
   // Live Date & Time
   function updateDateTime() {
     const now = new Date();
-    const options = { weekday: 'long', year: 'numeric', month: 'long',
-      day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+    const opt = { weekday:'long', year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:true };
     const el = document.getElementById('datetime');
-    if (el) el.textContent = `🗓️ ${now.toLocaleString('en-US', options)}`;
+    if (el) el.textContent = `🗓️ ${now.toLocaleString('en-US', opt)}`;
   }
   setInterval(updateDateTime, 1000);
   updateDateTime();
+
+  // Grid/List toggle for courses (simple layout tweak)
+  const gridBtn = document.getElementById('gridView');
+  const listBtn = document.getElementById('listView');
+  const container = document.getElementById('courseContainer');
+  gridBtn?.addEventListener('click', () => {
+    if (!container) return;
+    container.className = 'grid gap-6 sm:grid-cols-2 lg:grid-cols-3';
+    gridBtn.classList.add('bg-indigo-600','text-white');
+    listBtn.classList.remove('bg-indigo-600','text-white');
+  });
+  listBtn?.addEventListener('click', () => {
+    if (!container) return;
+    container.className = 'grid gap-3'; // single-column card list
+    listBtn.classList.add('bg-indigo-600','text-white');
+    gridBtn.classList.remove('bg-indigo-600','text-white');
+  });
 </script>
 
 <?php include 'components/footer.php'; ?>

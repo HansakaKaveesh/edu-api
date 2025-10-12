@@ -3,112 +3,172 @@ session_start();
 include 'db_connect.php';
 
 if (($_SESSION['role'] ?? '') !== 'student') {
-    die("Unauthorized access");
+    http_response_code(403);
+    die('Unauthorized access');
 }
 
-$user_id = (int)($_SESSION['user_id'] ?? 0);
-$content_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
-if (!$content_id) die("Invalid content ID");
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+$csrf = $_SESSION['csrf_token'];
 
-// Fetch content
-$stmt = $conn->prepare("SELECT c.*, cs.name AS course_name FROM contents c 
-                        JOIN courses cs ON c.course_id = cs.course_id 
-                        WHERE c.content_id = ?");
+$user_id    = (int)($_SESSION['user_id'] ?? 0);
+$content_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+if (!$user_id || !$content_id) {
+    http_response_code(400);
+    die('Invalid request.');
+}
+
+// Helper esc
+function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
+
+// Fetch content (secure)
+$stmt = $conn->prepare("
+    SELECT c.*, cs.name AS course_name 
+    FROM contents c 
+    JOIN courses cs ON c.course_id = cs.course_id 
+    WHERE c.content_id = ?
+");
 $stmt->bind_param("i", $content_id);
 $stmt->execute();
-$result = $stmt->get_result();
+$res = $stmt->get_result();
+if ($res->num_rows === 0) {
+    http_response_code(404);
+    die('Content not found.');
+}
+$content       = $res->fetch_assoc();
+$course_id     = (int)$content['course_id'];
+$content_type  = $content['type'] ?? 'lesson';
+$stmt->close();
 
-if ($result->num_rows === 0) die("Content not found.");
-
-$content = $result->fetch_assoc();
-$course_id = (int)$content['course_id'];
-$content_type = $content['type'];
-
-// Check enrollment
-$checkEnroll = $conn->prepare("SELECT 1 FROM enrollments WHERE user_id = ? AND course_id = ? AND status='active'");
+// Check enrollment (secure)
+$checkEnroll = $conn->prepare("SELECT 1 FROM enrollments WHERE user_id = ? AND course_id = ? AND status='active' LIMIT 1");
 $checkEnroll->bind_param("ii", $user_id, $course_id);
 $checkEnroll->execute();
 $enrollRes = $checkEnroll->get_result();
-if ($enrollRes->num_rows === 0) die("You are not enrolled in this course.");
+if ($enrollRes->num_rows === 0) {
+    http_response_code(403);
+    die('You are not enrolled in this course.');
+}
+$checkEnroll->close();
 
-// Log view if not already logged
-$logged = $conn->prepare("SELECT 1 FROM activity_logs WHERE user_id = ? AND content_id = ? AND action = 'view'");
+// Log view if not already logged (secure)
+$logged = $conn->prepare("SELECT 1 FROM activity_logs WHERE user_id = ? AND content_id = ? AND action = 'view' LIMIT 1");
 $logged->bind_param("ii", $user_id, $content_id);
 $logged->execute();
 $loggedRes = $logged->get_result();
+$alreadyLogged = $loggedRes->num_rows > 0;
+$logged->close();
 
-if ($loggedRes->num_rows === 0) {
+if (!$alreadyLogged) {
+    // Insert activity log
     $logStmt = $conn->prepare("INSERT INTO activity_logs (user_id, content_id, action) VALUES (?, ?, 'view')");
     $logStmt->bind_param("ii", $user_id, $content_id);
     $logStmt->execute();
+    $logStmt->close();
 
-    $rowS = $conn->query("SELECT student_id FROM students WHERE user_id = {$user_id}")->fetch_assoc();
+    // Update student progress
+    $stuStmt = $conn->prepare("SELECT student_id FROM students WHERE user_id = ? LIMIT 1");
+    $stuStmt->bind_param("i", $user_id);
+    $stuStmt->execute();
+    $rowS = $stuStmt->get_result()->fetch_assoc();
+    $stuStmt->close();
+
     $student_id = (int)($rowS['student_id'] ?? 0);
     if ($student_id) {
-        $conn->query("
+        $prog = $conn->prepare("
             INSERT INTO student_progress (student_id, course_id, chapters_completed)
-            VALUES ($student_id, $course_id, 1)
+            VALUES (?, ?, 1)
             ON DUPLICATE KEY UPDATE chapters_completed = chapters_completed + 1
         ");
+        $prog->bind_param("ii", $student_id, $course_id);
+        $prog->execute();
+        $prog->close();
     }
 }
 
-// Quiz submission handler (Unlimited attempts)
+// Quiz submission handler (Unlimited attempts, secure)
 if ($content_type === 'quiz' && isset($_POST['submit_quiz']) && isset($_POST['quiz'])) {
-    $rowA = $conn->query("SELECT assignment_id FROM assignments WHERE lesson_id = $content_id")->fetch_assoc();
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        http_response_code(403);
+        die('Invalid CSRF token.');
+    }
+
+    // Assignment by lesson/content link
+    $asStmt = $conn->prepare("SELECT assignment_id FROM assignments WHERE lesson_id = ? LIMIT 1");
+    $asStmt->bind_param("i", $content_id);
+    $asStmt->execute();
+    $rowA = $asStmt->get_result()->fetch_assoc();
+    $asStmt->close();
+
     $assignment_id = (int)($rowA['assignment_id'] ?? 0);
 
     if ($assignment_id) {
-        $rowS = $conn->query("SELECT student_id FROM students WHERE user_id = $user_id")->fetch_assoc();
+        // Resolve student
+        $su = $conn->prepare("SELECT student_id FROM students WHERE user_id = ? LIMIT 1");
+        $su->bind_param("i", $user_id);
+        $su->execute();
+        $rowS = $su->get_result()->fetch_assoc();
+        $su->close();
+
         $student_id = (int)($rowS['student_id'] ?? 0);
+        if ($student_id) {
+            // Fetch questions
+            $qs = $conn->prepare("SELECT question_id, question_text, option_a, option_b, option_c, option_d, correct_option FROM assignment_questions WHERE assignment_id = ?");
+            $qs->bind_param("i", $assignment_id);
+            $qs->execute();
+            $questionsRes = $qs->get_result();
 
-        $questions = $conn->query("SELECT * FROM assignment_questions WHERE assignment_id = $assignment_id");
-        $assignment = $conn->query("SELECT * FROM assignments WHERE assignment_id = $assignment_id")->fetch_assoc();
-        $answers = $_POST['quiz'];
-        $score = 0;
+            // Assignment meta (for pass score)
+            $am = $conn->prepare("SELECT passing_score FROM assignments WHERE assignment_id = ? LIMIT 1");
+            $am->bind_param("i", $assignment_id);
+            $am->execute();
+            $assignment = $am->get_result()->fetch_assoc();
+            $am->close();
 
-        $conn->query("INSERT INTO student_assignment_attempts (student_id, assignment_id, score, passed) VALUES ($student_id, $assignment_id, 0, 0)");
-        $attempt_id = (int)$conn->insert_id;
+            $answers = $_POST['quiz'];
+            $score   = 0;
 
-        foreach ($questions as $q) {
-            $qid = (int)$q['question_id'];
-            $selected = $answers[$qid] ?? '';
-            $correct = $q['correct_option'];
-            $is_correct = ($selected === $correct) ? 1 : 0;
-            $score += $is_correct;
+            // Create attempt
+            $insAttempt = $conn->prepare("INSERT INTO student_assignment_attempts (student_id, assignment_id, score, passed) VALUES (?, ?, 0, 0)");
+            $insAttempt->bind_param("ii", $student_id, $assignment_id);
+            $insAttempt->execute();
+            $attempt_id = (int)$conn->insert_id;
+            $insAttempt->close();
 
-            $stmt = $conn->prepare("INSERT INTO assignment_attempt_questions (attempt_id, question_id, selected_option, is_correct) VALUES (?, ?, ?, ?)");
-            $stmt->bind_param("iisi", $attempt_id, $qid, $selected, $is_correct);
-            $stmt->execute();
+            // Insert answers
+            $insQ = $conn->prepare("INSERT INTO assignment_attempt_questions (attempt_id, question_id, selected_option, is_correct) VALUES (?, ?, ?, ?)");
+            while ($q = $questionsRes->fetch_assoc()) {
+                $qid      = (int)$q['question_id'];
+                $selected = $answers[$qid] ?? '';
+                $correct  = $q['correct_option'];
+                $is_correct = ($selected === $correct) ? 1 : 0;
+                $score += $is_correct;
+
+                $insQ->bind_param("iisi", $attempt_id, $qid, $selected, $is_correct);
+                $insQ->execute();
+            }
+            $insQ->close();
+            $qs->close();
+
+            $passScore = (int)($assignment['passing_score'] ?? 0);
+            $passed    = ($score >= $passScore) ? 1 : 0;
+
+            $up = $conn->prepare("UPDATE student_assignment_attempts SET score = ?, passed = ? WHERE attempt_id = ?");
+            $up->bind_param("iii", $score, $passed, $attempt_id);
+            $up->execute();
+            $up->close();
+
+            echo "<script>
+                alert('✅ Quiz submitted! Score: " . (int)$score . "');
+                location.href = location.href;
+            </script>";
+            exit;
         }
-
-        $pass = ($score >= (int)$assignment['passing_score']) ? 1 : 0;
-        $conn->query("UPDATE student_assignment_attempts SET score = $score, passed = $pass WHERE attempt_id = $attempt_id");
-
-        echo "<script>alert('✅ Quiz submitted! Score: $score / " . (int)$questions->num_rows . "'); location.reload();</script>";
     }
 }
 
-function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title><?= h($content['title']) ?> - View Content</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- Ionicons -->
-    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
-    <style>[x-cloak]{display:none}</style>
-</head>
-<body class="bg-gradient-to-br from-blue-50 via-white to-indigo-50 text-gray-800 min-h-screen">
-
-<?php include 'components/navbar.php'; ?>
-
-<?php
+// Icons + badges
 $iconByType = [
   'lesson' => 'book-outline',
   'video'  => 'videocam-outline',
@@ -125,7 +185,82 @@ $badgeByType = [
 ];
 $typeIcon  = $iconByType[$content_type] ?? 'document-text-outline';
 $typeBadge = $badgeByType[$content_type] ?? 'bg-gray-100 text-gray-700';
+
+// Preload for quiz review
+$latest_attempt = null; $answersMap = []; $questions_review = null; $attempts = 0;
+if ($content_type === 'quiz') {
+    // Assignment id again (prepared)
+    $asStmt = $conn->prepare("SELECT assignment_id FROM assignments WHERE lesson_id = ? LIMIT 1");
+    $asStmt->bind_param("i", $content_id);
+    $asStmt->execute();
+    $rowA = $asStmt->get_result()->fetch_assoc();
+    $asStmt->close();
+
+    $assignment_id = (int)($rowA['assignment_id'] ?? 0);
+
+    if ($assignment_id) {
+        $stuStmt = $conn->prepare("SELECT student_id FROM students WHERE user_id = ? LIMIT 1");
+        $stuStmt->bind_param("i", $user_id);
+        $stuStmt->execute();
+        $rowS = $stuStmt->get_result()->fetch_assoc();
+        $stuStmt->close();
+        $student_id = (int)($rowS['student_id'] ?? 0);
+
+        if ($student_id) {
+            $cntAtt = $conn->prepare("SELECT COUNT(*) as cnt FROM student_assignment_attempts WHERE student_id = ? AND assignment_id = ?");
+            $cntAtt->bind_param("ii", $student_id, $assignment_id);
+            $cntAtt->execute();
+            $attempts = (int)($cntAtt->get_result()->fetch_assoc()['cnt'] ?? 0);
+            $cntAtt->close();
+
+            $lastAtt = $conn->prepare("
+                SELECT attempt_id, score, passed, attempted_at 
+                FROM student_assignment_attempts 
+                WHERE assignment_id = ? AND student_id = ? 
+                ORDER BY attempted_at DESC 
+                LIMIT 1
+            ");
+            $lastAtt->bind_param("ii", $assignment_id, $student_id);
+            $lastAtt->execute();
+            $latest_attempt = $lastAtt->get_result()->fetch_assoc();
+            $lastAtt->close();
+
+            if ($latest_attempt) {
+                $aid = (int)$latest_attempt['attempt_id'];
+                $ans = $conn->prepare("SELECT question_id, selected_option, is_correct FROM assignment_attempt_questions WHERE attempt_id = ?");
+                $ans->bind_param("i", $aid);
+                $ans->execute();
+                $ansRes = $ans->get_result();
+                while ($row = $ansRes->fetch_assoc()) {
+                    $answersMap[(int)$row['question_id']] = $row;
+                }
+                $ans->close();
+
+                $qrev = $conn->prepare("SELECT question_id, question_text, option_a, option_b, option_c, option_d, correct_option FROM assignment_questions WHERE assignment_id = ?");
+                $qrev->bind_param("i", $assignment_id);
+                $qrev->execute();
+                $questions_review = $qrev->get_result();
+                // Note: Not closing yet to use in template loop; will rely on PHP end-of-request cleanup.
+            }
+        }
+    }
+}
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><?= h($content['title']) ?> - View Content</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Ionicons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <style>[x-cloak]{display:none}</style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-white to-indigo-50 text-gray-800 min-h-screen">
+<?php include 'components/navbar.php'; ?>
 
 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-10" x-data="{ showModal: false }">
   <!-- Header -->
@@ -149,10 +284,18 @@ $typeBadge = $badgeByType[$content_type] ?? 'bg-gray-100 text-gray-700';
           </span>
         </p>
       </div>
-      <a href="student_courses.php"
-         class="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-white px-4 py-2 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition">
-        <ion-icon name="arrow-back-outline"></ion-icon> Back to My Courses
-      </a>
+      <div class="flex items-center gap-2">
+        <a href="student_courses.php"
+           class="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-white px-4 py-2 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition">
+          <ion-icon name="arrow-back-outline"></ion-icon> Back to My Courses
+        </a>
+        <?php if (!empty($content['file_url'])): ?>
+          <a href="<?= h($content['file_url']) ?>" target="_blank" rel="noopener"
+             class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50 transition">
+            <ion-icon name="open-outline"></ion-icon> Open in new tab
+          </a>
+        <?php endif; ?>
+      </div>
     </div>
   </div>
 
@@ -166,20 +309,25 @@ $typeBadge = $badgeByType[$content_type] ?? 'bg-gray-100 text-gray-700';
 
     <?php if (!empty($content['file_url'])): ?>
       <?php
-        $ext  = strtolower(pathinfo(parse_url($content['file_url'], PHP_URL_PATH) ?? '', PATHINFO_EXTENSION));
-        $isVideo = ($content_type === 'video' || $ext === 'mp4');
+        $extPath = parse_url($content['file_url'], PHP_URL_PATH) ?? '';
+        $ext     = strtolower(pathinfo($extPath, PATHINFO_EXTENSION));
+        $isVideo = ($content_type === 'video' || $ext === 'mp4' || $ext === 'webm' || $ext === 'ogg');
         $isPdf   = ($content_type === 'pdf'   || $ext === 'pdf');
       ?>
-      <div class="mt-5">
+      <div class="mt-5 flex items-center gap-2">
         <button @click="showModal = true"
                 class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow">
-          <ion-icon name="open-outline"></ion-icon> View Attached Content
+          <ion-icon name="eye-outline"></ion-icon> View Attached Content
         </button>
+        <a class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg"
+           href="<?= h($content['file_url']) ?>" download>
+          <ion-icon name="download-outline"></ion-icon> Download
+        </a>
       </div>
 
       <!-- Modal viewer -->
       <div x-show="showModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
-        <div class="absolute inset-0 bg-black/70" @click="showModal = false"></div>
+        <div class="absolute inset-0 bg-black/70" @click="showModal = false" aria-hidden="true"></div>
         <div class="relative bg-white w-[95%] max-w-6xl rounded-2xl shadow-xl ring-1 ring-gray-200 p-4">
           <button @click="showModal = false" class="absolute top-2 right-2 text-gray-600 hover:text-red-600 text-2xl" aria-label="Close">
             &times;
@@ -189,8 +337,8 @@ $typeBadge = $badgeByType[$content_type] ?? 'bg-gray-100 text-gray-700';
           </h2>
 
           <?php if ($isVideo): ?>
-            <video controls class="w-full max-h-[70vh] rounded">
-              <source src="<?= h($content['file_url']) ?>" type="video/mp4">
+            <video controls class="w-full max-h-[70vh] rounded bg-black">
+              <source src="<?= h($content['file_url']) ?>">
               Your browser does not support the video tag.
             </video>
           <?php elseif ($isPdf): ?>
@@ -207,7 +355,13 @@ $typeBadge = $badgeByType[$content_type] ?? 'bg-gray-100 text-gray-700';
       <h2 class="text-xl font-semibold mt-8 mb-3 inline-flex items-center gap-2">
         <ion-icon name="create-outline" class="text-amber-600"></ion-icon> Linked Assignment
       </h2>
-      <?php $assignment = $conn->query("SELECT * FROM assignments WHERE lesson_id = $content_id")->fetch_assoc(); ?>
+      <?php
+        $assStmt = $conn->prepare("SELECT assignment_id, title, description, due_date, total_marks, passing_score FROM assignments WHERE lesson_id = ? LIMIT 1");
+        $assStmt->bind_param("i", $content_id);
+        $assStmt->execute();
+        $assignment = $assStmt->get_result()->fetch_assoc();
+        $assStmt->close();
+      ?>
       <?php if ($assignment): ?>
         <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
           <p class="mb-2"><strong><?= h($assignment['title']) ?></strong></p>
@@ -227,44 +381,30 @@ $typeBadge = $badgeByType[$content_type] ?? 'bg-gray-100 text-gray-700';
       <?php endif; ?>
     <?php endif; ?>
 
-    <!-- Quiz (Unlimited attempts) with separate Summary/Review buttons -->
+    <!-- Quiz (Unlimited attempts) with Summary/Review -->
     <?php if ($content_type === 'quiz'): ?>
       <h2 class="text-xl font-semibold mt-8 mb-3 inline-flex items-center gap-2">
         <ion-icon name="trophy-outline" class="text-emerald-600"></ion-icon> Quiz
       </h2>
       <?php
-        $rowA = $conn->query("SELECT assignment_id FROM assignments WHERE lesson_id = $content_id")->fetch_assoc();
-        $assignment_id = (int)($rowA['assignment_id'] ?? 0);
-        $assignment = $assignment_id ? $conn->query("SELECT * FROM assignments WHERE assignment_id = $assignment_id")->fetch_assoc() : null;
-        $questions = $assignment_id ? $conn->query("SELECT * FROM assignment_questions WHERE assignment_id = $assignment_id") : null;
+        // For rendering the quiz questions (fresh)
+        $aidStmt = $conn->prepare("SELECT assignment_id FROM assignments WHERE lesson_id = ? LIMIT 1");
+        $aidStmt->bind_param("i", $content_id);
+        $aidStmt->execute();
+        $aidRow = $aidStmt->get_result()->fetch_assoc();
+        $aidStmt->close();
+        $assignment_id = (int)($aidRow['assignment_id'] ?? 0);
 
-        $rowS = $conn->query("SELECT student_id FROM students WHERE user_id = $user_id")->fetch_assoc();
-        $student_id = (int)($rowS['student_id'] ?? 0);
-
-        $attempts = 0; $latest_attempt = null; $answersMap = []; $questions_review = null;
-        if ($assignment_id && $student_id) {
-          $attempts_res = $conn->query("SELECT COUNT(*) as cnt FROM student_assignment_attempts WHERE student_id = $student_id AND assignment_id = $assignment_id");
-          $attempts = (int)($attempts_res->fetch_assoc()['cnt'] ?? 0);
-
-          $latest_attempt = $conn->query("
-            SELECT attempt_id, score, passed, attempted_at 
-            FROM student_assignment_attempts 
-            WHERE assignment_id = $assignment_id AND student_id = $student_id 
-            ORDER BY attempted_at DESC LIMIT 1
-          ")->fetch_assoc();
-
-          if ($latest_attempt) {
-            $attempt_id = (int)$latest_attempt['attempt_id'];
-            $ans_res = $conn->query("SELECT question_id, selected_option, is_correct FROM assignment_attempt_questions WHERE attempt_id = $attempt_id");
-            while ($row = $ans_res->fetch_assoc()) {
-              $answersMap[(int)$row['question_id']] = $row;
-            }
-            $questions_review = $conn->query("SELECT * FROM assignment_questions WHERE assignment_id = $assignment_id");
-          }
+        $questionsList = null;
+        if ($assignment_id) {
+            $qList = $conn->prepare("SELECT question_id, question_text, option_a, option_b, option_c, option_d FROM assignment_questions WHERE assignment_id = ?");
+            $qList->bind_param("i", $assignment_id);
+            $qList->execute();
+            $questionsList = $qList->get_result();
         }
       ?>
 
-      <?php if ($assignment_id && $student_id): ?>
+      <?php if (!empty($assignment_id)): ?>
         <div x-data="{ showSummary:false, showReview:false }" class="space-y-4">
           <?php if ($latest_attempt): ?>
             <div class="flex flex-wrap items-center gap-2">
@@ -352,9 +492,10 @@ $typeBadge = $badgeByType[$content_type] ?? 'bg-gray-100 text-gray-700';
         </div>
 
         <!-- Submission form (unlimited attempts) -->
-        <?php if ($questions && $questions->num_rows > 0): ?>
+        <?php if ($questionsList && $questionsList->num_rows > 0): ?>
           <form method="post" class="space-y-4 mt-6">
-            <?php foreach ($questions as $q): ?>
+            <input type="hidden" name="csrf_token" value="<?= h($csrf) ?>">
+            <?php foreach ($questionsList as $q): ?>
               <div class="rounded-lg border border-gray-100 p-3">
                 <p class="font-medium"><?= h($q['question_text']) ?></p>
                 <?php foreach (['A','B','C','D'] as $opt): ?>
@@ -374,6 +515,8 @@ $typeBadge = $badgeByType[$content_type] ?? 'bg-gray-100 text-gray-700';
         <?php else: ?>
           <p class="text-gray-600">No quiz questions found.</p>
         <?php endif; ?>
+      <?php else: ?>
+        <p class="text-gray-600">No quiz attached to this content.</p>
       <?php endif; ?>
     <?php endif; ?>
 
@@ -383,12 +526,19 @@ $typeBadge = $badgeByType[$content_type] ?? 'bg-gray-100 text-gray-700';
         <ion-icon name="chatbubbles-outline" class="text-indigo-600"></ion-icon> Forum Discussion
       </h2>
       <?php
-      $posts = $conn->query("SELECT p.post_id, p.body, u.username, p.posted_at 
-                             FROM forum_posts p 
-                             JOIN users u ON u.user_id = p.user_id 
-                             WHERE p.content_id = $content_id AND p.parent_post_id IS NULL 
-                             ORDER BY posted_at");
-      while ($post = $posts->fetch_assoc()):
+      // Fetch posts (secure)
+      $postsStmt = $conn->prepare("
+        SELECT p.post_id, p.body, u.username, p.posted_at 
+        FROM forum_posts p 
+        JOIN users u ON u.user_id = p.user_id 
+        WHERE p.content_id = ? AND p.parent_post_id IS NULL 
+        ORDER BY p.posted_at
+      ");
+      $postsStmt->bind_param("i", $content_id);
+      $postsStmt->execute();
+      $postsRes = $postsStmt->get_result();
+
+      while ($post = $postsRes->fetch_assoc()):
       ?>
         <div class="border border-gray-200 rounded-xl p-4 mb-4 bg-white">
           <div class="flex items-center justify-between mb-1">
@@ -403,10 +553,18 @@ $typeBadge = $badgeByType[$content_type] ?? 'bg-gray-100 text-gray-700';
           <p class="text-gray-700"><?= nl2br(h($post['body'])) ?></p>
 
           <?php
-          $replies = $conn->query("SELECT r.body, u.username, r.posted_at FROM forum_posts r 
-                                   JOIN users u ON u.user_id = r.user_id 
-                                   WHERE r.parent_post_id = {$post['post_id']} ORDER BY r.posted_at");
-          while ($reply = $replies->fetch_assoc()):
+          // Replies secure
+          $repStmt = $conn->prepare("
+            SELECT r.body, u.username, r.posted_at 
+            FROM forum_posts r 
+            JOIN users u ON u.user_id = r.user_id 
+            WHERE r.parent_post_id = ? 
+            ORDER BY r.posted_at
+          ");
+          $repStmt->bind_param("i", $post['post_id']);
+          $repStmt->execute();
+          $repliesRes = $repStmt->get_result();
+          while ($reply = $repliesRes->fetch_assoc()):
           ?>
             <div class="ml-6 mt-3 p-2 border-l-2 border-gray-200">
               <div class="flex items-center justify-between">
@@ -418,11 +576,12 @@ $typeBadge = $badgeByType[$content_type] ?? 'bg-gray-100 text-gray-700';
               </div>
               <p class="text-gray-700"><?= nl2br(h($reply['body'])) ?></p>
             </div>
-          <?php endwhile; ?>
+          <?php endwhile; $repStmt->close(); ?>
         </div>
-      <?php endwhile; ?>
+      <?php endwhile; $postsStmt->close(); ?>
 
       <form method="POST" class="mt-6">
+        <input type="hidden" name="csrf_token" value="<?= h($csrf) ?>">
         <label class="block mb-1 font-medium">Add a reply</label>
         <div class="flex gap-2">
           <textarea name="forum_body" class="w-full border border-gray-200 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-200" rows="2" placeholder="Type your reply..." required></textarea>
@@ -434,11 +593,18 @@ $typeBadge = $badgeByType[$content_type] ?? 'bg-gray-100 text-gray-700';
 
       <?php
       if (isset($_POST['post_forum'])) {
-        $msg = $_POST['forum_body'];
-        $stmt = $conn->prepare("INSERT INTO forum_posts (content_id, user_id, body) VALUES (?, ?, ?)");
-        $stmt->bind_param("iis", $content_id, $user_id, $msg);
-        $stmt->execute();
-        echo "<script>location.reload();</script>";
+        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+          echo "<script>alert('Invalid session. Please refresh and try again.');</script>";
+        } else {
+          $msg = trim((string)($_POST['forum_body'] ?? ''));
+          if ($msg !== '') {
+            $stmt = $conn->prepare("INSERT INTO forum_posts (content_id, user_id, body) VALUES (?, ?, ?)");
+            $stmt->bind_param("iis", $content_id, $user_id, $msg);
+            $stmt->execute();
+            $stmt->close();
+            echo "<script>location.reload();</script>";
+          }
+        }
       }
       ?>
     <?php endif; ?>

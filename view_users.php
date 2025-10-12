@@ -115,77 +115,77 @@ $query = $conn->query("
 <body class="bg-gradient-to-br from-blue-50 via-white to-indigo-50 min-h-screen antialiased text-gray-800">
 <?php include 'components/navbar.php'; ?>
 
-<div class="max-w-8xl mx-auto px-6 pt-28 pb-10">
-  <!-- Header Card -->
-  <div class="relative overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 p-6 mb-6">
+<div class="max-w-8xl mx-auto px-3 pt-20 pb-4">
+  <!-- Header Card (extra compact) -->
+  <div class="relative overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 p-3 mb-3">
     <div aria-hidden="true" class="pointer-events-none absolute inset-0">
-      <div class="absolute -top-16 -right-20 w-72 h-72 bg-blue-200/40 rounded-full blur-3xl"></div>
-      <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-indigo-200/40 rounded-full blur-3xl"></div>
+      <div class="absolute -top-16 -right-20 w-60 h-60 bg-blue-200/40 rounded-full blur-3xl"></div>
+      <div class="absolute -bottom-20 -left-24 w-72 h-72 bg-indigo-200/40 rounded-full blur-3xl"></div>
     </div>
-    <div class="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
       <div>
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-blue-700 tracking-tight flex items-center gap-2">
-          👥 All Registered Users
+        <h2 class="text-lg sm:text-xl font-extrabold text-blue-700 tracking-tight flex items-center gap-2">
+          <i class="fa-solid fa-users"></i> All Registered Users
         </h2>
-        <p class="text-gray-600 mt-1">Approve, suspend, or delete users. Filter and export as needed.</p>
+        <p class="text-gray-600/90 mt-0.5 text-xs">Approve, suspend, or delete users. Filter and export as needed.</p>
       </div>
-      <div class="flex flex-wrap gap-2">
-        <a href="admin_dashboard.php" class="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-white px-4 py-2 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition">
-          ← Back to Dashboard
+      <div class="flex flex-wrap gap-1.5">
+        <a href="admin_dashboard.php" class="inline-flex items-center gap-1.5 rounded-md border border-blue-200 bg-white px-2.5 py-1 text-blue-700 hover:bg-blue-50 hover:border-blue-300 text-xs transition">
+          <i class="fa-solid fa-arrow-left"></i> Back
         </a>
-        <a href="add_user.php" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 text-white px-4 py-2 hover:bg-indigo-700 shadow-sm">
-          ➕ Add New User
+        <a href="add_user.php" class="inline-flex items-center gap-1.5 rounded-md bg-indigo-600 text-white px-2.5 py-1 hover:bg-indigo-700 shadow-sm text-xs">
+          <i class="fa-solid fa-user-plus"></i> Add
         </a>
-        <button onclick="downloadUsersPDF()" class="inline-flex items-center gap-2 rounded-lg bg-green-600 text-white px-4 py-2 hover:bg-green-700 shadow-sm">
-          ⬇️ Download PDF
+        <button onclick="downloadUsersPDF()" class="inline-flex items-center gap-1.5 rounded-md bg-green-600 text-white px-2.5 py-1 hover:bg-green-700 shadow-sm text-xs">
+          <i class="fa-solid fa-file-pdf"></i> PDF
         </button>
-        <button onclick="downloadUsersCSV()" class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 text-white px-4 py-2 hover:bg-emerald-700 shadow-sm">
-          ⬇️ Download CSV
+        <button onclick="downloadUsersCSV()" class="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 text-white px-2.5 py-1 hover:bg-emerald-700 shadow-sm text-xs">
+          <i class="fa-solid fa-file-csv"></i> CSV
         </button>
       </div>
     </div>
 
     <!-- Message -->
     <?php if (!empty($_GET['msg'])): ?>
-      <div class="mt-4">
-        <div class="relative rounded-xl px-4 py-3 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">
-          <button type="button" onclick="this.parentElement.remove()" class="absolute right-2 top-2 text-gray-400 hover:text-gray-600">✕</button>
-          <div class="font-medium"><?= htmlspecialchars($_GET['msg']) ?></div>
+      <div class="mt-2">
+        <div class="relative rounded-lg px-2.5 py-1.5 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 text-xs">
+          <button type="button" onclick="this.parentElement.remove()" class="absolute right-2 top-1.5 text-gray-400 hover:text-gray-600" aria-label="Dismiss">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+          <div class="font-medium"><i class="fa-solid fa-circle-check mr-1"></i> <?= htmlspecialchars($_GET['msg']) ?></div>
         </div>
       </div>
     <?php endif; ?>
   </div>
 
   <!-- Grid: Sidebar + Main -->
-  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-3">
     <?php
       $activePath = basename(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
       $createAnnouncementLink = '#create-announcement';
       include 'components/admin_tools_sidebar.php';
     ?>
 
-    <!-- Main column -->
-    <section class="lg:col-span-9 space-y-4">
+    <!-- Main column (extra compact spacing) -->
+    <section class="lg:col-span-9 space-y-2">
       <!-- Mobile: open tools button -->
       <div class="lg:hidden flex justify-end">
         <button id="toolsOpen"
-                class="inline-flex items-center gap-2 bg-white ring-1 ring-gray-200 px-3 py-2 rounded-lg shadow-sm text-blue-700 hover:bg-blue-50 transition"
+                class="inline-flex items-center gap-2 bg-white ring-1 ring-gray-200 px-2.5 py-1 rounded-lg shadow-sm text-blue-700 hover:bg-blue-50 text-xs transition"
                 aria-controls="toolsDrawer" aria-expanded="false" aria-label="Open admin tools">
-          <span class="fa-solid fa-sliders"></span> Admin Tools
+          <i class="fa-solid fa-sliders"></i> Admin Tools
         </button>
       </div>
 
-      <!-- Filters -->
-      <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 p-4">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+      <!-- Filters (extra compact) -->
+      <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 p-2.5">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
           <div class="relative md:col-span-2">
-            <input id="searchInput" type="text" placeholder="Search by name, username or email..." class="w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300">
-            <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M8.5 3.5a5 5 0 013.905 8.132l3.231 3.232a.75.75 0 11-1.06 1.06l-3.232-3.23A5 5 0 118.5 3.5zm0 1.5a3.5 3.5 0 100 7 3.5 3.5 0 000-7z" clip-rule="evenodd"/>
-            </svg>
+            <input id="searchInput" type="text" placeholder="Search name, username or email..." class="w-full pl-8 pr-2.5 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 text-xs" aria-label="Search">
+            <i class="fa-solid fa-magnifying-glass w-4 h-4 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" aria-hidden="true"></i>
           </div>
           <div>
-            <select id="roleFilter" class="w-full py-2.5 px-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300">
+            <select id="roleFilter" class="w-full py-1.5 px-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 text-xs" aria-label="Filter by role">
               <option value="">All Roles</option>
               <option value="admin">Admin</option>
               <option value="teacher">Teacher</option>
@@ -193,13 +193,15 @@ $query = $conn->query("
             </select>
           </div>
           <div class="flex gap-2">
-            <select id="statusFilter" class="w-full py-2.5 px-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300">
+            <select id="statusFilter" class="w-full py-1.5 px-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 text-xs" aria-label="Filter by status">
               <option value="">All Statuses</option>
               <option value="active">Active</option>
               <option value="suspended">Suspended</option>
               <option value="pending">Pending</option>
             </select>
-            <button id="clearFilters" class="hidden md:inline-flex items-center gap-1 px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-50">Reset</button>
+            <button id="clearFilters" class="hidden md:inline-flex items-center gap-1.5 px-2 py-1 rounded-lg border border-gray-200 hover:bg-gray-50 text-xs" type="button" aria-label="Reset filters">
+              <i class="fa-solid fa-rotate-left"></i> Reset
+            </button>
           </div>
         </div>
       </div>
@@ -209,19 +211,19 @@ $query = $conn->query("
         <div class="overflow-x-auto" id="users-table-section">
           <table id="usersTable" class="min-w-full text-left border-collapse">
             <thead>
-              <tr class="text-gray-700 text-sm bg-gray-100/80">
-                <th class="sticky px-4 py-3 border-b border-gray-200 whitespace-nowrap">User ID</th>
-                <th class="sticky px-4 py-3 border-b border-gray-200">Username</th>
-                <th class="sticky px-4 py-3 border-b border-gray-200">Role</th>
-                <th class="sticky px-4 py-3 border-b border-gray-200">Full Name</th>
-                <th class="sticky px-4 py-3 border-b border-gray-200">Email</th>
-                <th class="sticky px-4 py-3 border-b border-gray-200">Contact</th>
-                <th class="sticky px-4 py-3 border-b border-gray-200">Status</th>
-                <th class="sticky px-4 py-3 border-b border-gray-200 whitespace-nowrap">Created At</th>
-                <th class="sticky px-4 py-3 border-b border-gray-200">Actions</th>
+              <tr class="text-gray-700 text-[11px] bg-gray-100/80">
+                <th class="sticky px-2.5 py-2 border-b border-gray-200 whitespace-nowrap">User ID</th>
+                <th class="sticky px-2.5 py-2 border-b border-gray-200">Username</th>
+                <th class="sticky px-2.5 py-2 border-b border-gray-200">Role</th>
+                <th class="sticky px-2.5 py-2 border-b border-gray-200">Full Name</th>
+                <th class="sticky px-2.5 py-2 border-b border-gray-200">Email</th>
+                <th class="sticky px-2.5 py-2 border-b border-gray-200">Contact</th>
+                <th class="sticky px-2.5 py-2 border-b border-gray-200">Status</th>
+                <th class="sticky px-2.5 py-2 border-b border-gray-200 whitespace-nowrap">Created</th>
+                <th class="sticky px-2.5 py-2 border-b border-gray-200">Actions</th>
               </tr>
             </thead>
-            <tbody class="text-sm">
+            <tbody class="text-xs">
               <?php while ($user = $query->fetch_assoc()): 
                 $fullName = trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? ''));
                 $fname = $user['first_name'] ?? '';
@@ -235,14 +237,18 @@ $query = $conn->query("
                 $role = strtolower($user['role']);
                 $status = strtolower($user['status'] ?? '');
                 $roleBadge = 'bg-gray-100 text-gray-700';
-                if ($role === 'admin') $roleBadge = 'bg-purple-100 text-purple-700';
-                elseif ($role === 'teacher') $roleBadge = 'bg-indigo-100 text-indigo-700';
-                elseif ($role === 'student') $roleBadge = 'bg-emerald-100 text-emerald-700';
+                $roleIcon  = 'fa-user';
+                if ($role === 'admin') { $roleBadge = 'bg-purple-100 text-purple-700'; $roleIcon = 'fa-user-shield'; }
+                elseif ($role === 'teacher') { $roleBadge = 'bg-indigo-100 text-indigo-700'; $roleIcon = 'fa-chalkboard-user'; }
+                elseif ($role === 'student') { $roleBadge = 'bg-emerald-100 text-emerald-700'; $roleIcon = 'fa-user-graduate'; }
+
                 $statusBadge = 'bg-gray-100 text-gray-700';
-                if ($status === 'active') $statusBadge = 'bg-emerald-100 text-emerald-700';
-                elseif ($status === 'suspended') $statusBadge = 'bg-amber-100 text-amber-700';
-                elseif ($status === 'pending') $statusBadge = 'bg-gray-100 text-gray-700';
-                elseif ($status && !in_array($status, ['active','suspended','pending'])) $statusBadge = 'bg-red-100 text-red-700';
+                $statusIcon  = 'fa-circle-question';
+                if ($status === 'active') { $statusBadge = 'bg-emerald-100 text-emerald-700'; $statusIcon = 'fa-circle-check'; }
+                elseif ($status === 'suspended') { $statusBadge = 'bg-amber-100 text-amber-700'; $statusIcon = 'fa-ban'; }
+                elseif ($status === 'pending') { $statusBadge = 'bg-gray-100 text-gray-700'; $statusIcon = 'fa-hourglass-half'; }
+                elseif ($status && !in_array($status, ['active','suspended','pending'])) { $statusBadge = 'bg-red-100 text-red-700'; $statusIcon = 'fa-triangle-exclamation'; }
+
                 $createdFmt = !empty($user['created_at']) ? date('M j, Y', strtotime($user['created_at'])) : '';
                 $searchKey = strtolower(trim($fullName . ' ' . $user['username'] . ' ' . ($user['email'] ?? '')));
               ?>
@@ -250,14 +256,17 @@ $query = $conn->query("
                   data-role="<?= htmlspecialchars($role) ?>"
                   data-status="<?= htmlspecialchars($status) ?>"
                   data-key="<?= htmlspecialchars($searchKey) ?>">
-                <td class="px-4 py-3 border-b border-gray-100"><?= (int)$user['user_id'] ?></td>
-                <td class="px-4 py-3 border-b border-gray-100 truncate">@<?= htmlspecialchars($user['username']) ?></td>
-                <td class="px-4 py-3 border-b border-gray-100">
-                  <span class="inline-block text-[11px] px-2 py-0.5 rounded-full <?= $roleBadge ?>"><?= ucfirst(htmlspecialchars($role)) ?></span>
+                <td class="px-2.5 py-1.5 border-b border-gray-100"><?= (int)$user['user_id'] ?></td>
+                <td class="px-2.5 py-1.5 border-b border-gray-100 truncate">@<?= htmlspecialchars($user['username']) ?></td>
+                <td class="px-2.5 py-1.5 border-b border-gray-100">
+                  <span class="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full <?= $roleBadge ?>">
+                    <i class="fa-solid <?= $roleIcon ?>"></i>
+                    <?= ucfirst(htmlspecialchars($role)) ?>
+                  </span>
                 </td>
-                <td class="px-4 py-3 border-b border-gray-100">
-                  <div class="flex items-center gap-3 min-w-0">
-                    <div class="flex items-center justify-center h-8 w-8 rounded-full bg-blue-100 text-blue-700 font-semibold ring-1 ring-blue-200">
+                <td class="px-2.5 py-1.5 border-b border-gray-100">
+                  <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="flex items-center justify-center h-7 w-7 rounded-full bg-blue-100 text-blue-700 font-semibold ring-1 ring-blue-200 text-[11px]" aria-label="User initials">
                       <?= htmlspecialchars($initials ?: '👤') ?>
                     </div>
                     <div class="min-w-0">
@@ -265,24 +274,31 @@ $query = $conn->query("
                     </div>
                   </div>
                 </td>
-                <td class="px-4 py-3 border-b border-gray-100 break-words"><?= htmlspecialchars($user['email'] ?? '—') ?></td>
-                <td class="px-4 py-3 border-b border-gray-100"><?= htmlspecialchars($user['contact_number'] ?? '—') ?></td>
-                <td class="px-4 py-3 border-b border-gray-100">
-                  <span class="inline-block text-[11px] px-2 py-0.5 rounded-full <?= $statusBadge ?>">
+                <td class="px-2.5 py-1.5 border-b border-gray-100 break-words">
+                  <span class="inline-flex items-center gap-1"><i class="fa-regular fa-envelope text-gray-500"></i> <?= htmlspecialchars($user['email'] ?? '—') ?></span>
+                </td>
+                <td class="px-2.5 py-1.5 border-b border-gray-100">
+                  <span class="inline-flex items-center gap-1"><i class="fa-solid fa-phone text-gray-500"></i> <?= htmlspecialchars($user['contact_number'] ?? '—') ?></span>
+                </td>
+                <td class="px-2.5 py-1.5 border-b border-gray-100">
+                  <span class="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full <?= $statusBadge ?>">
+                    <i class="fa-solid <?= $statusIcon ?>"></i>
                     <?= htmlspecialchars(ucfirst($status ?: '—')) ?>
                   </span>
                 </td>
-                <td class="px-4 py-3 border-b border-gray-100 whitespace-nowrap"><?= htmlspecialchars($createdFmt ?: '—') ?></td>
-                <td class="px-4 py-3 border-b border-gray-100 whitespace-nowrap">
-                  <div class="flex flex-wrap gap-2">
+                <td class="px-2.5 py-1.5 border-b border-gray-100 whitespace-nowrap">
+                  <span class="inline-flex items-center gap-1"><i class="fa-regular fa-calendar-plus text-gray-500"></i> <?= htmlspecialchars($createdFmt ?: '—') ?></span>
+                </td>
+                <td class="px-2.5 py-1.5 border-b border-gray-100 whitespace-nowrap">
+                  <div class="flex flex-wrap gap-1.5">
                     <?php if ($user['status'] !== 'active'): ?>
                       <form method="POST" class="inline-action">
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
                         <input type="hidden" name="action" value="approve">
                         <input type="hidden" name="user_id" value="<?= (int)$user['user_id'] ?>">
                         <button type="submit"
-                          class="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-900 px-2 py-1 rounded-md ring-1 ring-emerald-200 bg-emerald-50"
-                          title="Approve">✅ Approve</button>
+                          class="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-900 px-2 py-0.5 rounded-md ring-1 ring-emerald-200 bg-emerald-50 text-[11px]"
+                          title="Approve"><i class="fa-solid fa-circle-check"></i> Approve</button>
                       </form>
                     <?php endif; ?>
 
@@ -292,8 +308,8 @@ $query = $conn->query("
                         <input type="hidden" name="action" value="suspend">
                         <input type="hidden" name="user_id" value="<?= (int)$user['user_id'] ?>">
                         <button type="submit"
-                          class="inline-flex items-center gap-1 text-amber-700 hover:text-amber-900 px-2 py-1 rounded-md ring-1 ring-amber-200 bg-amber-50"
-                          title="Suspend">⛔ Suspend</button>
+                          class="inline-flex items-center gap-1 text-amber-700 hover:text-amber-900 px-2 py-0.5 rounded-md ring-1 ring-amber-200 bg-amber-50 text-[11px]"
+                          title="Suspend"><i class="fa-solid fa-user-slash"></i> Suspend</button>
                       </form>
                     <?php endif; ?>
 
@@ -302,8 +318,8 @@ $query = $conn->query("
                       <input type="hidden" name="action" value="delete">
                       <input type="hidden" name="user_id" value="<?= (int)$user['user_id'] ?>">
                       <button type="submit"
-                        class="inline-flex items-center gap-1 text-red-700 hover:text-red-900 px-2 py-1 rounded-md ring-1 ring-red-200 bg-red-50"
-                        title="Delete">❌ Delete</button>
+                        class="inline-flex items-center gap-1 text-red-700 hover:text-red-900 px-2 py-0.5 rounded-md ring-1 ring-red-200 bg-red-50 text-[11px]"
+                        title="Delete"><i class="fa-regular fa-trash-can"></i> Delete</button>
                     </form>
                   </div>
                 </td>
@@ -362,7 +378,6 @@ function applyFilters() {
   const role = (roleFilter.value || '').toLowerCase();
   const status = (statusFilter.value || '').toLowerCase();
 
-  let visible = 0;
   rows.forEach(tr => {
     const key = (tr.getAttribute('data-key') || '').toLowerCase();
     const r = (tr.getAttribute('data-role') || '').toLowerCase();
@@ -372,20 +387,15 @@ function applyFilters() {
     const matchR = !role || r === role;
     const matchS = !status || s === status;
 
-    const show = matchQ && matchR && matchS;
-    tr.style.display = show ? '' : 'none';
-    if (show) visible++;
+    tr.style.display = (matchQ && matchR && matchS) ? '' : 'none';
   });
 
   clearBtn.classList.toggle('opacity-50', !q && !role && !status);
 }
-if (searchInput) searchInput.addEventListener('input', applyFilters);
-if (roleFilter) roleFilter.addEventListener('change', applyFilters);
-if (statusFilter) statusFilter.addEventListener('change', applyFilters);
-if (clearBtn) clearBtn.addEventListener('click', () => {
-  searchInput.value = ''; roleFilter.value = ''; statusFilter.value = '';
-  applyFilters();
-});
+searchInput?.addEventListener('input', applyFilters);
+roleFilter?.addEventListener('change', applyFilters);
+statusFilter?.addEventListener('change', applyFilters);
+clearBtn?.addEventListener('click', () => { searchInput.value = ''; roleFilter.value = ''; statusFilter.value = ''; applyFilters(); });
 applyFilters();
 </script>
 
@@ -400,19 +410,21 @@ applyFilters();
 
     function openDrawer() {
       prevFocus = document.activeElement;
+      if (!drawer) return;
       drawer.style.transform = 'translateX(0)';
-      overlay.classList.remove('hidden');
+      overlay && overlay.classList.remove('hidden');
       drawer.setAttribute('aria-hidden', 'false');
       openBtn?.setAttribute('aria-expanded', 'true');
       document.body.style.overflow = 'hidden';
       const first = drawer.querySelector('a,button');
       first && first.focus();
       document.addEventListener('keydown', onKeydown);
-      overlay.addEventListener('click', closeDrawer, { once: true });
+      overlay && overlay.addEventListener('click', closeDrawer, { once: true });
     }
     function closeDrawer() {
+      if (!drawer) return;
       drawer.style.transform = 'translateX(-100%)';
-      overlay.classList.add('hidden');
+      overlay && overlay.classList.add('hidden');
       drawer.setAttribute('aria-hidden', 'true');
       openBtn?.setAttribute('aria-expanded', 'false');
       document.body.style.overflow = '';
@@ -425,7 +437,7 @@ applyFilters();
 
     openBtn?.addEventListener('click', openDrawer);
     closeBtn?.addEventListener('click', closeDrawer);
-    drawer.addEventListener('click', (e) => {
+    drawer && drawer.addEventListener('click', (e) => {
       const t = e.target.closest('a,button');
       if (!t) return;
       closeDrawer();

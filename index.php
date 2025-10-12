@@ -51,6 +51,7 @@
       .reveal { transition: none; }
       .animate-blob { animation: none; }
       .typed-caret { animation: none; }
+      .shine { animation: none; }
     }
 
     /* Typed headline caret */
@@ -61,18 +62,35 @@
       opacity: .8;
       animation: blink 1s step-end infinite;
     }
-    @keyframes blink {
-      0%, 100% { opacity: .1; }
-      50% { opacity: 1; }
-    }
+    @keyframes blink { 0%, 100% { opacity: .1; } 50% { opacity: 1; } }
 
     /* Waves */
     .wave-top { transform: translateY(1px); }
     .wave-bottom { transform: translateY(-1px); }
+
+    /* Gradient text shine */
+    .shine {
+      background: linear-gradient(90deg, #fff, #dbeafe, #fff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      background-size: 200% 100%;
+      animation: shine 6s linear infinite;
+    }
+    @keyframes shine { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+
+    /* Glass utility */
+    .glass { background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06)); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+
+    /* Scroll progress bar */
+    #scrollProgress { width: 0%; }
   </style>
 </head>
 
 <body class="bg-white text-gray-800 flex flex-col min-h-screen overflow-x-hidden">
+  <!-- Scroll progress -->
+  <div id="scrollProgress" class="fixed top-0 left-0 h-1 bg-gradient-to-r from-indigo-500 via-blue-500 to-cyan-400 z-[60]"></div>
+
   <div id="top"></div>
 
   <!-- Skip link -->
@@ -95,16 +113,24 @@
     <div class="pointer-events-none absolute -bottom-20 -right-16 w-96 h-96 bg-gradient-to-tr from-cyan-400 to-blue-500 opacity-30 blur-3xl rounded-full animate-blob animation-delay-2000"></div>
     <div class="pointer-events-none absolute top-1/3 right-1/3 w-72 h-72 bg-gradient-to-tr from-yellow-400 to-orange-500 opacity-20 blur-3xl rounded-full animate-blob animation-delay-4000"></div>
 
+    <!-- Soft radial glow behind content -->
+    <div class="absolute inset-0 pointer-events-none [mask-image:radial-gradient(ellipse_60%_40%_at_50%_45%,black,transparent)]">
+      <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[780px] h-[780px] rounded-full bg-white/6 blur-3xl"></div>
+    </div>
+
     <!-- Content -->
     <div class="relative z-10 max-w-4xl px-6" id="main">
-      <!-- Logo -->
+      <!-- Logo with glow ring -->
       <div class="mb-6 flex justify-center reveal mt-20">
-        <img src="./images/logo.png" alt="SynapZ Logo" class="h-20 w-auto sm:h-24 md:h-28 drop-shadow-lg" loading="eager" decoding="async">
+        <div class="relative">
+          <div class="absolute inset-0 rounded-full bg-white/10 blur-lg"></div>
+          <img src="./images/logo.png" alt="SynapZ Logo" class="relative h-20 w-auto sm:h-24 md:h-28 drop-shadow-lg" loading="eager" decoding="async">
+        </div>
       </div>
 
       <!-- Title -->
       <h1 class="reveal text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight mb-4 text-white">
-        <span class="bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 text-transparent bg-clip-text">Welcome to</span>
+        <span class="shine">Welcome to</span>
         <span class="block">Synap<span class="text-yellow-300">Z</span></span>
       </h1>
 
@@ -113,6 +139,19 @@
         Your complete Virtual Learning Environment for
         <span class="font-semibold text-blue-300 typed-caret inline-flex items-center gap-1" id="typedWords" aria-live="polite">students</span>.
       </p>
+
+      <!-- Trust badges -->
+      <div class="reveal mt-4 flex justify-center flex-wrap gap-2 text-[13px] text-white/90">
+        <span class="inline-flex items-center gap-1.5 bg-white/10 border border-white/20 px-3 py-1 rounded-full">
+          <ion-icon name="shield-checkmark-outline"></ion-icon> Secure
+        </span>
+        <span class="inline-flex items-center gap-1.5 bg-white/10 border border-white/20 px-3 py-1 rounded-full">
+          <ion-icon name="phone-portrait-outline"></ion-icon> Mobile Friendly
+        </span>
+        <span class="inline-flex items-center gap-1.5 bg-white/10 border border-white/20 px-3 py-1 rounded-full">
+          <ion-icon name="time-outline"></ion-icon> 24/7 Access
+        </span>
+      </div>
 
       <!-- CTA -->
       <div class="reveal flex justify-center flex-wrap gap-4 mt-8">
@@ -165,7 +204,7 @@
       <!-- Scroll indicator -->
       <div class="reveal mt-12 text-white/80 text-sm flex items-center justify-center gap-2">
         <span>Scroll</span>
-        <ion-icon name="chevron-down-outline" aria-hidden="true"></ion-icon>
+        <ion-icon name="chevron-down-outline" aria-hidden="true" class="animate-bounce"></ion-icon>
       </div>
     </div>
   </section>
@@ -173,33 +212,41 @@
   <!-- Stats -->
   <section class="py-16 bg-gradient-to-b from-white to-blue-50">
     <div class="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="reveal bg-white/90 rounded-2xl p-5 shadow border border-gray-100 text-center">
-        <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-50 text-blue-600 mb-2">
-          <ion-icon name="people-outline"></ion-icon>
+      <div class="reveal rounded-2xl p-[1px] bg-gradient-to-r from-blue-100 to-indigo-100 hover:shadow-lg transition">
+        <div class="bg-white/90 rounded-2xl p-5 border border-white/60 text-center">
+          <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-50 text-blue-600 mb-2">
+            <ion-icon name="people-outline"></ion-icon>
+          </div>
+          <div class="text-3xl font-extrabold text-blue-700"><span class="countup" data-target="5000">0</span>+</div>
+          <div class="text-gray-600">Active Students</div>
         </div>
-        <div class="text-3xl font-extrabold text-blue-700"><span class="countup" data-target="5000">0</span>+</div>
-        <div class="text-gray-600">Active Students</div>
       </div>
-      <div class="reveal bg-white/90 rounded-2xl p-5 shadow border border-gray-100 text-center">
-        <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 mb-2">
-          <ion-icon name="ribbon-outline"></ion-icon>
+      <div class="reveal rounded-2xl p-[1px] bg-gradient-to-r from-emerald-100 to-green-100 hover:shadow-lg transition">
+        <div class="bg-white/90 rounded-2xl p-5 border border-white/60 text-center">
+          <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 mb-2">
+            <ion-icon name="ribbon-outline"></ion-icon>
+          </div>
+          <div class="text-3xl font-extrabold text-emerald-600"><span class="countup" data-target="200">0</span>+</div>
+          <div class="text-gray-600">Expert Tutors</div>
         </div>
-        <div class="text-3xl font-extrabold text-emerald-600"><span class="countup" data-target="200">0</span>+</div>
-        <div class="text-gray-600">Expert Tutors</div>
       </div>
-      <div class="reveal bg-white/90 rounded-2xl p-5 shadow border border-gray-100 text-center">
-        <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-purple-50 text-purple-600 mb-2">
-          <ion-icon name="library-outline"></ion-icon>
+      <div class="reveal rounded-2xl p-[1px] bg-gradient-to-r from-purple-100 to-fuchsia-100 hover:shadow-lg transition">
+        <div class="bg-white/90 rounded-2xl p-5 border border-white/60 text-center">
+          <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-purple-50 text-purple-600 mb-2">
+            <ion-icon name="library-outline"></ion-icon>
+          </div>
+          <div class="text-3xl font-extrabold text-purple-700"><span class="countup" data-target="350">0</span>+</div>
+          <div class="text-gray-600">Courses</div>
         </div>
-        <div class="text-3xl font-extrabold text-purple-700"><span class="countup" data-target="350">0</span>+</div>
-        <div class="text-gray-600">Courses</div>
       </div>
-      <div class="reveal bg-white/90 rounded-2xl p-5 shadow border border-gray-100 text-center">
-        <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-rose-50 text-rose-600 mb-2">
-          <ion-icon name="document-text-outline"></ion-icon>
+      <div class="reveal rounded-2xl p-[1px] bg-gradient-to-r from-rose-100 to-pink-100 hover:shadow-lg transition">
+        <div class="bg-white/90 rounded-2xl p-5 border border-white/60 text-center">
+          <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-rose-50 text-rose-600 mb-2">
+            <ion-icon name="document-text-outline"></ion-icon>
+          </div>
+          <div class="text-3xl font-extrabold text-rose-600"><span class="countup" data-target="15000">0</span>+</div>
+          <div class="text-gray-600">Lessons</div>
         </div>
-        <div class="text-3xl font-extrabold text-rose-600"><span class="countup" data-target="15000">0</span>+</div>
-        <div class="text-gray-600">Lessons</div>
       </div>
     </div>
   </section>
@@ -219,7 +266,7 @@
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mt-12">
-        <article class="reveal bg-white/90 p-6 rounded-2xl shadow-md hover:shadow-lg transition text-left" role="region" aria-labelledby="students-title">
+        <article class="reveal bg-white/90 p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-0.5 transition text-left" role="region" aria-labelledby="students-title">
           <div class="text-blue-600 text-4xl mb-4" aria-hidden="true"><ion-icon name="laptop-outline"></ion-icon></div>
           <h3 id="students-title" class="text-xl font-semibold mb-2">For Students</h3>
           <p class="text-gray-600 text-sm sm:text-base">
@@ -227,7 +274,7 @@
           </p>
         </article>
 
-        <article class="reveal bg-white/90 p-6 rounded-2xl shadow-md hover:shadow-lg transition text-left" role="region" aria-labelledby="teachers-title">
+        <article class="reveal bg-white/90 p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-0.5 transition text-left" role="region" aria-labelledby="teachers-title">
           <div class="text-green-500 text-4xl mb-4" aria-hidden="true"><ion-icon name="easel-outline"></ion-icon></div>
           <h3 id="teachers-title" class="text-xl font-semibold mb-2">For Teachers</h3>
           <p class="text-gray-600 text-sm sm:text-base">
@@ -235,7 +282,7 @@
           </p>
         </article>
 
-        <article class="reveal bg-white/90 p-6 rounded-2xl shadow-md hover:shadow-lg transition text-left" role="region" aria-labelledby="admins-title">
+        <article class="reveal bg-white/90 p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-0.5 transition text-left" role="region" aria-labelledby="admins-title">
           <div class="text-yellow-500 text-4xl mb-4" aria-hidden="true"><ion-icon name="settings-outline"></ion-icon></div>
           <h3 id="admins-title" class="text-xl font-semibold mb-2">For Admins</h3>
           <p class="text-gray-600 text-sm sm:text-base">
@@ -257,7 +304,7 @@
       </p>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-        <article class="reveal bg-white/90 p-8 rounded-2xl shadow hover:shadow-lg transition text-left" role="region" aria-labelledby="live-sessions-title">
+        <article class="reveal bg-white/90 p-8 rounded-2xl shadow hover:shadow-xl hover:-translate-y-1 transition text-left" role="region" aria-labelledby="live-sessions-title">
           <div class="text-blue-500 text-4xl mb-4" aria-hidden="true"><ion-icon name="videocam-outline"></ion-icon></div>
           <h3 id="live-sessions-title" class="font-semibold text-xl mb-2">Live Sessions</h3>
           <p class="text-gray-600 text-sm sm:text-base">
@@ -265,7 +312,7 @@
           </p>
         </article>
 
-        <article class="reveal bg-white/90 p-8 rounded-2xl shadow hover:shadow-lg transition text-left" role="region" aria-labelledby="expert-guidance-title">
+        <article class="reveal bg-white/90 p-8 rounded-2xl shadow hover:shadow-xl hover:-translate-y-1 transition text-left" role="region" aria-labelledby="expert-guidance-title">
           <div class="text-green-500 text-4xl mb-4" aria-hidden="true"><ion-icon name="school-outline"></ion-icon></div>
           <h3 id="expert-guidance-title" class="font-semibold text-xl mb-2">Expert Guidance</h3>
           <p class="text-gray-600 text-sm sm:text-base">
@@ -273,7 +320,7 @@
           </p>
         </article>
 
-        <article class="reveal bg-white/90 p-8 rounded-2xl shadow hover:shadow-lg transition text-left" role="region" aria-labelledby="progress-tracking-title">
+        <article class="reveal bg-white/90 p-8 rounded-2xl shadow hover:shadow-xl hover:-translate-y-1 transition text-left" role="region" aria-labelledby="progress-tracking-title">
           <div class="text-yellow-500 text-4xl mb-4" aria-hidden="true"><ion-icon name="stats-chart-outline"></ion-icon></div>
           <h3 id="progress-tracking-title" class="font-semibold text-xl mb-2">Progress Tracking</h3>
           <p class="text-gray-600 text-sm sm:text-base">
@@ -296,7 +343,7 @@
 
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-8">
         <!-- IGCSE ICT -->
-        <article class="reveal bg-white rounded-2xl shadow hover:shadow-xl transition overflow-hidden text-left group" role="region" aria-labelledby="igcse-ict-title">
+        <article class="reveal bg-white rounded-2xl shadow hover:shadow-2xl hover:-translate-y-1 transition overflow-hidden text-left group" role="region" aria-labelledby="igcse-ict-title">
           <div class="relative">
             <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFRObkO8H_uYDj0uuGJ1vlSPl4i-qFHG92YQ&s"
                  alt="IGCSE ICT" class="w-full h-48 object-cover group-hover:scale-[1.02] transition" loading="lazy" decoding="async">
@@ -314,7 +361,7 @@
         </article>
 
         <!-- IAL AS ICT -->
-        <article class="reveal bg-white rounded-2xl shadow hover:shadow-xl transition overflow-hidden text-left group" role="region" aria-labelledby="ial-as-ict-title">
+        <article class="reveal bg-white rounded-2xl shadow hover:shadow-2xl hover:-translate-y-1 transition overflow-hidden text-left group" role="region" aria-labelledby="ial-as-ict-title">
           <div class="relative">
             <img src="https://aotscolombiajapon.com/wp-content/uploads/2025/01/3ra-Beca-IA-Utilizing-to-overcome-DX-related-1.jpg"
                  alt="IAL AS ICT" class="w-full h-48 object-cover group-hover:scale-[1.02] transition" loading="lazy" decoding="async">
@@ -332,7 +379,7 @@
         </article>
 
         <!-- IAL AS2 ICT -->
-        <article class="reveal bg-white rounded-2xl shadow hover:shadow-xl transition overflow-hidden text-left group" role="region" aria-labelledby="ial-as2-ict-title">
+        <article class="reveal bg-white rounded-2xl shadow hover:shadow-2xl hover:-translate-y-1 transition overflow-hidden text-left group" role="region" aria-labelledby="ial-as2-ict-title">
           <div class="relative">
             <img src="https://www.ict.eu/sites/corporate/files/images/iStock-1322517295%20copy_3.jpg"
                  alt="IAL AS2 ICT" class="w-full h-48 object-cover group-hover:scale-[1.02] transition" loading="lazy" decoding="async">
@@ -350,7 +397,7 @@
         </article>
 
         <!-- IGCSE Computer Science -->
-        <article class="reveal bg-white rounded-2xl shadow hover:shadow-xl transition overflow-hidden text-left group" role="region" aria-labelledby="igcse-cs-title">
+        <article class="reveal bg-white rounded-2xl shadow hover:shadow-2xl hover:-translate-y-1 transition overflow-hidden text-left group" role="region" aria-labelledby="igcse-cs-title">
           <div class="relative">
             <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTiX_sE8HNgliGkDZNJaestGinmoLUp1ab5Eg&s"
                  alt="IGCSE Computer Science" class="w-full h-48 object-cover group-hover:scale-[1.02] transition" loading="lazy" decoding="async">
@@ -379,7 +426,7 @@
       </p>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-        <article class="reveal bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition" role="region" aria-labelledby="edu-ruwan">
+        <article class="reveal bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl hover:-translate-y-1 transition" role="region" aria-labelledby="edu-ruwan">
           <img src="./images/tanjana-sir-image-1.png" alt="Mr. Tanjana Chamikara" class="w-24 h-24 mx-auto rounded-full border-4 border-blue-200 mb-4" loading="lazy" decoding="async" />
           <h3 id="edu-ruwan" class="font-semibold text-xl text-blue-800 flex items-center justify-center gap-2">
             <ion-icon name="person-circle-outline" class="text-blue-600"></ion-icon> Mr. Tanjana Chamikara
@@ -392,7 +439,7 @@
           </ul>
         </article>
 
-        <article class="reveal bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition" role="region" aria-labelledby="edu-thilini">
+        <article class="reveal bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl hover:-translate-y-1 transition" role="region" aria-labelledby="edu-thilini">
           <img src="./images/madara-miss-image-600-2-1.png" alt="Ms. Madhara Wedhage" class="w-24 h-24 mx-auto rounded-full border-4 border-green-200 mb-4" loading="lazy" decoding="async" />
           <h3 id="edu-thilini" class="font-semibold text-xl text-green-800 flex items-center justify-center gap-2">
             <ion-icon name="person-circle-outline" class="text-green-600"></ion-icon> Ms. Madhara Wedhage
@@ -405,7 +452,7 @@
           </ul>
         </article>
 
-        <article class="reveal bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition" role="region" aria-labelledby="edu-chamika">
+        <article class="reveal bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl hover:-translate-y-1 transition" role="region" aria-labelledby="edu-chamika">
           <img src="./images/udara-miss-2.png" alt="Ms. Udara Dilshani" class="w-24 h-24 mx-auto rounded-full border-4 border-yellow-200 mb-4" loading="lazy" decoding="async" />
           <h3 id="edu-chamika" class="font-semibold text-xl text-yellow-800 flex items-center justify-center gap-2">
             <ion-icon name="person-circle-outline" class="text-yellow-600"></ion-icon> Ms. Udara Dilshani
@@ -624,7 +671,7 @@
      <ion-icon name="arrow-up-outline" class="text-xl"></ion-icon>
   </a>
 
-  <!-- Scripts: reveal on scroll + back-to-top + typed + countUp + cookie consent -->
+  <!-- Scripts: reveal on scroll + back-to-top + typed + countUp + cookie consent + progress bar -->
   <script>
     // Reveal on scroll
     const observer = new IntersectionObserver((entries) => {
@@ -637,6 +684,22 @@
     window.addEventListener('scroll', () => {
       if (window.scrollY > 600) backBtn.classList.remove('hidden'); else backBtn.classList.add('hidden');
     });
+
+    // Scroll progress bar
+    (function(){
+      const bar = document.getElementById('scrollProgress');
+      if (!bar) return;
+      const onScroll = () => {
+        const h = document.documentElement;
+        const sc = h.scrollTop || document.body.scrollTop;
+        const sh = h.scrollHeight - h.clientHeight;
+        const pct = Math.max(0, Math.min(100, (sc / sh) * 100));
+        bar.style.width = pct + '%';
+      };
+      onScroll();
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll);
+    })();
 
     // Typed rotating words
     (function() {
@@ -723,7 +786,6 @@
           updatedAt: Date.now()
         };
         localStorage.setItem(KEY, JSON.stringify(payload));
-        // Lightweight cookie record (boolean) for server-side checks if needed
         document.cookie = "cookie_consent=1; Max-Age=15552000; Path=/; SameSite=Lax";
         applyConsent(payload);
       }
@@ -744,22 +806,10 @@
         modal.classList.remove('flex');
       }
 
-      // Apply consent choices (load/unload non-essential scripts here)
       function applyConsent(c) {
-        // Example: conditionally load Analytics (placeholder)
-        if (c.analytics) {
-          // loadAnalyticsOnce(); // implement if you use GA/other
-        } else {
-          // disableAnalytics();
-        }
-        if (c.marketing) {
-          // loadMarketingPixels();
-        } else {
-          // disableMarketingPixels();
-        }
+        // Hook for analytics/marketing scripts
       }
 
-      // Wire up events
       btnAccept && btnAccept.addEventListener('click', () => { saveConsent({ analytics: true, marketing: true }); hideBanner(); });
       btnReject && btnReject.addEventListener('click', () => { saveConsent({ analytics: false, marketing: false }); hideBanner(); });
       btnClose && btnClose.addEventListener('click', hideBanner);
@@ -770,14 +820,10 @@
         closeModal(); hideBanner();
       });
 
-      // Init
       const existing = readConsent();
       if (existing) applyConsent(existing); else showBanner();
 
-      // Close modal on backdrop click
       modal && modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-
-      // ESC to close modal
       document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
     })();
   </script>

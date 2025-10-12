@@ -1,47 +1,118 @@
-<?php 
-ob_start(); // Enable output buffering
-include 'db_connect.php'; 
+<?php
+declare(strict_types=1);
+
+ob_start();
+require_once 'db_connect.php';
+
+/* ---------- Security headers (send before any output) ---------- */
+header('X-Frame-Options: DENY');
+header('X-Content-Type-Options: nosniff');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
+// If site is on HTTPS, consider enabling HSTS globally (server/proxy level):
+// header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+
+/* ---------- Secure session cookie settings ---------- */
+$usingHttps = (
+  (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
+  (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+);
+
+session_set_cookie_params([
+  'lifetime' => 0,
+  'path'     => '/',
+  'domain'   => '',
+  'secure'   => $usingHttps,
+  'httponly' => true,
+  'samesite' => 'Lax',
+]);
+
 session_start();
 
-$error = ""; // default error message
+$error = "";
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = trim($_POST['username'] ?? '');
-    $password = $_POST['password'] ?? '';
+/* ---------- CSRF token ---------- */
+if (empty($_SESSION['csrf_token'])) {
+  $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+$csrfToken = $_SESSION['csrf_token'];
 
-    $stmt = $conn->prepare("SELECT u.user_id, u.role, p.password_hash FROM users u 
-                            JOIN passwords p ON u.user_id = p.user_id AND p.is_current = 1 
-                            WHERE u.username = ?");
-    $stmt->bind_param("s", $username);
-    $stmt->execute();
-    $stmt->bind_result($user_id, $role, $hash);
+/* ---------- Basic session-scoped rate limiting (per IP) ---------- */
+$ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+$rateKey = 'login_rate_' . $ip;
+$windowSeconds = 15 * 60; // 15 minutes
+$maxAttempts   = 5;
 
-    if ($stmt->fetch() && password_verify($password, $hash)) {
-        session_regenerate_id(true); // more secure session
-        $_SESSION['user_id'] = $user_id;
-        $_SESSION['role'] = $role;
+if (!isset($_SESSION[$rateKey])) {
+  $_SESSION[$rateKey] = ['count' => 0, 'first' => time()];
+}
 
-        // Redirect based on role
-        switch ($role) {
-            case 'admin':
-                header("Location: admin_dashboard.php");
-                exit;
-            case 'teacher':
-                header("Location: teacher_dashboard.php");
-                exit;
-            case 'student':
-                header("Location: student_dashboard.php");
-                exit;
-            default:
-                $error = "❌ Unknown role.";
-        }
-    } else {
-        $error = "❌ Invalid credentials";
+/* ---------- Handle POST ---------- */
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+  // CSRF validation
+  $postedToken = $_POST['csrf_token'] ?? '';
+  if (!hash_equals($csrfToken, $postedToken)) {
+    $error = "❌ Invalid request.";
+  } else {
+    // Reset window if expired
+    if (time() - $_SESSION[$rateKey]['first'] > $windowSeconds) {
+      $_SESSION[$rateKey] = ['count' => 0, 'first' => time()];
     }
-    $stmt->close();
+
+    if ($_SESSION[$rateKey]['count'] >= $maxAttempts) {
+      $error = "❌ Too many attempts. Try again in a few minutes.";
+    } else {
+      $username = trim($_POST['username'] ?? '');
+      $username = mb_substr($username, 0, 150); // sanity limit
+      $password = $_POST['password'] ?? '';
+
+      $stmt = $conn->prepare(
+        "SELECT u.user_id, u.role, p.password_hash
+           FROM users u
+           JOIN passwords p ON u.user_id = p.user_id AND p.is_current = 1
+          WHERE u.username = ?"
+      );
+
+      if ($stmt === false) {
+        // Do not leak DB errors to users
+        error_log('Login prepare failed: ' . $conn->error);
+        $error = "❌ Something went wrong. Please try again.";
+      } else {
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $stmt->bind_result($user_id, $role, $hash);
+
+        $found = $stmt->fetch();
+        $stmt->close();
+
+        // Constant-time style verification to reduce username enumeration
+        // Static bcrypt of the string "dummy_password"
+        $dummyHash = '$2y$10$KIX/CR0iYc6eZ/EuKQGhFeD69L0/MO6c.pwSdN1JPBUuJIUl0P8y6';
+        $verified = password_verify($password, $found ? $hash : $dummyHash);
+
+        if ($found && $verified) {
+          session_regenerate_id(true);
+          $_SESSION['user_id']   = $user_id;
+          $_SESSION['role']      = $role;
+          $_SESSION['last_auth'] = time();
+          unset($_SESSION[$rateKey]); // reset attempts
+
+          switch ($role) {
+            case 'admin':   header("Location: admin_dashboard.php");   exit;
+            case 'teacher': header("Location: teacher_dashboard.php"); exit;
+            case 'student': header("Location: student_dashboard.php"); exit;
+            default:        $error = "❌ Unknown role.";
+          }
+        } else {
+          $_SESSION[$rateKey]['count']++;
+          $error = "❌ Invalid credentials";
+          usleep(300000); // 300ms slow-down
+        }
+      }
+    }
+  }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -86,8 +157,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   <!-- Background -->
   <div class="absolute inset-0 -z-10">
     <div class="absolute inset-0" style="background-image: linear-gradient(to bottom right, rgba(30,58,138,.5), rgba(147,51,234,.35)), var(--bg-img); background-size: cover; background-position: center;"></div>
-  
-    
     <div class="absolute inset-0 bg-white/30 backdrop-blur-[2px]"></div>
   </div>
 
@@ -98,7 +167,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <div class="relative p-[2px] rounded-2xl bg-gradient-to-b from-white/70 to-white/20 shadow-2xl shadow-blue-900/10">
         <div class="rounded-2xl bg-white/80 backdrop-blur-xl ring-1 ring-white/60 p-8">
           <div class="mb-6 text-center">
-            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-lg shadow-indigo-600/20 mb-3">
+            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-lg shadow-indigo-600/20 mb-3" aria-hidden="true">
               <!-- lock icon -->
               <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16.5 10.5V7.5a4.5 4.5 0 10-9 0v3M5.25 10.5h13.5a1.5 1.5 0 011.5 1.5v7.5a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5V12a1.5 1.5 0 011.5-1.5z" />
@@ -110,29 +179,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
           <?php if (!empty($error)): ?>
             <div class="mb-5 rounded-lg border border-red-200 bg-red-50 text-red-700 px-4 py-3 flex items-start gap-3" role="alert" aria-live="polite">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mt-0.5 flex-none text-red-500" viewBox="0 0 20 20" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mt-0.5 flex-none text-red-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM9 13a1 1 0 102 0 1 1 0 00-2 0zm1-8a.75.75 0 01.75.75v5.5a.75.75 0 01-1.5 0v-5.5A.75.75 0 0110 5z" clip-rule="evenodd" />
               </svg>
-              <p class="text-sm font-medium"><?= $error ?></p>
+              <p class="text-sm font-medium"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></p>
             </div>
           <?php endif; ?>
 
           <form method="POST" class="space-y-5" onsubmit="return handleSubmit(this)">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
+
             <div class="relative">
               <label for="username" class="sr-only">Username</label>
-              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-blue-900/40">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-blue-900/40" aria-hidden="true">
                 <!-- user icon -->
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 12a5 5 0 100-10 5 5 0 000 10z" />
-                  <path fill-rule="evenodd" d="M2.25 20.25A9.75 9.75 0 01112 10.5a9.75 9.75 0 019.75 9.75.75.75 0 01-.75.75H3a.75.75 0 01-.75-.75z" clip-rule="evenodd"/>
+                  <path d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8H4z" />
                 </svg>
               </span>
-              <input 
-                id="username" 
-                type="text" 
-                name="username" 
-                required 
+              <input
+                id="username"
+                type="text"
+                name="username"
+                required
                 autocomplete="username"
+                inputmode="text"
                 class="w-full pl-10 pr-3 py-3 rounded-xl border border-blue-900/10 bg-white/70 backdrop-blur placeholder:text-blue-900/40 text-blue-900 shadow-inner focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition"
                 placeholder="Username"
               />
@@ -140,24 +212,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             <div class="relative">
               <label for="password" class="sr-only">Password</label>
-              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-blue-900/40">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-blue-900/40" aria-hidden="true">
                 <!-- key icon -->
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M21 10a4 4 0 10-7.031 2.5L9 17.469V20h2.531l4.969-4.969A4 4 0 0021 10zM5 20a2 2 0 110-4 2 2 0 010 4z" />
                 </svg>
               </span>
-              <input 
-                id="password" 
-                type="password" 
-                name="password" 
-                required 
+              <input
+                id="password"
+                type="password"
+                name="password"
+                required
                 autocomplete="current-password"
                 class="w-full pl-10 pr-12 py-3 rounded-xl border border-blue-900/10 bg-white/70 backdrop-blur placeholder:text-blue-900/40 text-blue-900 shadow-inner focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition"
                 placeholder="Password"
               />
               <button type="button" onclick="togglePassword()" class="absolute right-3 top-1/2 -translate-y-1/2 text-blue-900/50 hover:text-blue-900/80 transition" aria-label="Toggle password visibility">
                 <!-- eye icon -->
-                <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 110-10 5 5 0 010 10z"/>
                 </svg>
               </button>
@@ -174,19 +246,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
               <a href="forgot_password.php" class="font-medium text-blue-700 hover:text-blue-800 hover:underline">Forgot password?</a>
             </div>
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               class="group w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold py-3 rounded-xl shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/40 transition focus:outline-none focus:ring-4 focus:ring-indigo-500/30"
               id="loginButton"
             >
               <span class="inline-block transition-transform group-hover:-translate-y-0.5">Login</span>
-              <svg class="h-5 w-5 opacity-90 transition-transform group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg class="h-5 w-5 opacity-90 transition-transform group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
               </svg>
             </button>
 
             <p class="text-center text-sm text-blue-900/70">
-              Don't have an account?
+              Don&apos;t have an account?
               <a href="register.php" class="text-blue-800 font-semibold hover:underline">Create one</a>
             </p>
           </form>
@@ -209,9 +281,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       const btn = document.getElementById('loginButton');
       btn.disabled = true;
       btn.classList.add('opacity-70', 'cursor-not-allowed');
-      btn.innerHTML = '<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-30" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg><span class="ml-2">Signing in...</span>';
+      btn.innerHTML = '<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-30" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg><span class="ml-2">Signing in...</span>';
       return true;
     }
   </script>
 </body>
 </html>
+<?php
+ob_end_flush();
