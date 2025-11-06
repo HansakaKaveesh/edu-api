@@ -84,6 +84,64 @@
 
     /* Scroll progress bar */
     #scrollProgress { width: 0%; }
+
+    /* ——— Beauty Upgrades ——— */
+
+    /* Aurora gradient blobs for the hero */
+    .aurora { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+    .aurora span {
+      position: absolute; width: 42rem; height: 42rem;
+      filter: blur(48px); opacity: .75; border-radius: 9999px;
+      animation: drift 24s ease-in-out infinite;
+    }
+    .aurora .a1 {
+      top: -12%; left: -10%;
+      background: radial-gradient(circle at 30% 30%, rgba(99,102,241,.45), transparent 60%);
+      animation-delay: 0s;
+    }
+    .aurora .a2 {
+      right: -12%; bottom: -18%;
+      background: radial-gradient(circle at 70% 40%, rgba(59,130,246,.45), transparent 55%);
+      animation-delay: 6s;
+    }
+    .aurora .a3 {
+      top: 18%; right: 25%;
+      background: radial-gradient(circle at 50% 50%, rgba(236,72,153,.35), transparent 60%);
+      animation-delay: 12s;
+    }
+    @keyframes drift {
+      0%,100% { transform: translate3d(0,0,0) scale(1); }
+      50%     { transform: translate3d(-18px,12px,0) scale(1.05); }
+    }
+
+    /* Subtle dotted texture overlay */
+    .texture-dots {
+      position: absolute; inset: 0; pointer-events: none;
+      background-image: radial-gradient(rgba(255,255,255,.06) 1px, transparent 1.5px);
+      background-size: 10px 10px;
+      mix-blend-mode: screen; opacity: .25;
+    }
+
+    /* Glow ring for primary CTA buttons */
+    .btn-glow { position: relative; z-index: 0; }
+    .btn-glow::before {
+      content: ""; position: absolute; inset: -3px; z-index: -1; border-radius: .8rem;
+      background: linear-gradient(90deg, #60a5fa, #a78bfa, #60a5fa);
+      filter: blur(12px); opacity: .35; transition: opacity .25s ease;
+    }
+    .btn-glow:hover::before { opacity: .85; }
+
+    /* Tilt micro-interaction for cards */
+    .tilt {
+      will-change: transform; transform-style: preserve-3d;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .tilt:hover { box-shadow: 0 18px 45px rgba(2,6,23,.15); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .aurora span { animation: none; }
+      .tilt { transition: none; }
+    }
   </style>
 </head>
 
@@ -104,9 +162,17 @@
   <!-- Hero -->
   <section class="relative min-h-screen flex items-center justify-center text-center overflow-hidden">
     <!-- Background image -->
-    <img src="./images/hero-bg.jpg" alt="" class="absolute inset-0 w-full h-full object-cover" fetchpriority="high" />
+    <img id="heroBg" src="./images/hero-bg.jpg" alt="" class="absolute inset-0 w-full h-full object-cover" fetchpriority="high" />
     <!-- Gradient overlay -->
     <div class="absolute inset-0 bg-gradient-to-br from-slate-900/80 via-blue-900/70 to-cyan-800/60"></div>
+
+    <!-- New: aurora + subtle texture -->
+    <div class="aurora">
+      <span class="a1"></span>
+      <span class="a2"></span>
+      <span class="a3"></span>
+    </div>
+    <div class="texture-dots"></div>
 
     <!-- Decorative blobs -->
     <div class="pointer-events-none absolute -top-16 -left-20 w-80 h-80 bg-gradient-to-tr from-pink-400 to-purple-500 opacity-30 blur-3xl rounded-full animate-blob"></div>
@@ -157,15 +223,15 @@
       <div class="reveal flex justify-center flex-wrap gap-4 mt-8">
         <?php if (!empty($_SESSION['user_id'])): ?>
           <?php if (($_SESSION['role'] ?? '') === 'student'): ?>
-            <a href="student_dashboard.php" class="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
+            <a href="student_dashboard.php" class="btn-glow inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
               <ion-icon name="school-outline" class="text-xl"></ion-icon> Go to Dashboard
             </a>
           <?php elseif (($_SESSION['role'] ?? '') === 'teacher'): ?>
-            <a href="teacher_dashboard.php" class="inline-flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-lg shadow hover:bg-purple-700 focus:ring-4 focus:ring-purple-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
+            <a href="teacher_dashboard.php" class="btn-glow inline-flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-lg shadow hover:bg-purple-700 focus:ring-4 focus:ring-purple-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
               <ion-icon name="easel-outline" class="text-xl"></ion-icon> Go to Dashboard
             </a>
           <?php else: ?>
-            <a href="admin_dashboard.php" class="inline-flex items-center gap-2 bg-gray-700 text-white px-6 py-3 rounded-lg shadow hover:bg-gray-800 focus:ring-4 focus:ring-gray-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
+            <a href="admin_dashboard.php" class="btn-glow inline-flex items-center gap-2 bg-gray-700 text-white px-6 py-3 rounded-lg shadow hover:bg-gray-800 focus:ring-4 focus:ring-gray-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
               <ion-icon name="shield-checkmark-outline" class="text-xl"></ion-icon> Go to Dashboard
             </a>
           <?php endif; ?>
@@ -173,10 +239,10 @@
             <ion-icon name="log-out-outline"></ion-icon> Logout
           </a>
         <?php else: ?>
-          <a href="login.php" class="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
+          <a href="login.php" class="btn-glow inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
             <ion-icon name="log-in-outline" class="text-xl"></ion-icon> Login
           </a>
-          <a href="register.php" class="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg shadow hover:bg-green-700 focus:ring-4 focus:ring-green-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
+          <a href="register.php" class="btn-glow inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg shadow hover:bg-green-700 focus:ring-4 focus:ring-green-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
             <ion-icon name="person-add-outline" class="text-xl"></ion-icon> Register
           </a>
           <a href="#about" class="inline-flex items-center gap-2 text-white/90 hover:text-white px-6 py-3 rounded-lg border border-white/30 hover:bg-white/10 transition">
@@ -207,12 +273,13 @@
         <ion-icon name="chevron-down-outline" aria-hidden="true" class="animate-bounce"></ion-icon>
       </div>
     </div>
+
   </section>
 
   <!-- Stats -->
   <section class="py-16 bg-gradient-to-b from-white to-blue-50">
     <div class="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="reveal rounded-2xl p-[1px] bg-gradient-to-r from-blue-100 to-indigo-100 hover:shadow-lg transition">
+      <div class="tilt reveal rounded-2xl p-[1px] bg-gradient-to-r from-blue-100 to-indigo-100 hover:shadow-lg transition">
         <div class="bg-white/90 rounded-2xl p-5 border border-white/60 text-center">
           <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-50 text-blue-600 mb-2">
             <ion-icon name="people-outline"></ion-icon>
@@ -221,7 +288,7 @@
           <div class="text-gray-600">Active Students</div>
         </div>
       </div>
-      <div class="reveal rounded-2xl p-[1px] bg-gradient-to-r from-emerald-100 to-green-100 hover:shadow-lg transition">
+      <div class="tilt reveal rounded-2xl p-[1px] bg-gradient-to-r from-emerald-100 to-green-100 hover:shadow-lg transition">
         <div class="bg-white/90 rounded-2xl p-5 border border-white/60 text-center">
           <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 mb-2">
             <ion-icon name="ribbon-outline"></ion-icon>
@@ -230,7 +297,7 @@
           <div class="text-gray-600">Expert Tutors</div>
         </div>
       </div>
-      <div class="reveal rounded-2xl p-[1px] bg-gradient-to-r from-purple-100 to-fuchsia-100 hover:shadow-lg transition">
+      <div class="tilt reveal rounded-2xl p-[1px] bg-gradient-to-r from-purple-100 to-fuchsia-100 hover:shadow-lg transition">
         <div class="bg-white/90 rounded-2xl p-5 border border-white/60 text-center">
           <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-purple-50 text-purple-600 mb-2">
             <ion-icon name="library-outline"></ion-icon>
@@ -239,7 +306,7 @@
           <div class="text-gray-600">Courses</div>
         </div>
       </div>
-      <div class="reveal rounded-2xl p-[1px] bg-gradient-to-r from-rose-100 to-pink-100 hover:shadow-lg transition">
+      <div class="tilt reveal rounded-2xl p-[1px] bg-gradient-to-r from-rose-100 to-pink-100 hover:shadow-lg transition">
         <div class="bg-white/90 rounded-2xl p-5 border border-white/60 text-center">
           <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-rose-50 text-rose-600 mb-2">
             <ion-icon name="document-text-outline"></ion-icon>
@@ -266,7 +333,7 @@
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mt-12">
-        <article class="reveal bg-white/90 p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-0.5 transition text-left" role="region" aria-labelledby="students-title">
+        <article class="tilt reveal bg-white/90 p-6 rounded-2xl shadow-md hover:shadow-xl transition text-left" role="region" aria-labelledby="students-title">
           <div class="text-blue-600 text-4xl mb-4" aria-hidden="true"><ion-icon name="laptop-outline"></ion-icon></div>
           <h3 id="students-title" class="text-xl font-semibold mb-2">For Students</h3>
           <p class="text-gray-600 text-sm sm:text-base">
@@ -274,7 +341,7 @@
           </p>
         </article>
 
-        <article class="reveal bg-white/90 p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-0.5 transition text-left" role="region" aria-labelledby="teachers-title">
+        <article class="tilt reveal bg-white/90 p-6 rounded-2xl shadow-md hover:shadow-xl transition text-left" role="region" aria-labelledby="teachers-title">
           <div class="text-green-500 text-4xl mb-4" aria-hidden="true"><ion-icon name="easel-outline"></ion-icon></div>
           <h3 id="teachers-title" class="text-xl font-semibold mb-2">For Teachers</h3>
           <p class="text-gray-600 text-sm sm:text-base">
@@ -282,7 +349,7 @@
           </p>
         </article>
 
-        <article class="reveal bg-white/90 p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-0.5 transition text-left" role="region" aria-labelledby="admins-title">
+        <article class="tilt reveal bg-white/90 p-6 rounded-2xl shadow-md hover:shadow-xl transition text-left" role="region" aria-labelledby="admins-title">
           <div class="text-yellow-500 text-4xl mb-4" aria-hidden="true"><ion-icon name="settings-outline"></ion-icon></div>
           <h3 id="admins-title" class="text-xl font-semibold mb-2">For Admins</h3>
           <p class="text-gray-600 text-sm sm:text-base">
@@ -304,7 +371,7 @@
       </p>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-        <article class="reveal bg-white/90 p-8 rounded-2xl shadow hover:shadow-xl hover:-translate-y-1 transition text-left" role="region" aria-labelledby="live-sessions-title">
+        <article class="tilt reveal bg-white/90 p-8 rounded-2xl shadow hover:shadow-xl transition text-left" role="region" aria-labelledby="live-sessions-title">
           <div class="text-blue-500 text-4xl mb-4" aria-hidden="true"><ion-icon name="videocam-outline"></ion-icon></div>
           <h3 id="live-sessions-title" class="font-semibold text-xl mb-2">Live Sessions</h3>
           <p class="text-gray-600 text-sm sm:text-base">
@@ -312,7 +379,7 @@
           </p>
         </article>
 
-        <article class="reveal bg-white/90 p-8 rounded-2xl shadow hover:shadow-xl hover:-translate-y-1 transition text-left" role="region" aria-labelledby="expert-guidance-title">
+        <article class="tilt reveal bg-white/90 p-8 rounded-2xl shadow hover:shadow-xl transition text-left" role="region" aria-labelledby="expert-guidance-title">
           <div class="text-green-500 text-4xl mb-4" aria-hidden="true"><ion-icon name="school-outline"></ion-icon></div>
           <h3 id="expert-guidance-title" class="font-semibold text-xl mb-2">Expert Guidance</h3>
           <p class="text-gray-600 text-sm sm:text-base">
@@ -320,7 +387,7 @@
           </p>
         </article>
 
-        <article class="reveal bg-white/90 p-8 rounded-2xl shadow hover:shadow-xl hover:-translate-y-1 transition text-left" role="region" aria-labelledby="progress-tracking-title">
+        <article class="tilt reveal bg-white/90 p-8 rounded-2xl shadow hover:shadow-xl transition text-left" role="region" aria-labelledby="progress-tracking-title">
           <div class="text-yellow-500 text-4xl mb-4" aria-hidden="true"><ion-icon name="stats-chart-outline"></ion-icon></div>
           <h3 id="progress-tracking-title" class="font-semibold text-xl mb-2">Progress Tracking</h3>
           <p class="text-gray-600 text-sm sm:text-base">
@@ -343,7 +410,7 @@
 
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-8">
         <!-- IGCSE ICT -->
-        <article class="reveal bg-white rounded-2xl shadow hover:shadow-2xl hover:-translate-y-1 transition overflow-hidden text-left group" role="region" aria-labelledby="igcse-ict-title">
+        <article class="tilt reveal bg-white rounded-2xl shadow hover:shadow-2xl transition overflow-hidden text-left group" role="region" aria-labelledby="igcse-ict-title">
           <div class="relative">
             <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFRObkO8H_uYDj0uuGJ1vlSPl4i-qFHG92YQ&s"
                  alt="IGCSE ICT" class="w-full h-48 object-cover group-hover:scale-[1.02] transition" loading="lazy" decoding="async">
@@ -361,7 +428,7 @@
         </article>
 
         <!-- IAL AS ICT -->
-        <article class="reveal bg-white rounded-2xl shadow hover:shadow-2xl hover:-translate-y-1 transition overflow-hidden text-left group" role="region" aria-labelledby="ial-as-ict-title">
+        <article class="tilt reveal bg-white rounded-2xl shadow hover:shadow-2xl transition overflow-hidden text-left group" role="region" aria-labelledby="ial-as-ict-title">
           <div class="relative">
             <img src="https://aotscolombiajapon.com/wp-content/uploads/2025/01/3ra-Beca-IA-Utilizing-to-overcome-DX-related-1.jpg"
                  alt="IAL AS ICT" class="w-full h-48 object-cover group-hover:scale-[1.02] transition" loading="lazy" decoding="async">
@@ -379,7 +446,7 @@
         </article>
 
         <!-- IAL AS2 ICT -->
-        <article class="reveal bg-white rounded-2xl shadow hover:shadow-2xl hover:-translate-y-1 transition overflow-hidden text-left group" role="region" aria-labelledby="ial-as2-ict-title">
+        <article class="tilt reveal bg-white rounded-2xl shadow hover:shadow-2xl transition overflow-hidden text-left group" role="region" aria-labelledby="ial-as2-ict-title">
           <div class="relative">
             <img src="https://www.ict.eu/sites/corporate/files/images/iStock-1322517295%20copy_3.jpg"
                  alt="IAL AS2 ICT" class="w-full h-48 object-cover group-hover:scale-[1.02] transition" loading="lazy" decoding="async">
@@ -397,7 +464,7 @@
         </article>
 
         <!-- IGCSE Computer Science -->
-        <article class="reveal bg-white rounded-2xl shadow hover:shadow-2xl hover:-translate-y-1 transition overflow-hidden text-left group" role="region" aria-labelledby="igcse-cs-title">
+        <article class="tilt reveal bg-white rounded-2xl shadow hover:shadow-2xl transition overflow-hidden text-left group" role="region" aria-labelledby="igcse-cs-title">
           <div class="relative">
             <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTiX_sE8HNgliGkDZNJaestGinmoLUp1ab5Eg&s"
                  alt="IGCSE Computer Science" class="w-full h-48 object-cover group-hover:scale-[1.02] transition" loading="lazy" decoding="async">
@@ -426,7 +493,7 @@
       </p>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-        <article class="reveal bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl hover:-translate-y-1 transition" role="region" aria-labelledby="edu-ruwan">
+        <article class="tilt reveal bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition" role="region" aria-labelledby="edu-ruwan">
           <img src="./images/tanjana-sir-image-1.png" alt="Mr. Tanjana Chamikara" class="w-24 h-24 mx-auto rounded-full border-4 border-blue-200 mb-4" loading="lazy" decoding="async" />
           <h3 id="edu-ruwan" class="font-semibold text-xl text-blue-800 flex items-center justify-center gap-2">
             <ion-icon name="person-circle-outline" class="text-blue-600"></ion-icon> Mr. Tanjana Chamikara
@@ -439,7 +506,7 @@
           </ul>
         </article>
 
-        <article class="reveal bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl hover:-translate-y-1 transition" role="region" aria-labelledby="edu-thilini">
+        <article class="tilt reveal bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition" role="region" aria-labelledby="edu-thilini">
           <img src="./images/madara-miss-image-600-2-1.png" alt="Ms. Madhara Wedhage" class="w-24 h-24 mx-auto rounded-full border-4 border-green-200 mb-4" loading="lazy" decoding="async" />
           <h3 id="edu-thilini" class="font-semibold text-xl text-green-800 flex items-center justify-center gap-2">
             <ion-icon name="person-circle-outline" class="text-green-600"></ion-icon> Ms. Madhara Wedhage
@@ -452,7 +519,7 @@
           </ul>
         </article>
 
-        <article class="reveal bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl hover:-translate-y-1 transition" role="region" aria-labelledby="edu-chamika">
+        <article class="tilt reveal bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition" role="region" aria-labelledby="edu-chamika">
           <img src="./images/udara-miss-2.png" alt="Ms. Udara Dilshani" class="w-24 h-24 mx-auto rounded-full border-4 border-yellow-200 mb-4" loading="lazy" decoding="async" />
           <h3 id="edu-chamika" class="font-semibold text-xl text-yellow-800 flex items-center justify-center gap-2">
             <ion-icon name="person-circle-outline" class="text-yellow-600"></ion-icon> Ms. Udara Dilshani
@@ -477,7 +544,7 @@
       </p>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <article class="reveal bg-gradient-to-br from-blue-100 to-white p-6 rounded-xl shadow-lg text-left hover:shadow-2xl transition">
+        <article class="tilt reveal bg-gradient-to-br from-blue-100 to-white p-6 rounded-xl shadow-lg text-left hover:shadow-2xl transition">
           <div class="flex items-start gap-4">
             <img src="./images/Men.jpg" alt="Nisansala D." class="w-12 h-12 rounded-full border-2 border-blue-300" loading="lazy" decoding="async" />
             <div>
@@ -490,7 +557,7 @@
           </div>
         </article>
 
-        <article class="reveal bg-gradient-to-br from-green-100 to-white p-6 rounded-xl shadow-lg text-left hover:shadow-2xl transition">
+        <article class="tilt reveal bg-gradient-to-br from-green-100 to-white p-6 rounded-xl shadow-lg text-left hover:shadow-2xl transition">
           <div class="flex items-start gap-4">
             <img src="./images/Men.jpg" alt="Kaveen R." class="w-12 h-12 rounded-full border-2 border-green-300" loading="lazy" decoding="async" />
             <div>
@@ -534,7 +601,7 @@
         </details>
         <details class="bg-white/90 border border-gray-100 rounded-xl p-5 shadow group">
           <summary class="cursor-pointer font-semibold text-gray-800 flex items-center justify-between">
-            <span class="inline-flex items-center gap-2"><ion-icon name="videocam-outline" class="text-blue-600"></ion-icon> How do I join live sessions?</span>
+            <span class="inline-flex items-center gap-2"><ion-icon name="videocam-outline" class="text-blue-600"></ionicon> How do I join live sessions?</span>
             <ion-icon name="chevron-down-outline" class="text-gray-400 group-open:rotate-180 transition"></ion-icon>
           </summary>
           <p class="mt-2 text-gray-600">Enrolled students receive links and reminders directly in their dashboard.</p>
@@ -557,7 +624,7 @@
         <p class="mt-2 text-white/90">Join thousands of learners and level up your skills today.</p>
         <div class="mt-6 flex justify-center gap-3 flex-wrap">
           <?php if (empty($_SESSION['user_id'])): ?>
-            <a href="register.php" class="inline-flex items-center gap-2 bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg shadow hover:translate-y-[-1px] transition">
+            <a href="register.php" class="btn-glow inline-flex items-center gap-2 bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg shadow hover:translate-y-[-1px] transition">
               <ion-icon name="person-add-outline"></ion-icon> Get Started
             </a>
             <a href="login.php" class="inline-flex items-center gap-2 bg-indigo-900/30 text-white border border-white/30 px-6 py-3 rounded-lg hover:bg-indigo-900/40 transition">
@@ -565,15 +632,15 @@
             </a>
           <?php else: ?>
             <?php if (($_SESSION['role'] ?? '') === 'student'): ?>
-              <a href="student_dashboard.php" class="inline-flex items-center gap-2 bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg shadow hover:translate-y-[-1px] transition">
+              <a href="student_dashboard.php" class="btn-glow inline-flex items-center gap-2 bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg shadow hover:translate-y-[-1px] transition">
                 <ion-icon name="open-outline"></ion-icon> Open Dashboard
               </a>
             <?php elseif (($_SESSION['role'] ?? '') === 'teacher'): ?>
-              <a href="teacher_dashboard.php" class="inline-flex items-center gap-2 bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg shadow hover:translate-y-[-1px] transition">
+              <a href="teacher_dashboard.php" class="btn-glow inline-flex items-center gap-2 bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg shadow hover:translate-y-[-1px] transition">
                 <ion-icon name="open-outline"></ion-icon> Open Dashboard
               </a>
             <?php else: ?>
-              <a href="admin_dashboard.php" class="inline-flex items-center gap-2 bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg shadow hover:translate-y-[-1px] transition">
+              <a href="admin_dashboard.php" class="btn-glow inline-flex items-center gap-2 bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg shadow hover:translate-y-[-1px] transition">
                 <ion-icon name="open-outline"></ion-icon> Open Dashboard
               </a>
             <?php endif; ?>
@@ -671,7 +738,7 @@
      <ion-icon name="arrow-up-outline" class="text-xl"></ion-icon>
   </a>
 
-  <!-- Scripts: reveal on scroll + back-to-top + typed + countUp + cookie consent + progress bar -->
+  <!-- Scripts: reveal on scroll + back-to-top + typed + countUp + cookie consent + progress bar + beauty effects -->
   <script>
     // Reveal on scroll
     const observer = new IntersectionObserver((entries) => {
@@ -825,6 +892,46 @@
 
       modal && modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
       document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+    })();
+
+    // Beauty effects: hero parallax and tilt
+    (function() {
+      // Hero parallax (gentle)
+      const hero = document.getElementById('heroBg');
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (hero && !prefersReduced) {
+        const onScroll = () => {
+          const y = window.scrollY || 0;
+          const offset = Math.min(60, y * 0.12);
+          hero.style.transform = `translateY(${offset}px) scale(1.06)`;
+          hero.style.transformOrigin = 'center';
+        };
+        onScroll();
+        window.addEventListener('scroll', onScroll, { passive: true });
+      }
+
+      // Tilt cards on pointer
+      const fine = window.matchMedia('(pointer: fine)').matches;
+      if (fine && !prefersReduced) {
+        const SENS = 10;
+        document.querySelectorAll('.tilt').forEach((card) => {
+          let raf = null;
+          const leave = () => { card.style.transform = ''; };
+          const move = (e) => {
+            if (raf) cancelAnimationFrame(raf);
+            raf = requestAnimationFrame(() => {
+              const r = card.getBoundingClientRect();
+              const px = (e.clientX - r.left) / r.width;
+              const py = (e.clientY - r.top) / r.height;
+              const rx = (0.5 - py) * SENS;
+              const ry = (px - 0.5) * SENS;
+              card.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg) translateZ(0)`;
+            });
+          };
+          card.addEventListener('mousemove', move);
+          card.addEventListener('mouseleave', leave);
+        });
+      }
     })();
   </script>
 </body>

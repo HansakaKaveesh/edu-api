@@ -162,6 +162,7 @@ $is_doc    = $file_url && in_array($file_ext, ['doc','docx','ppt','pptx','xls','
   <meta charset="UTF-8" />
   <title><?= htmlspecialchars($content_id ? "$title • Teacher View" : "$course_name • Teacher View") ?></title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+   <link rel="icon" type="image/png" href="./images/logo.png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>

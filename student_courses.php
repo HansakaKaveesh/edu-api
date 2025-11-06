@@ -53,7 +53,8 @@ $total = count($courses);
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Improved viewport for modern mobile devices with notches -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>My Enrolled Courses</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" type="image/png" href="./images/logo.png" />
@@ -64,6 +65,11 @@ $total = count($courses);
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <style>
       html, body { font-family: "Inter", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+      /* Mobile text sizing + tap highlight */
+      html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+      * { -webkit-tap-highlight-color: transparent; }
+      img, svg, video, canvas { max-width: 100%; height: auto; display: block; }
+
       @keyframes fadeUp { from { opacity:0; transform: translateY(10px);} to { opacity:1; transform: translateY(0);} }
       .animate-fadeUp { animation: fadeUp .45s ease-out both; }
       .bg-bubbles::before, .bg-bubbles::after {
@@ -83,6 +89,9 @@ $total = count($courses);
       /* Card hover */
       .card { transition: box-shadow .2s ease, transform .2s ease; }
       .card:hover { box-shadow: 0 14px 28px rgba(15,23,42,.09); transform: translateY(-1px); }
+
+      /* iOS safe area bottom padding helper */
+      .safe-area-b { padding-bottom: max(env(safe-area-inset-bottom), 0px); }
     </style>
 </head>
 <body class="bg-gradient-to-br from-sky-50 via-white to-indigo-50 min-h-screen font-sans text-gray-800 antialiased">
@@ -90,13 +99,13 @@ $total = count($courses);
 <?php include 'components/navbar.php'; ?>
 <div class="fixed inset-0 bg-bubbles -z-10"></div>
 
-<div class="flex flex-col lg:flex-row max-w-8xl mx-auto px-6 lg:px-10 py-28 gap-8">
+<div class="flex flex-col lg:flex-row max-w-8xl mx-auto px-4 sm:px-6 lg:px-10 py-24 sm:py-28 gap-6 sm:gap-8">
 
   <!-- Sidebar -->
   <?php include 'components/sidebar_student.php'; ?>
 
   <!-- Main Content -->
-  <main class="w-full space-y-8 animate-fadeUp">
+  <main class="w-full space-y-6 sm:space-y-8 animate-fadeUp">
 
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -129,8 +138,16 @@ $total = count($courses);
       </div>
     <?php else: ?>
 
-      <!-- Controls -->
-      <div class="bg-white/80 backdrop-blur-sm p-4 sm:p-5 rounded-2xl shadow border border-gray-100">
+      <!-- Mobile Filters button -->
+      <div class="md:hidden">
+        <button id="openMobileFilters" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white/90 border border-gray-200 shadow-sm text-gray-800">
+          <ion-icon name="options-outline" class="text-lg text-indigo-600"></ion-icon>
+          Filters & Sort
+        </button>
+      </div>
+
+      <!-- Controls (hidden on mobile, visible on md+) -->
+      <div class="hidden md:block bg-white/80 backdrop-blur-sm p-4 sm:p-5 rounded-2xl shadow border border-gray-100">
         <div class="flex items-center gap-2 text-sm text-gray-600 mb-3">
           <ion-icon name="filter-outline" class="text-indigo-600"></ion-icon>
           Refine your list
@@ -176,16 +193,16 @@ $total = count($courses);
       </div>
 
       <!-- Courses Grid -->
-      <div id="coursesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div id="coursesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
         <?php foreach ($courses as $c): ?>
-          <div class="course-card card group bg-white/80 backdrop-blur-sm rounded-2xl shadow-md border border-gray-100 p-6 relative overflow-hidden"
+          <div class="course-card card group bg-white/80 backdrop-blur-sm rounded-2xl shadow-md border border-gray-100 p-5 sm:p-6 relative overflow-hidden"
                data-name="<?= htmlspecialchars(mb_strtolower($c['name'])) ?>"
                data-board="<?= htmlspecialchars(mb_strtolower($c['board'])) ?>"
                data-level="<?= htmlspecialchars(mb_strtolower($c['level'])) ?>">
             <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition bg-gradient-to-br from-indigo-500/5 via-transparent to-cyan-500/10"></div>
             <div class="relative z-10">
               <div class="flex items-start justify-between gap-3">
-                <h3 class="text-lg font-bold text-gray-900"><?= htmlspecialchars($c['name']) ?></h3>
+                <h3 class="text-base sm:text-lg font-bold text-gray-900"><?= htmlspecialchars($c['name']) ?></h3>
                 <span class="inline-flex items-center justify-center h-9 w-9 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100">
                   <ion-icon name="book-outline" class="text-xl"></ion-icon>
                 </span>
@@ -240,6 +257,64 @@ $total = count($courses);
           <ion-icon name="refresh-outline"></ion-icon>
           Clear filters
         </button>
+      </div>
+
+      <!-- Mobile Filters Sheet -->
+      <div id="mobileFiltersSheet" class="fixed inset-0 z-50 hidden" aria-hidden="true">
+        <div id="mfOverlay" class="absolute inset-0 bg-black/50"></div>
+        <div role="dialog" aria-modal="true" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl p-4 sm:p-5 safe-area-b">
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-semibold text-gray-900">Filters & Sort</h3>
+            <button id="closeMobileFilters" class="text-gray-500 hover:text-gray-700">
+              <ion-icon name="close-outline" class="text-2xl"></ion-icon>
+              <span class="sr-only">Close</span>
+            </button>
+          </div>
+          <div class="mt-4 space-y-3">
+            <div class="relative">
+              <ion-icon name="search-outline" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></ion-icon>
+              <input id="searchInputMobile" type="text" placeholder="Search by course, board, or level..."
+                     class="w-full rounded-lg bg-white border border-gray-200 px-3 py-2 pl-10 focus:ring-2 focus:ring-indigo-500/40 focus:outline-none">
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="relative">
+                <ion-icon name="school-outline" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></ion-icon>
+                <select id="boardFilterMobile" class="pl-9 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/40 w-full">
+                  <option value="">All Boards</option>
+                  <?php foreach ($boardOptions as $b): ?>
+                    <option value="<?= htmlspecialchars($b) ?>"><?= htmlspecialchars($b) ?></option>
+                  <?php endforeach; ?>
+                </select>
+              </div>
+              <div class="relative">
+                <ion-icon name="layers-outline" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></ion-icon>
+                <select id="levelFilterMobile" class="pl-9 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/40 w-full">
+                  <option value="">All Levels</option>
+                  <?php foreach ($levelOptions as $l): ?>
+                    <option value="<?= htmlspecialchars($l) ?>"><?= htmlspecialchars($l) ?></option>
+                  <?php endforeach; ?>
+                </select>
+              </div>
+            </div>
+            <div class="relative">
+              <ion-icon name="swap-vertical-outline" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></ion-icon>
+              <select id="sortSelectMobile" class="pl-9 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/40 w-full">
+                <option value="name-asc">Sort: Name A–Z</option>
+                <option value="name-desc">Sort: Name Z–A</option>
+              </select>
+            </div>
+          </div>
+          <div class="mt-5 flex items-center justify-between gap-3">
+            <button id="resetMobileFilters" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50">
+              <ion-icon name="refresh-outline"></ion-icon>
+              Reset
+            </button>
+            <button id="applyMobileFilters" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700">
+              <ion-icon name="checkmark-circle-outline"></ion-icon>
+              Apply
+            </button>
+          </div>
+        </div>
       </div>
 
     <?php endif; ?>
@@ -297,7 +372,7 @@ $total = count($courses);
     if (noResults) noResults.classList.toggle('hidden', visible.length > 0);
   }
 
-  searchInput?.addEventListener('input', apply);
+  searchInput?.addEventListener('input', apply, { passive: true });
   boardFilter?.addEventListener('change', apply);
   levelFilter?.addEventListener('change', apply);
   sortSelect?.addEventListener('change', apply);
@@ -305,10 +380,65 @@ $total = count($courses);
     if (searchInput) searchInput.value = '';
     if (boardFilter) boardFilter.value = '';
     if (levelFilter) levelFilter.value = '';
+    if (sortSelect) sortSelect.value = 'name-asc';
     apply();
   });
 
   apply();
+
+  // Mobile Filters Sheet logic
+  const openMobileFilters = document.getElementById('openMobileFilters');
+  const mobileSheet = document.getElementById('mobileFiltersSheet');
+  const mfOverlay = document.getElementById('mfOverlay');
+  const closeMobileFilters = document.getElementById('closeMobileFilters');
+
+  const searchInputMobile = document.getElementById('searchInputMobile');
+  const boardFilterMobile = document.getElementById('boardFilterMobile');
+  const levelFilterMobile = document.getElementById('levelFilterMobile');
+  const sortSelectMobile  = document.getElementById('sortSelectMobile');
+  const applyMobileBtn    = document.getElementById('applyMobileFilters');
+  const resetMobileBtn    = document.getElementById('resetMobileFilters');
+
+  function openSheet() {
+    if (!mobileSheet) return;
+    mobileSheet.classList.remove('hidden');
+    mobileSheet.setAttribute('aria-hidden', 'false');
+    // seed mobile values from desktop (if any)
+    if (searchInputMobile && searchInput) searchInputMobile.value = searchInput.value || '';
+    if (boardFilterMobile && boardFilter) boardFilterMobile.value = boardFilter.value || '';
+    if (levelFilterMobile && levelFilter) levelFilterMobile.value = levelFilter.value || '';
+    if (sortSelectMobile && sortSelect) sortSelectMobile.value = sortSelect.value || 'name-asc';
+    // lock scroll
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSheet() {
+    if (!mobileSheet) return;
+    mobileSheet.classList.add('hidden');
+    mobileSheet.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  openMobileFilters?.addEventListener('click', openSheet);
+  mfOverlay?.addEventListener('click', closeSheet);
+  closeMobileFilters?.addEventListener('click', closeSheet);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
+
+  applyMobileBtn?.addEventListener('click', () => {
+    // copy values to desktop controls, then apply
+    if (searchInput && searchInputMobile) searchInput.value = searchInputMobile.value;
+    if (boardFilter && boardFilterMobile) boardFilter.value = boardFilterMobile.value;
+    if (levelFilter && levelFilterMobile) levelFilter.value = levelFilterMobile.value;
+    if (sortSelect && sortSelectMobile) sortSelect.value = sortSelectMobile.value;
+    apply();
+    closeSheet();
+  });
+
+  resetMobileBtn?.addEventListener('click', () => {
+    if (searchInputMobile) searchInputMobile.value = '';
+    if (boardFilterMobile) boardFilterMobile.value = '';
+    if (levelFilterMobile) levelFilterMobile.value = '';
+    if (sortSelectMobile) sortSelectMobile.value = 'name-asc';
+  });
 </script>
 </body>
 </html>

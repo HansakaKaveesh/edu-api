@@ -8,33 +8,58 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 
 $isLoggedIn = isset($_SESSION['user_id']);
 $role       = $_SESSION['role'] ?? null;
-$userId     = (int)($_SESSION['user_id'] ?? 0); // <-- fixed: avoid undefined array key
+$userId     = (int)($_SESSION['user_id'] ?? 0);
 
 // Current path (for active link)
 $currentPath = basename(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
 $isHome = ($currentPath === '' || $currentPath === 'index.php');
-
-// Dashboard routes
-$dashboardLink = $role === 'student' ? 'student_dashboard.php' :
-                 ($role === 'teacher' ? 'teacher_dashboard.php' :
-                 ($role === 'admin'   ? 'admin_dashboard.php'   : ''));
-
-// Profile/Settings routes (adjust as needed)
-$profileLink  = $role === 'student' ? 'student_settings.php'  : ($role === 'teacher' ? 'teacher_profile.php'  : 'admin_profile.php');
-$settingsLink = $role === 'student' ? 'student_settings.php' : ($role === 'teacher' ? 'teacher_settings.php' : 'admin_settings.php');
 
 // Active class helper
 function activeClass(bool $isActive, string $extra = '') {
   return $isActive ? "text-yellow-300 $extra" : "hover:text-yellow-300 $extra";
 }
 
-// Display name + initials
+/* Dashboard routes (now includes CEO and CTO) */
+$dashMap = [
+  'student' => 'student_dashboard.php',
+  'teacher' => 'teacher_dashboard.php',
+  'admin'   => 'admin_dashboard.php',
+  'ceo'     => 'ceo_dashboard.php',
+  'cto'     => 'cto_dashboard.php', // optional if you have CTO
+];
+$dashboardLink = $dashMap[$role] ?? '';
+
+/* Profile/Settings routes per role (includes CEO/CTO) */
+$profileMap = [
+  'student' => 'student_settings.php',
+  'teacher' => 'teacher_profile.php',
+  'admin'   => 'admin_profile.php',
+  'ceo'     => 'ceo_settings.php',
+  'cto'     => 'cto_profile.php',
+];
+$settingsMap = [
+  'student' => 'student_settings.php',
+  'teacher' => 'teacher_settings.php',
+  'admin'   => 'admin_settings.php',
+  'ceo'     => 'ceo_settings.php',
+  'cto'     => 'cto_settings.php',
+];
+
+$profileLink  = $profileMap[$role]  ?? 'admin_profile.php';
+$settingsLink = $settingsMap[$role] ?? 'admin_settings.php';
+
+/* Display name + initials */
 $displayName = 'Account';
 if ($isLoggedIn) {
   $displayName = $_SESSION['full_name'] ?? $_SESSION['username'] ?? ucfirst($role ?? 'User');
 
   if (isset($conn) && $conn instanceof mysqli) {
-    $tbl = $role === 'student' ? 'students' : ($role === 'teacher' ? 'teachers' : ($role === 'admin' ? 'admins' : null));
+    // Include CEO/CTO tables for name lookup
+    $tbl = $role === 'student' ? 'students'
+         : ($role === 'teacher' ? 'teachers'
+         : ($role === 'admin'   ? 'admins'
+         : ($role === 'ceo'     ? 'ceo'
+         : ($role === 'cto'     ? 'cto' : null))));
     if ($tbl && $stmt = $conn->prepare("SELECT first_name, last_name FROM {$tbl} WHERE user_id = ? LIMIT 1")) {
       $stmt->bind_param('i', $userId);
       $stmt->execute();
@@ -62,7 +87,6 @@ $initials = strtoupper(preg_replace('/[^A-Za-z]/', '', mb_substr($displayName, 0
   <div class="relative flex items-center justify-between max-w-7xl mx-auto">
     <!-- Logo -->
     <a href="index.php" class="inline-flex items-center gap-2 text-2xl md:text-3xl font-extrabold tracking-tight hover:scale-105 transition-transform duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 rounded">
-      
       Synap<span class="text-yellow-400">Z</span>
     </a>
 

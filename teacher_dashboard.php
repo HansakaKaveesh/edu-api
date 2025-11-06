@@ -158,6 +158,8 @@ $greet = ($hr < 12) ? 'Good morning' : (($hr < 18) ? 'Good afternoon' : 'Good ev
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <meta property="og:image" content="./images/logo.png" />
+    <link rel="icon" type="image/png" href="./images/logo.png" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
   <script>
