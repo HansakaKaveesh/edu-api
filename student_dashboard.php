@@ -105,70 +105,71 @@ $lastActivity = $activityCount ? date('M j, Y g:i A', strtotime($logsArr[0]['tim
   <!-- Main Content -->
   <main class="w-full space-y-10 animate-fadeUp">
 
-    <!-- Hero Section -->
-    <section class="relative overflow-hidden rounded-3xl shadow-2xl">
-      <div class="absolute inset-0">
-        <img src="https://akm-img-a-in.tosshub.com/indiatoday/images/story/202409/how-ai-is-shaping-future-of-international-education-for-study-abroad-students-183406714-16x9_0.jpg?size=1200:675"
-             alt="Campus" class="w-full h-full object-cover object-center" loading="eager" decoding="async">
-        <div class="absolute inset-0 bg-gradient-to-br from-indigo-900/70 via-blue-800/60 to-cyan-700/50"></div>
-        <div class="absolute -top-24 -left-24 w-80 h-80 bg-cyan-400/30 blur-3xl rounded-full"></div>
-        <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-indigo-400/30 blur-3xl rounded-full"></div>
+    <!-- Hero Section (compact) -->
+<section class="relative overflow-hidden rounded-3xl shadow-2xl">
+  <div class="absolute inset-0">
+    <img src="https://www.vedamo.com/wp-content/uploads/cache/2017/06/what-is-virtual-learning-1/4148946552.png"
+         alt="Campus" class="w-full h-full object-cover object-center" loading="eager" decoding="async">
+    <div class="absolute inset-0 bg-gradient-to-br from-indigo-900/70 via-blue-800/60 to-cyan-700/50"></div>
+    <div class="absolute -top-24 -left-24 w-80 h-80 bg-cyan-400/30 blur-3xl rounded-full"></div>
+    <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-indigo-400/30 blur-3xl rounded-full"></div>
+  </div>
+
+  <div class="relative z-10 p-4 sm:p-6 lg:p-8 text-white">
+    <div class="flex items-center justify-between gap-3">
+      <div id="datetime" class="text-xs sm:text-sm italic opacity-90 drop-shadow-sm" aria-live="polite"></div>
+      <span class="inline-flex items-center gap-2 bg-white/10 ring-1 ring-white/20 px-3 py-1 rounded-full text-xs">
+        <i data-lucide="graduation-cap" class="w-4 h-4" aria-hidden="true"></i> Student Dashboard
+      </span>
+    </div>
+
+    <div class="mt-3 md:mt-4 text-center space-y-3 md:space-y-4">
+      <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold leading-tight drop-shadow-xl">
+        Welcome back, <span class="underline decoration-white/30"><?php echo htmlspecialchars($full_name); ?></span>
+        <span class="text-xs sm:text-base md:text-lg font-light italic">(<?php echo $role; ?>)</span>!
+        <span class="inline-block animate-wave" aria-hidden="true">👋</span>
+      </h1>
+
+      <p class="text-sm sm:text-base font-light text-white/95 max-w-3xl mx-auto">
+        Pick up where you left off, explore new topics, and stay on top of your goals.
+        <span class="block opacity-90 mt-1 hidden md:block">Access courses, take quizzes, and join vibrant discussions.</span>
+      </p>
+
+      <div class="flex items-center justify-center gap-2 mt-2">
+        <a href="enroll_course.php"
+           class="inline-flex items-center gap-2 rounded-full bg-white/90 text-indigo-700 font-semibold px-4 py-2 shadow hover:shadow-lg hover-raise">
+          <i data-lucide="plus-circle" class="w-5 h-5" aria-hidden="true"></i> Enroll in a course
+        </a>
+        <a href="#courses"
+           class="inline-flex items-center gap-2 rounded-full bg-indigo-900/30 text-white font-medium px-4 py-2 ring-1 ring-white/30 hover:bg-indigo-900/40 hover-raise">
+          <i data-lucide="compass" class="w-5 h-5" aria-hidden="true"></i> Browse your courses
+        </a>
       </div>
+    </div>
 
-      <div class="relative z-10 p-6 sm:p-10 lg:p-14 text-white">
-        <div class="flex items-center justify-between gap-4">
-          <div id="datetime" class="text-xs sm:text-sm italic opacity-90 drop-shadow-sm" aria-live="polite"></div>
-          <span class="inline-flex items-center gap-2 bg-white/10 ring-1 ring-white/20 px-3 py-1 rounded-full text-xs">
-            <i data-lucide="graduation-cap" class="w-4 h-4" aria-hidden="true"></i> Student Dashboard
-          </span>
+    <!-- Quick metrics -->
+    <div class="mt-5 sm:mt-6 grid grid-cols-3 gap-2 sm:gap-3 max-w-3xl mx-auto">
+      <div class="rounded-xl bg-white/10 ring-1 ring-white/20 p-3 backdrop-blur">
+        <div class="text-xs text-white/85 inline-flex items-center gap-1">
+          <i data-lucide="book-open" class="w-4 h-4"></i> Courses
         </div>
-
-        <div class="mt-6 text-center space-y-4">
-          <h1 class="text-2xl sm:text-3xl font-extrabold leading-tight drop-shadow-xl">
-            Welcome back, <span class="underline decoration-white/30"><?php echo htmlspecialchars($full_name); ?></span>
-            <span class="text-sm sm:text-xl font-light italic">(<?php echo $role; ?>)</span>!
-            <span class="inline-block animate-wave" aria-hidden="true">👋</span>
-          </h1>
-          <p class="text-base sm:text-lg font-light text-white/95 max-w-3xl mx-auto">
-            Pick up where you left off, explore new topics, and stay on top of your goals.
-            <span class="block opacity-90 mt-1">Access courses, take quizzes, and join vibrant discussions.</span>
-          </p>
-
-          <div class="flex items-center justify-center gap-3 mt-3">
-            <a href="enroll_course.php"
-               class="inline-flex items-center gap-2 rounded-full bg-white/90 text-indigo-700 font-semibold px-5 py-2.5 shadow hover:shadow-lg hover-raise">
-              <i data-lucide="plus-circle" class="w-5 h-5" aria-hidden="true"></i> Enroll in a course
-            </a>
-            <a href="#courses"
-               class="inline-flex items-center gap-2 rounded-full bg-indigo-900/30 text-white font-medium px-5 py-2.5 ring-1 ring-white/30 hover:bg-indigo-900/40 hover-raise">
-              <i data-lucide="compass" class="w-5 h-5" aria-hidden="true"></i> Browse your courses
-            </a>
-          </div>
-        </div>
-
-        <!-- Quick metrics -->
-        <div class="mt-8 grid grid-cols-3 gap-3 max-w-3xl mx-auto">
-          <div class="rounded-xl bg-white/10 ring-1 ring-white/20 p-4 backdrop-blur">
-            <div class="text-xs text-white/85 inline-flex items-center gap-1">
-              <i data-lucide="book-open" class="w-4 h-4"></i> Courses
-            </div>
-            <div class="mt-1 text-2xl font-semibold"><?php echo (int)$coursesCount; ?></div>
-          </div>
-          <div class="rounded-xl bg-white/10 ring-1 ring-white/20 p-4 backdrop-blur">
-            <div class="text-xs text-white/85 inline-flex items-center gap-1">
-              <i data-lucide="megaphone" class="w-4 h-4"></i> Announcements
-            </div>
-            <div class="mt-1 text-2xl font-semibold"><?php echo (int)$annCount; ?></div>
-          </div>
-          <div class="rounded-xl bg-white/10 ring-1 ring-white/20 p-4 backdrop-blur">
-            <div class="text-xs text-white/85 inline-flex items-center gap-1">
-              <i data-lucide="activity" class="w-4 h-4"></i> Recent
-            </div>
-            <div class="mt-1 text-sm font-medium"><?php echo $lastActivity ? htmlspecialchars($lastActivity) : 'No activity'; ?></div>
-          </div>
-        </div>
+        <div class="mt-0.5 text-xl font-semibold"><?php echo (int)$coursesCount; ?></div>
       </div>
-    </section>
+      <div class="rounded-xl bg-white/10 ring-1 ring-white/20 p-3 backdrop-blur">
+        <div class="text-xs text-white/85 inline-flex items-center gap-1">
+          <i data-lucide="megaphone" class="w-4 h-4"></i> Announcements
+        </div>
+        <div class="mt-0.5 text-xl font-semibold"><?php echo (int)$annCount; ?></div>
+      </div>
+      <div class="rounded-xl bg-white/10 ring-1 ring-white/20 p-3 backdrop-blur">
+        <div class="text-xs text-white/85 inline-flex items-center gap-1">
+          <i data-lucide="activity" class="w-4 h-4"></i> Recent
+        </div>
+        <div class="mt-0.5 text-sm font-medium"><?php echo $lastActivity ? htmlspecialchars($lastActivity) : 'No activity'; ?></div>
+      </div>
+    </div>
+  </div>
+</section>
 
     
 

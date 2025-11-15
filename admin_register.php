@@ -13,7 +13,7 @@ if (empty($_SESSION['csrf_token'])) {
 }
 $csrf = $_SESSION['csrf_token'];
 
-/* Optional: restrict access to logged-in admins only (uncomment to enforce) */
+/* Optional: restrict access */
 // if (!isset($_SESSION['user_id']) || (($_SESSION['role'] ?? '') !== 'admin')) {
 //   header('Location: admin_login.php');
 //   exit;
@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $errorMsg = 'Invalid request. Please refresh and try again.';
   } else {
     $role     = strtolower(trim($_POST['role'] ?? 'admin'));
-    $allowed  = ['admin','ceo'];
+    $allowed  = ['admin','ceo','accountant'];
     if (!in_array($role, $allowed, true)) $role = 'admin';
 
     // Collect inputs
@@ -66,24 +66,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       if ($stmt->num_rows > 0) $errors[] = 'Username is already taken.';
       $stmt->close();
 
-      // Check email across both profile tables to avoid duplicates
-      // (Remove one of these if you prefer per-role uniqueness)
-      $stmt = $conn->prepare("SELECT 1 FROM admins WHERE email = ? LIMIT 1");
-      $stmt->bind_param("s", $email);
-      $stmt->execute();
-      $stmt->store_result();
-      $adminEmailExists = $stmt->num_rows > 0;
-      $stmt->close();
-
-      $stmt = $conn->prepare("SELECT 1 FROM ceo WHERE email = ? LIMIT 1");
-      $stmt->bind_param("s", $email);
-      $stmt->execute();
-      $stmt->store_result();
-      $ceoEmailExists = $stmt->num_rows > 0;
-      $stmt->close();
-
-      if ($adminEmailExists || $ceoEmailExists) {
-        $errors[] = 'Email is already used.';
+      // Check email across all profile tables
+      $tables = ['admins', 'ceo', 'accountants'];
+      foreach ($tables as $table) {
+        $stmt = $conn->prepare("SELECT 1 FROM $table WHERE email = ? LIMIT 1");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $stmt->store_result();
+        if ($stmt->num_rows > 0) {
+          $errors[] = 'Email is already used.';
+          $stmt->close();
+          break;
+        }
+        $stmt->close();
       }
     }
 
@@ -92,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
       $hash = password_hash($password, PASSWORD_BCRYPT);
 
-      // Transaction: users -> passwords -> profile table (admins|ceo)
+      // Transaction: users -> passwords -> profile table
       $conn->begin_transaction();
       try {
         // 1) users
@@ -108,22 +103,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$stmt->execute()) throw new Exception('Failed to save password: ' . $stmt->error);
         $stmt->close();
 
-        // 3) profile
-        if ($role === 'admin') {
-          // Ensure you have this table:
-          // CREATE TABLE admins (admin_id INT AUTO_INCREMENT PRIMARY KEY, user_id INT UNIQUE NOT NULL, first_name VARCHAR(50), last_name VARCHAR(50), email VARCHAR(100), contact_number VARCHAR(15), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(user_id));
-          $stmt = $conn->prepare("INSERT INTO admins (user_id, first_name, last_name, email, contact_number) VALUES (?, ?, ?, ?, ?)");
-        } else {
-          // ceo table was provided in your schema
-          $stmt = $conn->prepare("INSERT INTO ceo (user_id, first_name, last_name, email, contact_number) VALUES (?, ?, ?, ?, ?)");
+        // 3) profile table insert
+        switch ($role) {
+          case 'ceo':
+            $stmt = $conn->prepare("INSERT INTO ceo (user_id, first_name, last_name, email, contact_number) VALUES (?, ?, ?, ?, ?)");
+            break;
+          case 'accountant':
+            $stmt = $conn->prepare("INSERT INTO accountants (user_id, first_name, last_name, email, contact_number) VALUES (?, ?, ?, ?, ?)");
+            break;
+          default:
+            $stmt = $conn->prepare("INSERT INTO admins (user_id, first_name, last_name, email, contact_number) VALUES (?, ?, ?, ?, ?)");
+            break;
         }
+
         $stmt->bind_param("issss", $user_id, $first, $last, $email, $contact);
         if (!$stmt->execute()) throw new Exception('Failed to create profile: ' . $stmt->error);
         $stmt->close();
 
         $conn->commit();
-        $successMsg = ($role === 'admin') ? '✅ Admin registered successfully!' : '✅ CEO registered successfully!';
-        // Clear form values on success
+        $successMsg = "✅ " . ucfirst($role) . " registered successfully!";
         $_POST = [];
         $postedRole = $role;
       } catch (Throwable $e) {
@@ -138,14 +136,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Register Admin or CEO</title>
+  <title>Register Admin, CEO, or Accountant</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-[url('https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1470&q=80')] bg-cover bg-center min-h-screen flex items-center justify-center text-gray-800">
 
   <div class="bg-white bg-opacity-90 shadow-xl rounded-lg p-8 w-full max-w-md backdrop-blur">
     <h2 id="formTitle" class="text-2xl font-bold mb-6 text-center">
-      <?= ($postedRole === 'ceo') ? 'Register a CEO' : 'Register an Administrator' ?>
+      <?= ucfirst($postedRole) === 'Accountant' ? 'Register an Accountant' : (($postedRole === 'ceo') ? 'Register a CEO' : 'Register an Administrator') ?>
     </h2>
 
     <?php if ($successMsg): ?>
@@ -160,19 +158,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <!-- Role selector -->
       <div>
         <span class="block text-sm font-medium mb-1">Role</span>
-        <div class="flex gap-3">
-          <label class="inline-flex items-center gap-2 cursor-pointer">
-            <input type="radio" name="role" value="admin" class="sr-only peer" <?= ($postedRole === 'admin') ? 'checked' : '' ?> />
-            <span class="peer-checked:bg-blue-600 peer-checked:text-white inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 ring-1 ring-gray-200">
-              Admin
-            </span>
-          </label>
-          <label class="inline-flex items-center gap-2 cursor-pointer">
-            <input type="radio" name="role" value="ceo" class="sr-only peer" <?= ($postedRole === 'ceo') ? 'checked' : '' ?> />
-            <span class="peer-checked:bg-blue-600 peer-checked:text-white inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 ring-1 ring-gray-200">
-              CEO
-            </span>
-          </label>
+        <div class="flex flex-wrap gap-3">
+          <?php 
+          $roles = ['admin' => 'Admin', 'ceo' => 'CEO', 'accountant' => 'Accountant'];
+          foreach ($roles as $val => $label): ?>
+            <label class="inline-flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="role" value="<?= $val ?>" class="sr-only peer" <?= ($postedRole === $val) ? 'checked' : '' ?> />
+              <span class="peer-checked:bg-blue-600 peer-checked:text-white inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 ring-1 ring-gray-200">
+                <?= $label ?>
+              </span>
+            </label>
+          <?php endforeach; ?>
         </div>
       </div>
 
@@ -214,15 +210,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <a href="admin_login.php" class="text-blue-700 hover:underline">Admin login</a>
       <span class="mx-1">·</span>
       <a href="ceo_login.php" class="text-blue-700 hover:underline">CEO login</a>
+      <span class="mx-1">·</span>
+      <a href="accountant_login.php" class="text-blue-700 hover:underline">Accountant login</a>
     </div>
   </div>
 
   <script>
-    // Update title on role change
     document.addEventListener('change', (e) => {
       if (e.target.name === 'role') {
         const title = document.getElementById('formTitle');
-        title.textContent = e.target.value === 'ceo' ? 'Register a CEO' : 'Register an Administrator';
+        if (e.target.value === 'ceo') title.textContent = 'Register a CEO';
+        else if (e.target.value === 'accountant') title.textContent = 'Register an Accountant';
+        else title.textContent = 'Register an Administrator';
       }
     });
   </script>

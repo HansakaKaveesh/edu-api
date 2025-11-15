@@ -1,8 +1,8 @@
 <?php
-// ceo_teacher.php
+// ceo_students.php
 
 session_start();
-include 'db_connect.php';
+include __DIR__ . '/../db_connect.php';
 
 /* Allow CEO or Admin */
 if (!isset($_SESSION['user_id']) || !in_array(($_SESSION['role'] ?? ''), ['ceo', 'admin'], true)) {
@@ -28,7 +28,9 @@ function pickFKColumn(mysqli $conn, string $table, string $refTable, array $fall
   if ($db) {
     $sql = "SELECT COLUMN_NAME
             FROM information_schema.KEY_COLUMN_USAGE
-            WHERE TABLE_SCHEMA=? AND TABLE_NAME=? AND REFERENCED_TABLE_NAME=?
+            WHERE TABLE_SCHEMA = ?
+              AND TABLE_NAME = ?
+              AND REFERENCED_TABLE_NAME = ?
             LIMIT 1";
     if ($stmt = $conn->prepare($sql)) {
       $stmt->bind_param('sss', $db, $table, $refTable);
@@ -43,7 +45,7 @@ function pickFKColumn(mysqli $conn, string $table, string $refTable, array $fall
 function pickDateColumn(mysqli $conn, string $table, array $candidates): ?string {
   return pickFirstExistingColumn($conn, $table, $candidates);
 }
-function initials_from(string $name, string $fallback = 'T'): string {
+function initials_from(string $name, string $fallback = 'S'): string {
   $name = trim($name);
   if ($name === '') return $fallback;
   $parts = preg_split('/\s+/u', $name);
@@ -53,32 +55,29 @@ function initials_from(string $name, string $fallback = 'T'): string {
   return $ini ?: $fallback;
 }
 
-/* ===== Detect teachers schema ===== */
-$teacherPK     = pickFirstExistingColumn($conn, 'teachers', ['teacher_id','id']);
-$firstNameCol  = columnExists($conn, 'teachers', 'first_name') ? 'first_name' : null;
-$lastNameCol   = columnExists($conn, 'teachers', 'last_name')  ? 'last_name'  : null;
-$fullNameCol   = columnExists($conn, 'teachers', 'name') ? 'name' : null;
-$emailCol      = pickFirstExistingColumn($conn, 'teachers', ['email','email_address','mail']);
-$phoneCol      = pickFirstExistingColumn($conn, 'teachers', ['phone','contact_number','mobile','tel','telephone','phone_number']);
-$teacherDateCol= pickDateColumn($conn, 'teachers', ['created_at','joined_at','hired_at','added_at','date']);
+/* ===== Detect students schema ===== */
+$studentPK      = pickFirstExistingColumn($conn, 'students', ['student_id','id']);
+$firstNameCol   = columnExists($conn, 'students', 'first_name') ? 'first_name' : null;
+$lastNameCol    = columnExists($conn, 'students', 'last_name')  ? 'last_name'  : null;
+$fullNameCol    = columnExists($conn, 'students', 'name') ? 'name' : null;
+$emailCol       = pickFirstExistingColumn($conn, 'students', ['email','email_address','mail']);
+$phoneCol       = pickFirstExistingColumn($conn, 'students', ['phone','contact_number','mobile','tel','telephone','phone_number']);
+$studentDateCol = pickDateColumn($conn, 'students', ['created_at','joined_at','registered_at','added_at','date']);
 
-/* Aggregate: detect FK from courses → teachers */
-$courseTeacherCol = pickFKColumn($conn, 'courses', 'teachers',
-  ['teacher_id','instructor_id','lecturer_id','trainer_id','teacherId','instructorId']
-);
+$enrollStudentCol = pickFKColumn($conn, 'enrollments', 'students', ['student_id','user_id','studentId','learner_id','student']);
 
 /* Name expression */
 if ($firstNameCol || $lastNameCol) {
-  $nameExpr = "TRIM(CONCAT_WS(' ', t.`$firstNameCol`, t.`$lastNameCol`))";
+  $nameExpr = "TRIM(CONCAT_WS(' ', s.`$firstNameCol`, s.`$lastNameCol`))";
 } elseif ($fullNameCol) {
-  $nameExpr = "t.`$fullNameCol`";
+  $nameExpr = "s.`$fullNameCol`";
 } else {
-  $nameExpr = "CONCAT('Teacher #', t.`$teacherPK`)";
+  $nameExpr = "CONCAT('Student #', s.`$studentPK`)";
 }
 
 /* ===== Filters, search, sort, pagination ===== */
 $q        = trim($_GET['q'] ?? '');
-$sort     = strtolower($_GET['sort'] ?? ($teacherDateCol ? 'joined' : 'name')); // name|joined|courses
+$sort     = strtolower($_GET['sort'] ?? ($studentDateCol ? 'joined' : 'name')); // name|joined|enrollments
 $dir      = strtolower($_GET['dir'] ?? 'desc'); // asc|desc
 $page     = max(1, (int)($_GET['page'] ?? 1));
 $perPage  = min(100, max(5, (int)($_GET['per_page'] ?? 20)));
@@ -86,13 +85,13 @@ $perPage  = min(100, max(5, (int)($_GET['per_page'] ?? 20)));
 $startJoin = $_GET['start'] ?? '';
 $endJoin   = $_GET['end']   ?? '';
 
-$allowedSort = ['name','joined','courses'];
+$allowedSort = ['name','joined','enrollments'];
 if (!in_array($sort, $allowedSort, true)) $sort = 'name';
 if (!in_array($dir, ['asc','desc'], true)) $dir = 'desc';
 
 $offset = ($page - 1) * $perPage;
 
-/* ===== WHERE and params ===== */
+/* ===== Build dynamic WHERE and params ===== */
 $where = [];
 $params = [];
 $types  = '';
@@ -101,33 +100,33 @@ if ($q !== '') {
   $qLike = '%' . $q . '%';
   $nameCond = "$nameExpr LIKE ?";
   $where[] = '(' . $nameCond
-          .  ($emailCol ? " OR t.`$emailCol` LIKE ?" : '')
-          .  ($phoneCol ? " OR t.`$phoneCol` LIKE ?" : '')
+          .  ($emailCol ? " OR s.`$emailCol` LIKE ?" : '')
+          .  ($phoneCol ? " OR s.`$phoneCol` LIKE ?" : '')
           . ')';
   $params[] = $qLike; $types .= 's';
   if ($emailCol) { $params[] = $qLike; $types .= 's'; }
   if ($phoneCol) { $params[] = $qLike; $types .= 's'; }
 }
-if ($teacherDateCol && $startJoin !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $startJoin)) {
-  $where[] = "t.`$teacherDateCol` >= ?";
+if ($studentDateCol && $startJoin !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $startJoin)) {
+  $where[] = "s.`$studentDateCol` >= ?";
   $params[] = $startJoin; $types .= 's';
 }
-if ($teacherDateCol && $endJoin !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $endJoin)) {
-  $where[] = "t.`$teacherDateCol` <= ?";
+if ($studentDateCol && $endJoin !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $endJoin)) {
+  $where[] = "s.`$studentDateCol` <= ?";
   $params[] = $endJoin; $types .= 's';
 }
 $whereSQL = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 
-/* ===== Courses aggregate ===== */
-$joinCourseAgg = '';
-$coursesSelect = '0 AS courses';
-if ($courseTeacherCol && $teacherPK) {
-  $joinCourseAgg = "LEFT JOIN (
-      SELECT c.`$courseTeacherCol` AS tid, COUNT(*) AS cnt
-      FROM courses c
-      GROUP BY c.`$courseTeacherCol`
-    ) cc ON cc.tid = t.`$teacherPK`";
-  $coursesSelect = "IFNULL(cc.cnt,0) AS courses";
+/* ===== Enrollments aggregate (optional) ===== */
+$joinEnrollAgg = '';
+$enrollSelect  = '0 AS enrollments';
+if ($enrollStudentCol && $studentPK) {
+  $joinEnrollAgg = "LEFT JOIN (
+      SELECT e.`$enrollStudentCol` AS sid, COUNT(*) AS cnt
+      FROM enrollments e
+      GROUP BY e.`$enrollStudentCol`
+    ) ec ON ec.sid = s.`$studentPK`";
+  $enrollSelect = "IFNULL(ec.cnt,0) AS enrollments";
 }
 
 /* ===== Export CSV ===== */
@@ -138,18 +137,18 @@ function buildUrl(array $merge): string {
 }
 if (isset($_GET['export']) && $_GET['export'] === 'csv') {
   header('Content-Type: text/csv; charset=utf-8');
-  header('Content-Disposition: attachment; filename=teachers_' . date('Ymd_His') . '.csv');
+  header('Content-Disposition: attachment; filename=students_' . date('Ymd_His') . '.csv');
 
-  $selectCSV = "SELECT t.`$teacherPK` AS tid,
+  $selectCSV = "SELECT s.`$studentPK` AS sid,
                        $nameExpr AS name" .
-               ($emailCol ? ", t.`$emailCol` AS email" : ", NULL AS email") .
-               ($phoneCol ? ", t.`$phoneCol` AS phone" : ", NULL AS phone") .
-               ($teacherDateCol ? ", t.`$teacherDateCol` AS joined" : ", NULL AS joined") .
-               ", $coursesSelect
-                FROM teachers t
-                $joinCourseAgg
+               ($emailCol ? ", s.`$emailCol` AS email" : ", NULL AS email") .
+               ($phoneCol ? ", s.`$phoneCol` AS phone" : ", NULL AS phone") .
+               ($studentDateCol ? ", s.`$studentDateCol` AS joined" : ", NULL AS joined") .
+               ", $enrollSelect
+                FROM students s
+                $joinEnrollAgg
                 $whereSQL
-                ORDER BY " . ($sort === 'name' ? "name" : ($sort === 'joined' && $teacherDateCol ? "t.`$teacherDateCol`" : "courses")) . " $dir";
+                ORDER BY " . ($sort === 'name' ? "name" : ($sort === 'joined' && $studentDateCol ? "s.`$studentDateCol`" : "enrollments")) . " $dir";
 
   $stmt = $conn->prepare($selectCSV);
   if ($types) $stmt->bind_param($types, ...$params);
@@ -157,25 +156,25 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
   $res = $stmt->get_result();
 
   $out = fopen('php://output', 'w');
-  fputcsv($out, ['ID','Name','Email','Phone','Joined','Courses']);
+  fputcsv($out, ['ID','Name','Email','Phone','Joined','Enrollments']);
   while ($row = $res->fetch_assoc()) {
     fputcsv($out, [
-      $row['tid'],
+      $row['sid'],
       $row['name'],
       $row['email'],
       $row['phone'],
       $row['joined'],
-      $row['courses'],
+      $row['enrollments'],
     ]);
   }
   fclose($out);
   exit;
 }
 
-/* ===== Counts ===== */
-$totalTeachers = (int)($conn->query("SELECT COUNT(*) AS c FROM teachers")->fetch_assoc()['c'] ?? 0);
+/* ===== Count totals (filtered + all) ===== */
+$totalStudents = (int)($conn->query("SELECT COUNT(*) AS c FROM students")->fetch_assoc()['c'] ?? 0);
 
-$countSQL = "SELECT COUNT(*) AS c FROM teachers t $whereSQL";
+$countSQL = "SELECT COUNT(*) AS c FROM students s $whereSQL";
 $stmtC = $conn->prepare($countSQL);
 if ($types) $stmtC->bind_param($types, ...$params);
 $stmtC->execute();
@@ -183,19 +182,19 @@ $resC = $stmtC->get_result();
 $filteredCount = (int)($resC->fetch_assoc()['c'] ?? 0);
 $stmtC->close();
 
-/* ===== Page results ===== */
-$orderBy = $sort === 'name' ? "name" : ($sort === 'joined' && $teacherDateCol ? "t.`$teacherDateCol`" : "courses");
+/* ===== Fetch page results ===== */
+$orderBy = $sort === 'name' ? "name" : ($sort === 'joined' && $studentDateCol ? "s.`$studentDateCol`" : "enrollments");
 $limit   = (int)$perPage;
 $offsetI = (int)$offset;
 
-$selectSQL = "SELECT t.`$teacherPK` AS tid,
+$selectSQL = "SELECT s.`$studentPK` AS sid,
                      $nameExpr AS name" .
-             ($emailCol ? ", t.`$emailCol` AS email" : ", NULL AS email") .
-             ($phoneCol ? ", t.`$phoneCol` AS phone" : ", NULL AS phone") .
-             ($teacherDateCol ? ", t.`$teacherDateCol` AS joined" : ", NULL AS joined") .
-             ", $coursesSelect
-              FROM teachers t
-              $joinCourseAgg
+             ($emailCol ? ", s.`$emailCol` AS email" : ", NULL AS email") .
+             ($phoneCol ? ", s.`$phoneCol` AS phone" : ", NULL AS phone") .
+             ($studentDateCol ? ", s.`$studentDateCol` AS joined" : ", NULL AS joined") .
+             ", $enrollSelect
+              FROM students s
+              $joinEnrollAgg
               $whereSQL
               ORDER BY $orderBy $dir
               LIMIT $limit OFFSET $offsetI";
@@ -209,21 +208,21 @@ $rows = [];
 while ($r = $result->fetch_assoc()) $rows[] = $r;
 $stmt->close();
 
-/* Quick on-page average courses (for the page only) */
-$avgCoursesPage = 0;
+/* Quick on-page average enrollments */
+$avgEnrollPage = 0;
 if ($rows) {
   $sum = 0; $n = 0;
-  foreach ($rows as $r) { $sum += (int)($r['courses'] ?? 0); $n++; }
-  $avgCoursesPage = $n ? $sum / $n : 0;
+  foreach ($rows as $r) { $sum += (int)($r['enrollments'] ?? 0); $n++; }
+  $avgEnrollPage = $n ? $sum / $n : 0;
 }
 
 /* ===== Sidebar component setup ===== */
-$keepQuery    = ['q','sort','dir','page','per_page','start','end'];
+$keepQuery    = ['q','sort','dir','page','per_page','start','end']; // preserved keys in sidebar links
 $sidebarId    = 'ceoSidebar';
 $toggleId     = 'ceoSbToggle';
 $sidebarTitle = 'Menu';
 
-/* Build row accent color helper */
+/* Accent helpers for avatars */
 $accentColors = ['bg-gradient-to-br from-indigo-500 to-blue-600','bg-gradient-to-br from-emerald-500 to-teal-600','bg-gradient-to-br from-violet-500 to-fuchsia-600','bg-gradient-to-br from-amber-500 to-orange-600','bg-gradient-to-br from-sky-500 to-cyan-600'];
 function colorForId($id, $colors){ return $colors[(int)$id % max(count($colors),1)]; }
 
@@ -238,23 +237,21 @@ $qs = $_GET ? ('?' . http_build_query($_GET)) : '';
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CEO · Teachers</title>
+  <title>CEO · Students</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
   <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}
-  </style>
+  <style>body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}</style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 via-white to-indigo-50 text-gray-800 min-h-screen flex flex-col antialiased">
-<?php include 'components/navbar.php'; ?>
+<?php include __DIR__ . '/../components/navbar.php'; ?>
 
 <main class="max-w-8xl mx-auto px-6 py-28 flex-grow">
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
     <!-- Sidebar -->
     <aside class="lg:col-span-3 lg:sticky lg:top-28 self-start">
-      <?php include 'components/ceo_sidebar.php'; ?>
+      <?php include __DIR__ . '/../components/ceo_sidebar.php'; ?>
     </aside>
 
     <!-- Content -->
@@ -269,20 +266,20 @@ $qs = $_GET ? ('?' . http_build_query($_GET)) : '';
           <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
               <h1 class="text-2xl sm:text-3xl font-extrabold text-blue-700 inline-flex items-center gap-2">
-                <ion-icon name="easel-outline"></ion-icon> Teachers
+                <ion-icon name="school-outline"></ion-icon> Students
               </h1>
-              <p class="text-gray-600 mt-1 text-sm">Browse and manage teacher records.</p>
+              <p class="text-gray-600 mt-1 text-sm">Manage and explore student records.</p>
 
-              <!-- Quick stats row -->
+              <!-- Quick stats chips -->
               <div class="mt-3 flex flex-wrap gap-3 text-xs">
                 <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 ring-1 ring-blue-200">
-                  <ion-icon name="grid-outline"></ion-icon> Total: <b><?= (int)$totalTeachers ?></b>
+                  <ion-icon name="grid-outline"></ion-icon> Total: <b><?= (int)$totalStudents ?></b>
                 </span>
                 <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 ring-1 ring-violet-200">
                   <ion-icon name="filter-outline"></ion-icon> Filtered: <b><?= (int)$filteredCount ?></b>
                 </span>
                 <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">
-                  <ion-icon name="library-outline"></ion-icon> Avg courses (page): <b><?= number_format($avgCoursesPage,1) ?></b>
+                  <ion-icon name="library-outline"></ion-icon> Avg enroll (page): <b><?= number_format($avgEnrollPage,1) ?></b>
                 </span>
               </div>
             </div>
@@ -300,8 +297,8 @@ $qs = $_GET ? ('?' . http_build_query($_GET)) : '';
                 <label class="block text-gray-600 mb-1">Sort</label>
                 <select name="sort" class="w-full border border-gray-200 rounded-lg px-3 py-2">
                   <option value="name" <?= $sort==='name'?'selected':'' ?>>Name</option>
-                  <option value="joined" <?= $sort==='joined'?'selected':'' ?> <?= $teacherDateCol ? '' : 'disabled' ?>>Joined</option>
-                  <option value="courses" <?= $sort==='courses'?'selected':'' ?> <?= $courseTeacherCol ? '' : 'disabled' ?>>Courses</option>
+                  <option value="joined" <?= $sort==='joined'?'selected':'' ?> <?= $studentDateCol ? '' : 'disabled' ?>>Joined</option>
+                  <option value="enrollments" <?= $sort==='enrollments'?'selected':'' ?> <?= $enrollStudentCol ? '' : 'disabled' ?>>Enrollments</option>
                 </select>
               </div>
               <div>
@@ -321,11 +318,11 @@ $qs = $_GET ? ('?' . http_build_query($_GET)) : '';
               </div>
               <div class="lg:col-span-2">
                 <label class="block text-gray-600 mb-1">Joined From</label>
-                <input type="date" name="start" value="<?= e($startJoin) ?>" class="w-full border border-gray-200 rounded-lg px-3 py-2" <?= $teacherDateCol ? '' : 'disabled' ?> />
+                <input type="date" name="start" value="<?= e($startJoin) ?>" class="w-full border border-gray-200 rounded-lg px-3 py-2" <?= $studentDateCol ? '' : 'disabled' ?> />
               </div>
               <div class="lg:col-span-2">
                 <label class="block text-gray-600 mb-1">Joined To</label>
-                <input type="date" name="end" value="<?= e($endJoin) ?>" class="w-full border border-gray-200 rounded-lg px-3 py-2" <?= $teacherDateCol ? '' : 'disabled' ?> />
+                <input type="date" name="end" value="<?= e($endJoin) ?>" class="w-full border border-gray-200 rounded-lg px-3 py-2" <?= $studentDateCol ? '' : 'disabled' ?> />
               </div>
               <div class="flex items-end gap-2">
                 <button class="inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
@@ -335,7 +332,7 @@ $qs = $_GET ? ('?' . http_build_query($_GET)) : '';
                    class="inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
                   <ion-icon name="download-outline"></ion-icon> CSV
                 </a>
-                <a href="ceo_teacher.php"
+                <a href="ceo_students.php"
                    class="inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-gray-100 text-gray-700 ring-1 ring-gray-200 hover:bg-gray-200">
                   <ion-icon name="refresh-outline"></ion-icon> Reset
                 </a>
@@ -351,18 +348,18 @@ $qs = $_GET ? ('?' . http_build_query($_GET)) : '';
           <table class="min-w-full text-sm">
             <thead class="bg-gray-50/70 backdrop-blur text-gray-700">
               <tr>
-                <th class="px-3 py-2 text-left">Teacher</th>
+                <th class="px-3 py-2 text-left">Student</th>
                 <th class="px-3 py-2 text-left">Email</th>
                 <th class="px-3 py-2 text-left">Phone</th>
                 <th class="px-3 py-2 text-left">Joined</th>
-                <th class="px-3 py-2 text-right">Courses</th>
+                <th class="px-3 py-2 text-right">Enrollments</th>
               </tr>
             </thead>
             <tbody class="divide-y">
-              <?php if ($rows): foreach ($rows as $tch):
-                $name = (string)($tch['name'] ?? '');
-                $ini  = initials_from($name, 'T');
-                $accent = colorForId($tch['tid'], $accentColors);
+              <?php if ($rows): foreach ($rows as $st):
+                $name = (string)($st['name'] ?? '');
+                $ini  = initials_from($name, 'S');
+                $accent = colorForId($st['sid'], $accentColors);
               ?>
                 <tr class="hover:bg-slate-50/60">
                   <td class="px-3 py-3">
@@ -372,17 +369,17 @@ $qs = $_GET ? ('?' . http_build_query($_GET)) : '';
                       </span>
                       <div class="min-w-0">
                         <div class="font-semibold text-gray-900 truncate"><?= e($name) ?></div>
-                        <div class="text-[11px] text-gray-500">ID: <?= (int)$tch['tid'] ?></div>
+                        <div class="text-[11px] text-gray-500">ID: <?= (int)$st['sid'] ?></div>
                       </div>
                     </div>
                   </td>
-                  <td class="px-3 py-3"><?= e($tch['email'] ?? '') ?></td>
-                  <td class="px-3 py-3"><?= e($tch['phone'] ?? '') ?></td>
+                  <td class="px-3 py-3"><?= e($st['email'] ?? '') ?></td>
+                  <td class="px-3 py-3"><?= e($st['phone'] ?? '') ?></td>
                   <td class="px-3 py-3">
-                    <?php if (!empty($tch['joined'])): ?>
+                    <?php if (!empty($st['joined'])): ?>
                       <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 ring-1 ring-blue-200">
                         <ion-icon name="calendar-outline"></ion-icon>
-                        <?= e(date('Y-m-d', strtotime($tch['joined']))) ?>
+                        <?= e(date('Y-m-d', strtotime($st['joined']))) ?>
                       </span>
                     <?php else: ?>
                       <span class="text-gray-400">—</span>
@@ -391,7 +388,7 @@ $qs = $_GET ? ('?' . http_build_query($_GET)) : '';
                   <td class="px-3 py-3 text-right">
                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">
                       <ion-icon name="library-outline"></ion-icon>
-                      <?= (int)($tch['courses'] ?? 0) ?>
+                      <?= (int)($st['enrollments'] ?? 0) ?>
                     </span>
                   </td>
                 </tr>
@@ -402,7 +399,7 @@ $qs = $_GET ? ('?' . http_build_query($_GET)) : '';
                       <div class="mx-auto w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
                         <ion-icon name="file-tray-outline" class="text-xl text-gray-500"></ion-icon>
                       </div>
-                      No teachers found. Try adjusting filters.
+                      No students found. Try adjusting filters.
                     </div>
                   </td>
                 </tr>
@@ -433,6 +430,6 @@ $qs = $_GET ? ('?' . http_build_query($_GET)) : '';
   </div>
 </main>
 
-<?php include 'components/footer.php'; ?>
+<?php include __DIR__ . '/../components/footer.php'; ?>
 </body>
 </html>

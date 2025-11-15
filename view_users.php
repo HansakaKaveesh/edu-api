@@ -65,6 +65,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['use
                 $stmt->execute();
                 $stmt->close();
             }
+            if ($stmt = $conn->prepare("DELETE FROM ceo WHERE user_id = ?")) {
+                $stmt->bind_param("i", $user_id);
+                $stmt->execute();
+                $stmt->close();
+      }
 
             $conn->commit();
             $msg = "User #$user_id and related records deleted.";
@@ -84,16 +89,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['use
 $query = $conn->query("
     SELECT 
         u.user_id, u.username, u.role, u.status, u.created_at,
-        COALESCE(s.first_name, t.first_name, a.first_name) AS first_name,
-        COALESCE(s.last_name, t.last_name, a.last_name) AS last_name,
-        COALESCE(s.email, t.email, a.email) AS email,
-        COALESCE(s.contact_number, a.contact_number) AS contact_number
+        COALESCE(s.first_name, t.first_name, a.first_name, c.first_name) AS first_name,
+        COALESCE(s.last_name, t.last_name, a.last_name, c.last_name) AS last_name,
+        COALESCE(s.email, t.email, a.email, c.email) AS email,
+        COALESCE(s.contact_number, a.contact_number, c.contact_number) AS contact_number
     FROM users u
     LEFT JOIN students s ON u.user_id = s.user_id
     LEFT JOIN teachers t ON u.user_id = t.user_id
     LEFT JOIN admins a ON u.user_id = a.user_id
+    LEFT JOIN ceo c ON u.user_id = c.user_id
     ORDER BY u.created_at DESC
 ");
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -241,6 +248,7 @@ $query = $conn->query("
                 if ($role === 'admin') { $roleBadge = 'bg-purple-100 text-purple-700'; $roleIcon = 'fa-user-shield'; }
                 elseif ($role === 'teacher') { $roleBadge = 'bg-indigo-100 text-indigo-700'; $roleIcon = 'fa-chalkboard-user'; }
                 elseif ($role === 'student') { $roleBadge = 'bg-emerald-100 text-emerald-700'; $roleIcon = 'fa-user-graduate'; }
+                elseif ($role === 'ceo') { $roleBadge = 'bg-blue-100 text-blue-700'; $roleIcon = 'fa-user-tie'; }
 
                 $statusBadge = 'bg-gray-100 text-gray-700';
                 $statusIcon  = 'fa-circle-question';

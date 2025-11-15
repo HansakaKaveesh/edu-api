@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 ob_start();
-require_once 'db_connect.php';
+@include_once __DIR__ . '/../db_connect.php';
 
 /* ---------- Security headers (send before any output) ---------- */
 header('X-Frame-Options: DENY');
@@ -141,7 +141,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <div class="absolute inset-0 bg-white/30 backdrop-blur-[2px]"></div>
   </div>
 
-  <?php include 'components/navbar.php'; ?>
+  <?php include __DIR__ . '/../components/navbar.php'; ?>
 
   <main class="flex items-center justify-center py-16 px-4">
     <div class="w-full max-w-md fade-in mt-16">

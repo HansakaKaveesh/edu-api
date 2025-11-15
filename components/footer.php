@@ -2,6 +2,9 @@
 // Start session and simple (optional) newsletter flash messages
 if (session_status() === PHP_SESSION_NONE) session_start();
 
+// Define app version
+$version = "25.11.13";
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['newsletter_email'])) {
   $email = filter_var($_POST['newsletter_email'], FILTER_VALIDATE_EMAIL);
   if ($email) {
@@ -190,7 +193,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['newsletter_email'])) 
   <div class="relative z-10 max-w-7xl mx-auto mt-12 pt-6 border-t border-blue-800/60 text-gray-300 text-sm">
     <div class="flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="text-center md:text-left">
-        &copy; <?= date("Y") ?> <span class="text-white font-semibold">Synap<span class="text-yellow-400">Z</span></span>. All rights reserved.
+        &copy; <?= date("Y") ?> 
+        <span class="text-white font-semibold">Synap<span class="text-yellow-400">Z</span></span> 
+        v<?= $version ?> — All rights reserved.
       </div>
       <ul class="flex items-center gap-5 text-gray-400">
         <li><a href="/privacy.php" class="hover:text-yellow-300 transition inline-flex items-center gap-1"><ion-icon name="lock-closed-outline"></ion-icon> Privacy</a></li>

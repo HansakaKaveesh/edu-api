@@ -55,7 +55,6 @@ if (!isset($navItems) || !is_array($navItems) || !$navItems) {
     ['label' => 'Teachers',      'href' => 'ceo_teachers.php'  . $qs, 'icon' => 'easel-outline'],
     ['label' => 'Students',      'href' => 'ceo_students.php'  . $qs, 'icon' => 'school-outline'],
     ['label' => 'Top Courses',   'href' => 'ceo_courses.php'   . $qs, 'icon' => 'trophy-outline'],
-    ['label' => 'Top Customers', 'href' => 'ceo_customers.php' . $qs, 'icon' => 'podium-outline'],
     ['label' => 'Settings',      'href' => 'ceo_settings.php',        'icon' => 'settings-outline'],
     ['label' => 'Logout',        'href' => 'logout.php',              'icon' => 'log-out-outline'],
   ];

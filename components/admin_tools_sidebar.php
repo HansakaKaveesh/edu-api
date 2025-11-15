@@ -2,6 +2,7 @@
 if (!isset($adminTools) || !is_array($adminTools) || !count($adminTools)) {
   $adminTools = [
     ['admin_dashboard.php','fa-tachometer-alt','Dashboard'],
+    ['admin_past_papers.php','fa-sitemap','Past Papers'],
     ['admin_register.php','fa-user-shield','Register Admin'],
     ['view_users.php','fa-users','All Users'],
     ['view_courses.php','fa-book','All Courses'],

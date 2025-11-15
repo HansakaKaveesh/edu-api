@@ -43,8 +43,8 @@ $navItems = [
   ['icon' => 'book-outline',           'label' => 'My Courses',  'href' => 'student_courses.php',   'theme' => 'purple'],
   ['icon' => 'reader-outline',         'label' => 'Quizzes',     'href' => 'student_quizzes.php',   'theme' => 'amber'],
   ['icon' => 'chatbubbles-outline',    'label' => 'Discussions', 'href' => 'forum.php',             'theme' => 'yellow'],
-  ['icon' => 'settings-outline',       'label' => 'Settings',    'href' => 'student_settings.php',  'theme' => 'slate'],
-  ['icon' => 'mail-unread-outline',    'label' => 'Messages',    'href' => 'messages.php',          'theme' => 'sky'],
+  ['icon' => 'settings-outline',       'label' => 'Profile Settings',    'href' => 'student_settings.php',  'theme' => 'slate'],
+ // ['icon' => 'mail-unread-outline',    'label' => 'Messages',    'href' => 'messages.php',          'theme' => 'sky'],
   ['icon' => 'log-out-outline',        'label' => 'Logout',      'href' => 'logout.php',            'theme' => 'rose'],
 ];
 

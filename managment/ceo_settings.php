@@ -2,7 +2,7 @@
 // ceo_settings.php
 
 session_start();
-include 'db_connect.php';
+include __DIR__ . '/../db_connect.php';
 
 /* Allow CEO or Admin */
 if (!isset($_SESSION['user_id']) || !in_array(($_SESSION['role'] ?? ''), ['ceo', 'admin'], true)) {
@@ -161,13 +161,13 @@ $lastAuth = isset($_SESSION['last_auth']) ? date('Y-m-d H:i', (int)$_SESSION['la
   </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 via-white to-indigo-50 text-gray-800 min-h-screen flex flex-col antialiased">
-<?php include 'components/navbar.php'; ?>
+<?php include __DIR__ . '/../components/navbar.php'; ?>
 
 <main class="max-w-8xl mx-auto px-6 py-28 flex-grow">
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
     <!-- Sidebar -->
     <aside class="lg:col-span-3 lg:sticky lg:top-28 self-start">
-      <?php include 'components/ceo_sidebar.php'; ?>
+      <?php include __DIR__ . '/../components/ceo_sidebar.php'; ?>
     </aside>
 
     <!-- Content -->
@@ -356,7 +356,7 @@ $lastAuth = isset($_SESSION['last_auth']) ? date('Y-m-d H:i', (int)$_SESSION['la
   </div>
 </main>
 
-<?php include 'components/footer.php'; ?>
+<?php include __DIR__ . '/../components/footer.php'; ?>
 
 <script>
   // Password visibility toggles

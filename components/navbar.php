@@ -21,29 +21,35 @@ function activeClass(bool $isActive, string $extra = '') {
 
 /* Dashboard routes (now includes CEO and CTO) */
 $dashMap = [
-  'student' => 'student_dashboard.php',
-  'teacher' => 'teacher_dashboard.php',
-  'admin'   => 'admin_dashboard.php',
-  'ceo'     => 'ceo_dashboard.php',
-  'cto'     => 'cto_dashboard.php', // optional if you have CTO
+  'student'    => 'student_dashboard.php',
+  'teacher'    => 'teacher_dashboard.php',
+  'admin'      => 'admin_dashboard.php',
+  'accountant' => 'accountant_dashboard.php', // New
+  'ceo'        => '/edu-api/managment/ceo_dashboard.php',
+  'cto'        => 'cto_dashboard.php',
 ];
 $dashboardLink = $dashMap[$role] ?? '';
 
+
 /* Profile/Settings routes per role (includes CEO/CTO) */
 $profileMap = [
-  'student' => 'student_settings.php',
-  'teacher' => 'teacher_profile.php',
-  'admin'   => 'admin_profile.php',
-  'ceo'     => 'ceo_settings.php',
-  'cto'     => 'cto_profile.php',
+  'student'    => 'student_settings.php',
+  'teacher'    => 'teacher_profile.php',
+  'admin'      => 'admin_profile.php',
+  'accountant' => 'accountant_profile.php', // New
+  'ceo'        => '/edu-api/managment/ceo_settings.php',
+  'cto'        => 'cto_profile.php',
 ];
+
 $settingsMap = [
-  'student' => 'student_settings.php',
-  'teacher' => 'teacher_settings.php',
-  'admin'   => 'admin_settings.php',
-  'ceo'     => 'ceo_settings.php',
-  'cto'     => 'cto_settings.php',
+  'student'    => 'student_settings.php',
+  'teacher'    => 'teacher_settings.php',
+  'admin'      => 'admin_settings.php',
+  'accountant' => 'accountant_settings.php', // New
+  'ceo'        => '/edu-api/managment/ceo_settings.php',
+  'cto'        => 'cto_settings.php',
 ];
+
 
 $profileLink  = $profileMap[$role]  ?? 'admin_profile.php';
 $settingsLink = $settingsMap[$role] ?? 'admin_settings.php';
@@ -54,12 +60,13 @@ if ($isLoggedIn) {
   $displayName = $_SESSION['full_name'] ?? $_SESSION['username'] ?? ucfirst($role ?? 'User');
 
   if (isset($conn) && $conn instanceof mysqli) {
-    // Include CEO/CTO tables for name lookup
-    $tbl = $role === 'student' ? 'students'
-         : ($role === 'teacher' ? 'teachers'
-         : ($role === 'admin'   ? 'admins'
-         : ($role === 'ceo'     ? 'ceo'
-         : ($role === 'cto'     ? 'cto' : null))));
+$tbl = $role === 'student' ? 'students'
+     : ($role === 'teacher' ? 'teachers'
+     : ($role === 'admin'   ? 'admins'
+     : ($role === 'ceo'     ? 'ceo'
+     : ($role === 'cto'     ? 'cto'
+     : ($role === 'accountant' ? 'accountants' : null)))));
+
     if ($tbl && $stmt = $conn->prepare("SELECT first_name, last_name FROM {$tbl} WHERE user_id = ? LIMIT 1")) {
       $stmt->bind_param('i', $userId);
       $stmt->execute();
@@ -74,7 +81,23 @@ if ($isLoggedIn) {
     }
   }
 }
+
 $initials = strtoupper(preg_replace('/[^A-Za-z]/', '', mb_substr($displayName, 0, 1, 'UTF-8') ?: 'U'));
+
+/* Profile Picture */
+$profilePic = 'uploads/default.png'; // default
+if ($isLoggedIn && isset($conn) && $conn instanceof mysqli) {
+  $stmt = $conn->prepare("SELECT profile_pic FROM users WHERE user_id = ? LIMIT 1");
+  $stmt->bind_param("i", $userId);
+  $stmt->execute();
+  $res = $stmt->get_result();
+  if ($res && ($row = $res->fetch_assoc())) {
+    if (!empty($row['profile_pic']) && file_exists(__DIR__ . '/../' . $row['profile_pic'])) {
+      $profilePic = $row['profile_pic'];
+    }
+  }
+  $stmt->close();
+}
 ?>
 
 <!-- Ionicons (icons) -->
@@ -109,32 +132,16 @@ $initials = strtoupper(preg_replace('/[^A-Za-z]/', '', mb_substr($displayName, 0
     <!-- Desktop Nav -->
     <ul class="hidden md:flex items-center space-x-6 font-medium text-[15px]">
       <li>
-        <a href="index.php"
+        <a href="/edu-api/index.php"
            class="<?= activeClass($isHome) ?> flex items-center gap-2 transition"
            <?= $isHome ? 'aria-current="page"' : '' ?>>
            <ion-icon name="home-outline" class="text-yellow-300/80"></ion-icon> Home
         </a>
       </li>
-      <li>
-        <a href="about.php" class="flex items-center gap-2 <?= activeClass(false) ?> transition" data-section-link="about">
-          <ion-icon name="information-circle-outline" class="text-yellow-300/80"></ion-icon> About Us
-        </a>
-      </li>
-      <li>
-        <a href="courseus.php" class="flex items-center gap-2 <?= activeClass(false) ?> transition" data-section-link="courses">
-          <ion-icon name="library-outline" class="text-yellow-300/80"></ion-icon> Courses
-        </a>
-      </li>
-      <li>
-        <a href="#tutors" class="flex items-center gap-2 <?= activeClass(false) ?> transition" data-section-link="tutors">
-          <ion-icon name="people-outline" class="text-yellow-300/80"></ion-icon> Tutors
-        </a>
-      </li>
-      <li>
-        <a href="#contact" class="flex items-center gap-2 <?= activeClass(false) ?> transition" data-section-link="contact">
-          <ion-icon name="mail-outline" class="text-yellow-300/80"></ion-icon> Contact
-        </a>
-      </li>
+      <li><a href="past_papers.php" class="flex items-center gap-2 <?= activeClass(false) ?>"><ion-icon name="information-circle-outline" class="text-yellow-300/80"></ion-icon> Past Papers</a></li>
+      <li><a href="courseus.php" class="flex items-center gap-2 <?= activeClass(false) ?>"><ion-icon name="library-outline" class="text-yellow-300/80"></ion-icon> Courses</a></li>
+      <li><a href="#tutors" class="flex items-center gap-2 <?= activeClass(false) ?>"><ion-icon name="people-outline" class="text-yellow-300/80"></ion-icon> Tutors</a></li>
+      <li><a href="#contact" class="flex items-center gap-2 <?= activeClass(false) ?>"><ion-icon name="mail-outline" class="text-yellow-300/80"></ion-icon> Contact</a></li>
     </ul>
 
     <!-- Right Section (Desktop) -->
@@ -145,9 +152,11 @@ $initials = strtoupper(preg_replace('/[^A-Za-z]/', '', mb_substr($displayName, 0
           <button id="userMenuButton"
                   class="inline-flex items-center gap-3 px-2 py-1 rounded-full hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
                   aria-haspopup="menu" aria-expanded="false" aria-controls="userMenu">
-            <div class="h-9 w-9 rounded-full bg-blue-600 text-white grid place-items-center font-bold ring-2 ring-blue-100">
-              <?= htmlspecialchars($initials, ENT_QUOTES, 'UTF-8') ?>
-            </div>
+            <?php if (!empty($profilePic) && $profilePic !== 'uploads/default.png'): ?>
+              <img src="<?= htmlspecialchars($profilePic, ENT_QUOTES, 'UTF-8') ?>" alt="Profile" class="h-9 w-9 rounded-full object-cover ring-2 ring-blue-100">
+            <?php else: ?>
+              <div class="h-9 w-9 rounded-full bg-blue-600 text-white grid place-items-center font-bold ring-2 ring-blue-100"><?= htmlspecialchars($initials, ENT_QUOTES, 'UTF-8') ?></div>
+            <?php endif; ?>
             <span class="hidden lg:block text-sm font-semibold truncate max-w-[140px]"><?= htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8') ?></span>
             <ion-icon name="chevron-down-outline" class="hidden lg:block"></ion-icon>
           </button>
@@ -156,46 +165,32 @@ $initials = strtoupper(preg_replace('/[^A-Za-z]/', '', mb_substr($displayName, 0
                class="absolute right-0 mt-2 w-64 rounded-xl shadow-xl bg-white border border-gray-200 text-gray-800 hidden origin-top-right scale-95 opacity-0 transition-all duration-150"
                role="menu" aria-labelledby="userMenuButton">
             <div class="p-4 border-b border-gray-100 flex items-center gap-3">
-              <div class="h-10 w-10 rounded-full bg-blue-600 text-white grid place-items-center font-bold">
-                <?= htmlspecialchars($initials, ENT_QUOTES, 'UTF-8') ?>
-              </div>
+              <?php if (!empty($profilePic) && $profilePic !== 'uploads/default.png'): ?>
+                <img src="<?= htmlspecialchars($profilePic, ENT_QUOTES, 'UTF-8') ?>" alt="Profile" class="h-10 w-10 rounded-full object-cover">
+              <?php else: ?>
+                <div class="h-10 w-10 rounded-full bg-blue-600 text-white grid place-items-center font-bold"><?= htmlspecialchars($initials, ENT_QUOTES, 'UTF-8') ?></div>
+              <?php endif; ?>
               <div class="min-w-0">
                 <div class="font-semibold truncate"><?= htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8') ?></div>
                 <div class="text-xs text-gray-500 capitalize"><?= htmlspecialchars($role ?? '', ENT_QUOTES, 'UTF-8') ?></div>
               </div>
             </div>
             <div class="py-1">
-              <a href="<?= htmlspecialchars($profileLink) ?>"  class="flex items-center gap-2 px-4 py-2 hover:bg-gray-50" role="menuitem">
-                <ion-icon name="person-circle-outline" class="text-slate-600"></ion-icon> Profile
-              </a>
-              <a href="<?= htmlspecialchars($settingsLink) ?>" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-50" role="menuitem">
-                <ion-icon name="settings-outline" class="text-slate-600"></ion-icon> Settings
-              </a>
-              <a href="<?= htmlspecialchars($dashboardLink) ?>" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-50" role="menuitem">
-                <ion-icon name="speedometer-outline" class="text-slate-600"></ion-icon> Dashboard
-              </a>
+              <a href="<?= htmlspecialchars($profileLink) ?>"  class="flex items-center gap-2 px-4 py-2 hover:bg-gray-50" role="menuitem"><ion-icon name="person-circle-outline" class="text-slate-600"></ion-icon> Profile</a>
+              <a href="<?= htmlspecialchars($settingsLink) ?>" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-50" role="menuitem"><ion-icon name="settings-outline" class="text-slate-600"></ion-icon> Settings</a>
+              <a href="<?= htmlspecialchars($dashboardLink) ?>" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-50" role="menuitem"><ion-icon name="speedometer-outline" class="text-slate-600"></ion-icon> Dashboard</a>
             </div>
             <div class="py-1 border-t border-gray-100">
-              <a href="logout.php" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 text-red-600" role="menuitem">
-                <ion-icon name="log-out-outline"></ion-icon> Logout
-              </a>
+              <a href="logout.php" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 text-red-600" role="menuitem"><ion-icon name="log-out-outline"></ion-icon> Logout</a>
             </div>
           </div>
         </div>
       <?php else: ?>
-        <!-- Smaller Login/Register buttons -->
-        <a href="login.php"
-           class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm bg-yellow-400 text-black font-semibold rounded-lg shadow-md hover:bg-yellow-300 transition">
-          <ion-icon name="log-in-outline" class="text-base"></ion-icon> Login
-        </a>
-        <a href="register.php"
-           class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm bg-white text-blue-700 font-semibold rounded-lg shadow-md ring-1 ring-blue-200 hover:bg-blue-50 transition">
-          <ion-icon name="person-add-outline" class="text-base"></ion-icon> Register
-        </a>
+        <a href="login.php" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm bg-yellow-400 text-black font-semibold rounded-lg shadow-md hover:bg-yellow-300 transition"><ion-icon name="log-in-outline" class="text-base"></ion-icon> Login</a>
+        <a href="register.php" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm bg-white text-blue-700 font-semibold rounded-lg shadow-md ring-1 ring-blue-200 hover:bg-blue-50 transition"><ion-icon name="person-add-outline" class="text-base"></ion-icon> Register</a>
       <?php endif; ?>
     </div>
   </div>
-
   <!-- Mobile Overlay -->
   <div id="navOverlay" class="inset-0 bg-black/35 z-40 hidden md:hidden"></div>
 
@@ -218,8 +213,8 @@ $initials = strtoupper(preg_replace('/[^A-Za-z]/', '', mb_substr($displayName, 0
     <a href="index.php" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50" role="menuitem">
       <ion-icon name="home-outline"></ion-icon> Home
     </a>
-    <a href="#about" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50" role="menuitem">
-      <ion-icon name="information-circle-outline"></ion-icon> About Us
+    <a href="#past-papers" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50" role="menuitem">
+      <ion-icon name="information-circle-outline"></ion-icon> Past Papers
     </a>
     <a href="#courses" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50" role="menuitem">
       <ion-icon name="library-outline"></ion-icon> Courses
