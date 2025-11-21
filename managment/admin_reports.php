@@ -125,13 +125,13 @@ function method_icon_class(string $method): string {
 }
 function status_badge(string $status): array {
     $s = strtolower($status);
-    if ($s === 'completed') return ['bg' => 'bg-green-100 text-green-800', 'icon' => 'fa-circle-check'];
-    if ($s === 'failed')    return ['bg' => 'bg-red-100 text-red-800',     'icon' => 'fa-circle-xmark'];
+    if ($s === 'completed') return ['bg' => 'bg-emerald-100 text-emerald-800', 'icon' => 'fa-circle-check'];
+    if ($s === 'failed')    return ['bg' => 'bg-rose-100 text-rose-800',     'icon' => 'fa-circle-xmark'];
     return ['bg' => 'bg-amber-100 text-amber-800', 'icon' => 'fa-hourglass-half'];
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8" />
     <title>Payment Reports</title>
@@ -143,83 +143,202 @@ function status_badge(string $status): array {
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
       html { scroll-behavior: smooth; }
-      .table-sticky thead th { position: sticky; top: 0; z-index: 5; }
+      body {
+        font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, 'Helvetica Neue', Arial;
+        min-height: 100vh;
+      }
+      body::before {
+        content:"";
+        position:fixed; inset:0;
+        background:
+          radial-gradient(circle at 0% 0%, rgba(129,140,248,0.18) 0, transparent 55%),
+          radial-gradient(circle at 100% 40%, rgba(37,99,235,0.16) 0, transparent 60%),
+          radial-gradient(circle at 20% 100%, rgba(45,212,191,0.14) 0, transparent 55%);
+        pointer-events:none;
+        z-index:-1;
+      }
+      .table-sticky thead th { position: sticky; top: 0; z-index: 5; backdrop-filter: blur(10px); }
+      .card {
+        background: rgba(255,255,255,.96);
+        border-radius: 1.5rem;
+        border: 1px solid rgba(226,232,240,.95);
+        box-shadow: 0 20px 45px -24px rgba(15,23,42,.7);
+        backdrop-filter: blur(16px);
+      }
+      .stat-card {
+        border-radius: 1.25rem;
+        background: rgba(255,255,255,.98);
+        border: 1px solid rgba(226,232,240,.95);
+        box-shadow: 0 14px 30px -18px rgba(15,23,42,.4);
+        transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+      }
+      .stat-card:hover {
+        transform: translateY(-2px);
+        border-color: #c7d2fe;
+        box-shadow: 0 18px 40px -22px rgba(30,64,175,.6);
+      }
+      .btn-soft {
+        display:inline-flex; align-items:center; gap:.4rem;
+        padding:.5rem .9rem; border-radius:.85rem;
+        background:#ffffff; border:1px solid #dbeafe;
+        font-size:.8rem; font-weight:500; color:#1d4ed8;
+        transition:background .18s, box-shadow .18s, border-color .18s, transform .1s;
+      }
+      .btn-soft:hover {
+        background:#eff6ff; border-color:#bfdbfe;
+        box-shadow:0 8px 20px -13px rgba(37,99,235,.6);
+        transform: translateY(-1px);
+      }
+      .btn-primary {
+        display:inline-flex; align-items:center; gap:.45rem;
+        padding:.55rem 1rem; border-radius:.9rem;
+        background-image:linear-gradient(90deg,#ef4444,#f97316);
+        color:#fff; font-size:.8rem; font-weight:600;
+        box-shadow:0 12px 30px -16px rgba(248,113,113,.9);
+        transition:filter .18s, box-shadow .18s, transform .1s;
+      }
+      .btn-primary:hover { filter:brightness(1.05); box-shadow:0 18px 40px -18px rgba(248,113,113,1); transform:translateY(-1px); }
+      .btn-green {
+        display:inline-flex; align-items:center; gap:.45rem;
+        padding:.55rem 1rem; border-radius:.9rem;
+        background-image:linear-gradient(90deg,#059669,#22c55e);
+        color:#fff; font-size:.8rem; font-weight:600;
+        box-shadow:0 12px 30px -16px rgba(22,163,74,.9);
+        transition:filter .18s, box-shadow .18s, transform .1s;
+      }
+      .btn-green:hover { filter:brightness(1.05); box-shadow:0 18px 40px -18px rgba(22,163,74,1); transform:translateY(-1px); }
     </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 via-white to-indigo-50 text-gray-800 min-h-screen">
+<body class="bg-gradient-to-br from-blue-50 via-white to-slate-50 text-gray-800">
 <?php include 'components/navbar.php'; ?>
 
-<div class="max-w-8xl mx-auto px-6 py-8 mt-16">
-    <!-- Header -->
-    <div class="relative overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 p-5 mb-6">
-      <div aria-hidden="true" class="pointer-events-none absolute inset-0">
-        <div class="absolute -top-16 -right-20 w-72 h-72 bg-blue-200/40 rounded-full blur-3xl"></div>
-        <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-indigo-200/40 rounded-full blur-3xl"></div>
-      </div>
-      <div class="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 class="text-2xl sm:text-3xl font-extrabold text-blue-700 tracking-tight flex items-center gap-3">
-            <i class="fa-solid fa-file-invoice-dollar"></i> Payment Reports
-          </h2>
-          <p class="text-gray-600">Review, verify and manage student payments.</p>
+<div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+    <!-- Hero -->
+    <section class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-950 via-slate-900 to-sky-900 text-white shadow-2xl mb-8">
+      <div class="absolute -left-24 -top-24 w-72 h-72 bg-indigo-500/40 rounded-full blur-3xl"></div>
+      <div class="absolute -right-24 top-8 w-64 h-64 bg-sky-400/40 rounded-full blur-3xl"></div>
+
+      <div class="relative z-10 px-6 py-7 sm:px-8 sm:py-8 flex flex-col gap-5">
+        <div class="flex items-center justify-between gap-3">
+          <div class="inline-flex items-center gap-2 text-xs sm:text-sm opacity-90">
+            <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/25">
+              <i class="fa-solid fa-file-invoice-dollar text-[13px]"></i>
+            </span>
+            <span>Admin · Payment Reports</span>
+          </div>
+          <span class="inline-flex items-center gap-2 bg-white/10 ring-1 ring-white/25 px-3 py-1 rounded-full text-[11px] sm:text-xs">
+            <i class="fa-solid fa-shield-halved text-[12px]"></i>
+            <span>Admin access</span>
+          </span>
         </div>
-        <div class="flex flex-wrap items-center gap-2">
-          <a href="admin_dashboard.php" class="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-white px-4 py-2 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition">
-            <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div class="space-y-2">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight">
+              Payment Reports & Verification
+            </h1>
+            <p class="text-xs sm:text-sm text-sky-100/90 max-w-2xl">
+              Review, verify, and manage all student payments. Use quick filters, status updates and one-click exports.
+            </p>
+          </div>
+          <div class="flex flex-col items-start lg:items-end gap-2 text-xs sm:text-sm text-sky-100/90">
+            <div class="inline-flex items-center gap-2 rounded-2xl bg-black/25 px-3 py-1.5 backdrop-blur">
+              <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-400/95 text-emerald-950 text-[11px] font-semibold">
+                ✓
+              </span>
+              <span>Secure status changes with CSRF protection</span>
+            </div>
+            <span class="text-[11px] sm:text-xs">
+              Tip: use “Export PDF/CSV” to share or archive your reports.
+            </span>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 pt-1">
+          <a href="admin_dashboard.php"
+             class="btn-soft bg-white/95 text-slate-800 border-slate-200">
+            <i class="fa-solid fa-arrow-left"></i> Back to dashboard
           </a>
-          <button onclick="exportTablePDF()" class="inline-flex items-center gap-2 rounded-lg bg-rose-600 text-white px-4 py-2 hover:bg-rose-700 shadow-sm">
+          <button onclick="exportTablePDF()" class="btn-primary">
             <i class="fa-solid fa-file-pdf"></i> Export PDF
           </button>
-          <button onclick="exportTableCSV()" class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 text-white px-4 py-2 hover:bg-emerald-700 shadow-sm">
+          <button onclick="exportTableCSV()" class="btn-green">
             <i class="fa-solid fa-file-csv"></i> Export CSV
           </button>
         </div>
-      </div>
 
-      <?php if (!empty($flashMsg)): ?>
-        <div class="relative mt-4">
+        <?php if (!empty($flashMsg)): ?>
           <?php
-            $alertClass = $flashType === 'success' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : ($flashType === 'error' ? 'bg-red-50 text-red-700 ring-red-200' : 'bg-blue-50 text-blue-700 ring-blue-200');
-            $iconClass  = $flashType === 'success' ? 'fa-circle-check' : ($flashType === 'error' ? 'fa-triangle-exclamation' : 'fa-circle-info');
+            $alertClass = $flashType === 'success'
+              ? 'bg-emerald-50/95 text-emerald-800 ring-emerald-200'
+              : ($flashType === 'error'
+                 ? 'bg-rose-50/95 text-rose-800 ring-rose-200'
+                 : 'bg-blue-50/95 text-blue-800 ring-blue-200');
+            $iconClass  = $flashType === 'success'
+              ? 'fa-circle-check'
+              : ($flashType === 'error' ? 'fa-triangle-exclamation' : 'fa-circle-info');
           ?>
-          <div class="rounded-xl px-4 py-3 ring-1 <?= $alertClass ?>">
-            <span class="inline-flex items-center gap-2 font-medium"><i class="fa-solid <?= $iconClass ?>"></i> <?= e($flashMsg) ?></span>
+          <div class="relative mt-2">
+            <div class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2 ring-1 <?= $alertClass ?> text-xs sm:text-sm">
+              <i class="fa-solid <?= $iconClass ?>"></i>
+              <span><?= e($flashMsg) ?></span>
+            </div>
           </div>
-        </div>
-      <?php endif; ?>
-    </div>
+        <?php endif; ?>
+      </div>
+    </section>
 
     <!-- Stats -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      <div class="rounded-xl bg-white shadow-sm ring-1 ring-gray-200 p-4">
-        <div class="text-xs text-gray-500 flex items-center gap-2"><i class="fa-solid fa-receipt text-indigo-600"></i> Total Payments</div>
-        <div class="mt-1 text-2xl font-bold"><?= count($payments) ?></div>
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div class="stat-card p-4">
+        <div class="text-[11px] text-slate-500 flex items-center gap-2 uppercase tracking-wide">
+          <i class="fa-solid fa-receipt text-indigo-600"></i> Total Payments
+        </div>
+        <div class="mt-1 text-2xl font-bold text-slate-900"><?= count($payments) ?></div>
       </div>
-      <div class="rounded-xl bg-white shadow-sm ring-1 ring-gray-200 p-4">
-        <div class="text-xs text-gray-500 flex items-center gap-2"><i class="fa-solid fa-circle-check text-green-600"></i> Completed</div>
-        <div class="mt-1 text-2xl font-bold text-green-700"><?= (int)$counts['completed'] ?></div>
+      <div class="stat-card p-4">
+        <div class="text-[11px] text-slate-500 flex items-center gap-2 uppercase tracking-wide">
+          <i class="fa-solid fa-circle-check text-emerald-600"></i> Completed
+        </div>
+        <div class="mt-1 text-2xl font-bold text-emerald-700"><?= (int)$counts['completed'] ?></div>
       </div>
-      <div class="rounded-xl bg-white shadow-sm ring-1 ring-gray-200 p-4">
-        <div class="text-xs text-gray-500 flex items-center gap-2"><i class="fa-solid fa-hourglass-half text-amber-600"></i> Pending</div>
+      <div class="stat-card p-4">
+        <div class="text-[11px] text-slate-500 flex items-center gap-2 uppercase tracking-wide">
+          <i class="fa-solid fa-hourglass-half text-amber-600"></i> Pending
+        </div>
         <div class="mt-1 text-2xl font-bold text-amber-700"><?= (int)$counts['pending'] ?></div>
       </div>
-      <div class="rounded-xl bg-white shadow-sm ring-1 ring-gray-200 p-4">
-        <div class="text-xs text-gray-500 flex items-center gap-2"><i class="fa-solid fa-sack-dollar text-emerald-600"></i> Sum Completed</div>
-        <div class="mt-1 text-2xl font-bold text-emerald-700"><?= e($currencySymbol) . number_format($sumCompleted, 2) ?></div>
+      <div class="stat-card p-4">
+        <div class="text-[11px] text-slate-500 flex items-center gap-2 uppercase tracking-wide">
+          <i class="fa-solid fa-sack-dollar text-emerald-600"></i> Sum Completed
+        </div>
+        <div class="mt-1 text-2xl font-bold text-emerald-700">
+          <?= e($currencySymbol) . number_format($sumCompleted, 2) ?>
+        </div>
       </div>
-    </div>
+    </section>
 
     <!-- Filters -->
-    <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 p-4 mb-4">
+    <section class="card p-4 sm:p-5 mb-4">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-sm sm:text-base font-semibold text-slate-900 flex items-center gap-2">
+          <i class="fa-solid fa-filter text-indigo-600"></i>
+          Filter Payments
+        </h2>
+      </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div class="relative">
-          <input id="searchInput" type="text" placeholder="Search by student, ref, method…" class="w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300">
-          <i class="fa-solid fa-magnifying-glass w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+          <input id="searchInput" type="text"
+                 placeholder="Search by student, ref, method…"
+                 class="w-full pl-9 pr-3 py-2.5 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300">
+          <i class="fa-solid fa-magnifying-glass w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
         </div>
         <div>
-          <select id="statusFilter" class="w-full py-2.5 px-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300">
+          <select id="statusFilter"
+                  class="w-full py-2.5 px-3 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300">
             <option value="">All statuses</option>
             <option value="completed">Completed</option>
             <option value="pending">Pending</option>
@@ -227,7 +346,8 @@ function status_badge(string $status): array {
           </select>
         </div>
         <div>
-          <select id="methodFilter" class="w-full py-2.5 px-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300">
+          <select id="methodFilter"
+                  class="w-full py-2.5 px-3 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300">
             <option value="">All methods</option>
             <option value="card">Card</option>
             <option value="bank">Bank/Transfer</option>
@@ -237,13 +357,13 @@ function status_badge(string $status): array {
           </select>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- Table -->
-    <div class="overflow-x-auto shadow-lg rounded-2xl bg-white ring-1 ring-gray-200" id="paymentsTableWrap">
+    <section id="paymentsTableWrap" class="overflow-x-auto rounded-2xl bg-white/95 ring-1 ring-slate-200 shadow-lg">
         <table id="paymentsTable" class="min-w-full table-auto text-sm text-left border-collapse table-sticky">
-            <thead class="bg-gray-100 text-gray-700">
-                <tr>
+            <thead class="bg-slate-50/95 text-slate-700">
+                <tr class="text-xs font-semibold uppercase tracking-wide">
                     <th class="px-4 py-3">ID</th>
                     <th class="px-4 py-3">Student</th>
                     <th class="px-4 py-3">Amount</th>
@@ -251,11 +371,11 @@ function status_badge(string $status): array {
                     <th class="px-4 py-3">Status</th>
                     <th class="px-4 py-3">Reference</th>
                     <th class="px-4 py-3">Date Paid</th>
-                    <th class="px-4 py-3">Actions</th>
-                    <th class="px-4 py-3">Slip</th>
+                    <th class="px-4 py-3">Status Actions</th>
+                    <th class="px-4 py-3">Slip / Receipt</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100">
+            <tbody class="divide-y divide-slate-100">
                 <?php foreach ($payments as $row): 
                     $status = strtolower($row['payment_status']);
                     $badge = status_badge($status);
@@ -270,20 +390,22 @@ function status_badge(string $status): array {
 
                     $searchKey = strtolower(trim($studentName.' '.$ref.' '.$method.' '.$status.' '.$pid));
                 ?>
-                <tr class="hover:bg-gray-50 transition-colors duration-150 align-top"
+                <tr class="hover:bg-slate-50 transition-colors duration-150 align-top"
                     data-key="<?= e($searchKey) ?>"
                     data-status="<?= e($status) ?>"
                     data-method="<?= e(strtolower($method)) ?>">
-                    <td class="px-4 py-3 font-medium">#<?= $pid ?></td>
+                    <td class="px-4 py-3 font-semibold text-slate-700">#<?= $pid ?></td>
                     <td class="px-4 py-3">
-                      <span class="inline-flex items-center gap-2">
-                        <i class="fa-regular fa-user text-gray-500"></i> <?= e($studentName) ?>
+                      <span class="inline-flex items-center gap-2 text-slate-800">
+                        <i class="fa-regular fa-user text-slate-400"></i> <?= e($studentName) ?>
                       </span>
                     </td>
-                    <td class="px-4 py-3 font-semibold text-emerald-700"><?= e($currencySymbol) . $amount ?></td>
+                    <td class="px-4 py-3 font-semibold text-emerald-700">
+                      <?= e($currencySymbol) . $amount ?>
+                    </td>
                     <td class="px-4 py-3">
-                      <span class="inline-flex items-center gap-2 capitalize">
-                        <i class="fa-solid <?= e($methodIcon) ?> text-gray-600"></i> <?= e($method) ?>
+                      <span class="inline-flex items-center gap-2 capitalize text-slate-800">
+                        <i class="fa-solid <?= e($methodIcon) ?> text-slate-600"></i> <?= e($method) ?>
                       </span>
                     </td>
                     <td class="px-4 py-3">
@@ -292,14 +414,14 @@ function status_badge(string $status): array {
                         </span>
                     </td>
                     <td class="px-4 py-3">
-                        <span class="inline-flex items-center gap-2">
-                          <i class="fa-solid fa-hashtag text-gray-500"></i>
-                          <code class="text-xs bg-gray-100 px-2 py-1 rounded"><?= e($ref ?: '—') ?></code>
+                        <span class="inline-flex items-center gap-2 text-slate-800">
+                          <i class="fa-solid fa-hashtag text-slate-400"></i>
+                          <code class="text-xs bg-slate-50 px-2 py-1 rounded border border-slate-200"><?= e($ref ?: '—') ?></code>
                         </span>
                     </td>
                     <td class="px-4 py-3">
-                      <span class="inline-flex items-center gap-2">
-                        <i class="fa-regular fa-calendar-days text-gray-500"></i> <?= e($paidAt) ?>
+                      <span class="inline-flex items-center gap-2 text-slate-700">
+                        <i class="fa-regular fa-calendar-days text-slate-400"></i> <?= e($paidAt) ?>
                       </span>
                     </td>
                     <td class="px-4 py-3">
@@ -310,7 +432,7 @@ function status_badge(string $status): array {
                               <input type="hidden" name="action" value="update_status">
                               <input type="hidden" name="payment_id" value="<?= $pid ?>">
                               <input type="hidden" name="new_status" value="completed">
-                              <button class="inline-flex items-center gap-2 px-3 py-1 rounded bg-emerald-600 text-white text-xs hover:bg-emerald-700">
+                              <button class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-600 text-white text-[11px] hover:bg-emerald-700 shadow-sm">
                                 <i class="fa-solid fa-circle-check"></i> Activate
                               </button>
                             </form>
@@ -322,7 +444,7 @@ function status_badge(string $status): array {
                               <input type="hidden" name="action" value="update_status">
                               <input type="hidden" name="payment_id" value="<?= $pid ?>">
                               <input type="hidden" name="new_status" value="pending">
-                              <button class="inline-flex items-center gap-2 px-3 py-1 rounded bg-amber-500 text-white text-xs hover:bg-amber-600">
+                              <button class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-500 text-white text-[11px] hover:bg-amber-600 shadow-sm">
                                 <i class="fa-solid fa-rotate-left"></i> Set Pending
                               </button>
                             </form>
@@ -334,8 +456,8 @@ function status_badge(string $status): array {
                               <input type="hidden" name="action" value="update_status">
                               <input type="hidden" name="payment_id" value="<?= $pid ?>">
                               <input type="hidden" name="new_status" value="failed">
-                              <button class="inline-flex items-center gap-2 px-3 py-1 rounded bg-red-600 text-white text-xs hover:bg-red-700">
-                                <i class="fa-solid fa-circle-xmark"></i> Mark Failed
+                              <button class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-rose-600 text-white text-[11px] hover:bg-rose-700 shadow-sm">
+                                <i class="fa-solid fa-circle-xmark"></i> Failed
                               </button>
                             </form>
                           <?php endif; ?>
@@ -344,22 +466,24 @@ function status_badge(string $status): array {
                     <td class="px-4 py-3">
                         <div class="flex flex-col gap-2">
                           <?php if ($slipUrl): ?>
-                            <div class="flex gap-2">
+                            <div class="flex flex-wrap gap-2">
                               <button
-                                class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded text-xs font-semibold transition"
+                                class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-lg text-[11px] font-semibold shadow-sm transition"
                                 onclick='openSlip(<?= json_encode($slipUrl, JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'
                               ><i class="fa-regular fa-eye"></i> View Proof</button>
                               <a
-                                class="inline-flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded text-xs font-semibold transition"
+                                class="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-800 px-3 py-1 rounded-lg text-[11px] font-semibold shadow-sm transition"
                                 href="<?= e($slipUrl) ?>" target="_blank" rel="noopener" download
                               ><i class="fa-solid fa-download"></i> Download</a>
                             </div>
                           <?php else: ?>
-                            <span class="text-xs text-gray-500 inline-flex items-center gap-2"><i class="fa-regular fa-file"></i> No proof</span>
+                            <span class="text-xs text-slate-500 inline-flex items-center gap-2">
+                              <i class="fa-regular fa-file"></i> No proof
+                            </span>
                           <?php endif; ?>
 
                           <button
-                              class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-semibold transition"
+                              class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-[11px] font-semibold shadow-sm transition"
                               onclick="downloadSlip(
                                   '<?= $pid ?>',
                                   '<?= e($studentName) ?>',
@@ -376,7 +500,7 @@ function status_badge(string $status): array {
                 <?php endforeach; ?>
             </tbody>
         </table>
-    </div>
+    </section>
 </div>
 
 <!-- Hidden Payment Slip Template (Receipt PDF) -->
@@ -404,19 +528,29 @@ function status_badge(string $status): array {
 
 <!-- Modal to view uploaded proof -->
 <div id="proofModal" class="hidden fixed inset-0 z-50">
-  <div class="absolute inset-0 bg-black/50" onclick="closeSlip()"></div>
-  <div class="relative max-w-3xl mx-auto mt-16 bg-white rounded-2xl shadow-xl overflow-hidden">
-    <div class="flex items-center justify-between px-4 py-3 border-b">
-      <h3 class="font-semibold flex items-center gap-2"><i class="fa-regular fa-eye"></i> Payment Proof</h3>
-      <button class="text-gray-600 hover:text-black" onclick="closeSlip()" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+  <div class="absolute inset-0 bg-black/55" onclick="closeSlip()"></div>
+  <div class="relative max-w-3xl mx-auto mt-16 bg-white rounded-2xl shadow-2xl overflow-hidden ring-1 ring-slate-200">
+    <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/80">
+      <h3 class="font-semibold flex items-center gap-2 text-slate-900 text-sm">
+        <i class="fa-regular fa-eye text-indigo-600"></i> Payment Proof
+      </h3>
+      <button class="text-slate-500 hover:text-slate-900 p-1 rounded-md hover:bg-slate-100" onclick="closeSlip()" aria-label="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
     </div>
     <div class="p-4">
-      <div id="proofContainer" class="w-full h-[70vh] flex items-center justify-center bg-gray-50 rounded border overflow-hidden">
+      <div id="proofContainer" class="w-full h-[70vh] flex items-center justify-center bg-slate-50 rounded-xl border border-slate-200 overflow-hidden">
         <!-- Filled dynamically -->
       </div>
-      <div id="proofActions" class="mt-3 text-right hidden">
-        <a id="proofDownload" href="#" download class="inline-flex items-center gap-2 px-3 py-1.5 rounded bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm"><i class="fa-solid fa-download"></i> Download</a>
-        <a id="proofOpen" href="#" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-3 py-1.5 rounded bg-blue-600 hover:bg-blue-700 text-white text-sm"><i class="fa-solid fa-up-right-from-square"></i> Open</a>
+      <div id="proofActions" class="mt-3 text-right hidden space-x-2">
+        <a id="proofDownload" href="#" download
+           class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs sm:text-sm shadow-sm">
+          <i class="fa-solid fa-download"></i> Download
+        </a>
+        <a id="proofOpen" href="#" target="_blank" rel="noopener"
+           class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm shadow-sm">
+          <i class="fa-solid fa-up-right-from-square"></i> Open
+        </a>
       </div>
     </div>
   </div>
@@ -514,7 +648,7 @@ function status_badge(string $status): array {
     const aDownload = document.getElementById('proofDownload');
     const aOpen = document.getElementById('proofOpen');
 
-    container.innerHTML = '<div class="text-gray-500 text-sm flex items-center gap-2"><i class="fa-solid fa-spinner fa-spin"></i> Loading…</div>';
+    container.innerHTML = '<div class="text-slate-500 text-sm flex items-center gap-2"><i class="fa-solid fa-spinner fa-spin"></i> Loading…</div>';
     actions.classList.add('hidden');
 
     const lower = url.toLowerCase();
@@ -526,7 +660,7 @@ function status_badge(string $status): array {
     } else if (isPdf) {
       container.innerHTML = '<iframe src="'+escapeHtml(url)+'#toolbar=1" class="w-full h-full" title="Payment proof (PDF)"></iframe>';
     } else {
-      container.innerHTML = '<div class="text-gray-600 text-sm">Unsupported file type. <a class="text-blue-600 underline" href="'+escapeHtml(url)+'" target="_blank" rel="noopener">Open file</a></div>';
+      container.innerHTML = '<div class="text-slate-600 text-sm">Unsupported file type. <a class="text-blue-600 underline" href="'+escapeHtml(url)+'" target="_blank" rel="noopener">Open file</a></div>';
     }
 
     aDownload.href = url;
@@ -544,7 +678,6 @@ function status_badge(string $status): array {
                  .replace(/'/g,'&#039;');
   }
 
-  // Init
   document.addEventListener('DOMContentLoaded', () => {
     applyFilters();
     if (window.lucide) { lucide.createIcons(); }

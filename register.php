@@ -112,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Register - SynapZ</title>
+  <title>Register (Student) - SynapZ</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
@@ -130,8 +130,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
   <div class="flex items-center justify-center px-4 py-24">
     <div x-data="registerUI()" class="glass rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-xl text-slate-800">
-      <h2 class="text-3xl font-extrabold text-center mb-2 text-blue-800">📝 Register to SynapZ</h2>
-      <p class="text-center text-slate-600 mb-6">Create your account in three quick steps.</p>
+      <h2 class="text-3xl font-extrabold text-center mb-2 text-blue-800">📝 Register (Student)</h2>
+      <p class="text-center text-slate-600 mb-6">Create your student account in three quick steps.</p>
 
       <!-- Stepper -->
       <ol class="flex items-center justify-between mb-6">
@@ -165,22 +165,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
       <form method="POST" id="registerForm" x-ref="form" @submit.prevent="onSubmit" class="space-y-5" autocomplete="off">
         <!-- Always post 'register' even on programmatic submit -->
         <input type="hidden" name="register" value="1">
+        <!-- Force student role -->
+        <input type="hidden" name="role" value="student">
         <!-- CSRF Token -->
         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
 
         <!-- STEP 1: Account -->
         <div x-show="step === 1" x-transition>
-          <!-- Role -->
-          <div>
-            <label for="role" class="block mb-1 font-medium text-gray-700">Select Role</label>
-            <select name="role" id="role" x-model="role" required
-                    class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
-              <option value="">-- Select --</option>
-              <option value="student">Student</option>
-              <option value="teacher">Teacher</option>
-            </select>
-          </div>
-
           <!-- Username -->
           <div>
             <label for="username" class="block mb-1 font-medium text-gray-700">Username</label>
@@ -268,25 +259,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             <small x-show="emailExists" class="block mt-1 text-red-600">Email already exists!</small>
           </div>
 
-          <!-- Student-only (DOB is mandatory) -->
-          <div x-show="role === 'student'" x-transition.opacity>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label for="dob" class="block mb-1 font-medium text-gray-700">Date of Birth</label>
-                <input type="date"
-                       id="dob"
-                       name="dob"
-                       x-model="dob"
-                       :required="role === 'student'"
-                       :max="new Date().toISOString().slice(0,10)"
-                       class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
-              </div>
+          <!-- Student: DOB (mandatory) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="dob" class="block mb-1 font-medium text-gray-700">Date of Birth</label>
+              <input type="date"
+                     id="dob"
+                     name="dob"
+                     x-model="dob"
+                     required
+                     :max="new Date().toISOString().slice(0,10)"
+                     class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+              <small class="text-gray-500">Students must be at least 13 years old.</small>
             </div>
-            <small class="text-gray-500">Students must be at least 13 years old.</small>
           </div>
 
-          <!-- Contact number: required for all roles -->
-          <div class="mt-4">
+          <!-- Contact number -->
+          <div class="mt-2">
             <label for="contact_number" class="block mb-1 font-medium text-gray-700">Contact Number</label>
             <input
               type="tel"
@@ -382,7 +371,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
           unset($_SESSION['pending_otp'], $_SESSION['pending_email'], $_SESSION['otp_set_at']);
 
           // Sanitize and validate inputs
-          $role = $_POST['role'] ?? '';
+          $role = 'student'; // force student role
           $username = trim($_POST['username'] ?? '');
           $passwordRaw = $_POST['password'] ?? '';
           $password_confirm = $_POST['password_confirm'] ?? '';
@@ -390,15 +379,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
           $last = trim($_POST['last_name'] ?? '');
           $email = $postedEmail;
 
-          // Contact number (mandatory for all roles)
+          // Contact number (mandatory)
           $contactRaw = trim($_POST['contact_number'] ?? '');
           if ($contactRaw === '') {
               echo "<script>alert('⛔ Contact number is required.');</script>";
               exit;
           }
-          // Normalize: remove spaces, hyphens, parentheses, dots; keep a single optional leading +
+          // Normalize phone
           $contact = preg_replace('/[\s\-().]/', '', $contactRaw);
-          $contact = preg_replace('/(?!^)\+/', '', $contact); // remove any '+' not at start
+          $contact = preg_replace('/(?!^)\+/', '', $contact);
           if (!preg_match('/^\+?\d{8,15}$/', $contact)) {
               echo "<script>alert('⛔ Please enter a valid phone number (8–15 digits, optional leading +).');</script>";
               exit;
@@ -421,16 +410,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
               echo "<script>alert('⛔ Password must be at least 8 characters and include upper, lower, and a number.');</script>";
               exit;
           }
-          // New rule: password must not contain (or match) the username
           if (password_conflicts_with_username($username, $passwordRaw)) {
               echo "<script>alert('⛔ Password must not contain or match your username.');</script>";
               exit;
           }
 
-          // Secure hash using Argon2id (fallback handled inside helper)
+          // Secure hash
           $password = hash_password_secure($passwordRaw);
 
-          // Email exists check in both students and teachers
+          // Email exists check (students or teachers)
           $checkEmailStmt = $conn->prepare("SELECT user_id FROM students WHERE email = ? UNION SELECT user_id FROM teachers WHERE email = ?");
           $checkEmailStmt->bind_param("ss", $email, $email);
           $checkEmailStmt->execute();
@@ -448,57 +436,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
               if ($checkStmt->num_rows > 0) {
                   echo "<script>alert('⛔ Username already exists!');</script>";
               } else {
+                  // Create user
                   $stmtUser = $conn->prepare("INSERT INTO users (username, role) VALUES (?, ?)");
                   $stmtUser->bind_param("ss", $username, $role);
 
                   if ($stmtUser->execute()) {
                       $user_id = $conn->insert_id;
 
+                      // Save password
                       $stmtPwd = $conn->prepare("INSERT INTO passwords (user_id, password_hash, is_current) VALUES (?, ?, 1)");
                       $stmtPwd->bind_param("is", $user_id, $password);
                       $stmtPwd->execute();
 
-                      if ($role === 'student') {
-                          // Require DOB for students
-                          $rawDob = $_POST['dob'] ?? '';
-                          if (!$rawDob) {
-                              echo "<script>alert('⛔ Date of Birth is required for students.');</script>";
-                              exit;
-                          }
-                          // Validate format and age >= 13
-                          $birthDate = DateTime::createFromFormat('Y-m-d', $rawDob);
-                          $validDob = $birthDate && $birthDate->format('Y-m-d') === $rawDob;
-                          if (!$validDob) {
-                              echo "<script>alert('⛔ Invalid Date of Birth format.');</script>";
-                              exit;
-                          }
-                          $today = new DateTime();
-                          $age = $today->diff($birthDate)->y;
-                          if ($age < 13) {
-                              echo "<script>alert('🚫 You must be at least 13 years old to register as a student.');</script>";
-                              exit;
-                          }
-
-                          $dob = $rawDob;
-
-                          $stmtStudent = $conn->prepare("INSERT INTO students (user_id, first_name, last_name, dob, email, contact_number)
-                                                  VALUES (?, ?, ?, ?, ?, ?)");
-                          $stmtStudent->bind_param("isssss", $user_id, $first, $last, $dob, $email, $contact);
-                          $stmtStudent->execute();
-
-                          session_regenerate_id(true); // Session security
-                          echo "<script>alert('🎉 Student registered successfully.'); window.location='login.php';</script>";
-
-                      } elseif ($role === 'teacher') {
-                          // NOTE: Requires teachers.contact_number column (VARCHAR(20))
-                          $stmtTeacher = $conn->prepare("INSERT INTO teachers (user_id, first_name, last_name, email, contact_number)
-                                                  VALUES (?, ?, ?, ?, ?)");
-                          $stmtTeacher->bind_param("issss", $user_id, $first, $last, $email, $contact);
-                          $stmtTeacher->execute();
-
-                          session_regenerate_id(true); // Session security
-                          echo "<script>alert('🎉 Teacher registered successfully.'); window.location='login.php';</script>";
+                      // Student-specific: require DOB and age >= 13
+                      $rawDob = $_POST['dob'] ?? '';
+                      if (!$rawDob) {
+                          echo "<script>alert('⛔ Date of Birth is required for students.');</script>";
+                          exit;
                       }
+                      $birthDate = DateTime::createFromFormat('Y-m-d', $rawDob);
+                      $validDob = $birthDate && $birthDate->format('Y-m-d') === $rawDob;
+                      if (!$validDob) {
+                          echo "<script>alert('⛔ Invalid Date of Birth format.');</script>";
+                          exit;
+                      }
+                      $today = new DateTime();
+                      $age = $today->diff($birthDate)->y;
+                      if ($age < 13) {
+                          echo "<script>alert('🚫 You must be at least 13 years old to register as a student.');</script>";
+                          exit;
+                      }
+
+                      $dob = $rawDob;
+
+                      $stmtStudent = $conn->prepare("INSERT INTO students (user_id, first_name, last_name, dob, email, contact_number)
+                                              VALUES (?, ?, ?, ?, ?, ?)");
+                      $stmtStudent->bind_param("isssss", $user_id, $first, $last, $dob, $email, $contact);
+                      $stmtStudent->execute();
+
+                      session_regenerate_id(true);
+                      echo "<script>alert('🎉 Student registered successfully.'); window.location='login.php';</script>";
                   } else {
                       echo "<script>alert('⛔ Registration failed due to an error.');</script>";
                   }
@@ -516,7 +493,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     function registerUI() {
       return {
         step: 1,
-        role: '',
         username: '',
         password: '',
         passwordConfirm: '',
@@ -534,59 +510,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         alert: { type: '', text: '' },
         strength: { percent: 0, label: 'Strength: —', color: '#e5e7eb' },
 
-        // Email check
+        // Email/Username checks
         emailExists: false,
         checkingEmail: false,
-
-        // Username check
         usernameExists: false,
         checkingUsername: false,
 
         async next() {
           if (this.step === 1) {
-            if (!this.role) return this.setError('Please select a role.');
             if (!/^[a-zA-Z0-9_]{4,20}$/.test(this.username)) return this.setError('Username must be 4-20 chars (letters, numbers, underscores).');
 
-            // Check username availability before proceeding
             await this.checkUsernameAvailability(true);
-            if (this.usernameExists) {
-              return this.setError('Username already exists!');
-            }
+            if (this.usernameExists) return this.setError('Username already exists!');
 
             if (this.password !== this.passwordConfirm) return this.setError('Passwords do not match.');
             if (!(this.password.length >= 8 && /[A-Z]/.test(this.password) && /[a-z]/.test(this.password) && /[0-9]/.test(this.password)))
               return this.setError('Password must be at least 8 chars and include upper, lower, and a number.');
-
-            // New client-side rule
-            if (this.passwordContainsUsername()) {
-              return this.setError('Password must not contain your username.');
-            }
+            if (this.passwordContainsUsername()) return this.setError('Password must not contain your username.');
 
             this.clearAlert();
             this.step = 2;
           } else if (this.step === 2) {
             if (!this.firstName || !this.lastName) return this.setError('Please enter your full name.');
             if (!this.validEmail(this.email)) return this.setError('Please enter a valid email.');
+            if (!this.dob) return this.setError('Date of Birth is required.');
+            const age = this.calcAge(this.dob);
+            if (Number.isNaN(age)) return this.setError('Please enter a valid Date of Birth.');
+            if (age < 13) return this.setError('You must be at least 13 to register as a student.');
+            if (!this.validPhone(this.contact)) return this.setError('Please enter a valid phone number (8–15 digits, optional leading +).');
             if (!this.agree) return this.setError('Please agree to the Terms & Privacy Policy.');
 
-            // Require DOB for students + age >= 13
-            if (this.role === 'student') {
-              if (!this.dob) return this.setError('Date of Birth is required.');
-              const age = this.calcAge(this.dob);
-              if (Number.isNaN(age)) return this.setError('Please enter a valid Date of Birth.');
-              if (age < 13) return this.setError('You must be at least 13 to register as a student.');
-            }
-
-            // Contact number required for all roles
-            if (!this.validPhone(this.contact)) {
-              return this.setError('Please enter a valid phone number (8–15 digits, optional leading +).');
-            }
-
-            // Check email availability before proceeding to OTP
             await this.checkEmailAvailability(true);
-            if (this.emailExists) {
-              return this.setError('Email already exists!');
-            }
+            if (this.emailExists) return this.setError('Email already exists!');
 
             this.clearAlert();
             this.sendOtpFlow();
@@ -594,7 +549,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         },
         prev() { if (this.step > 1) { this.clearAlert(); this.step--; } },
 
-        // Check if password contains username (case-insensitive, ignoring non-alphanumerics)
         passwordContainsUsername() {
           const u = (this.username || '').toLowerCase().replace(/[^a-z0-9]/g, '');
           const p = (this.password || '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -605,7 +559,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
           try {
             this.sending = true;
             const otp = (Math.floor(100000 + Math.random() * 900000)).toString();
-            // Save OTP to session
+
             const formData = new URLSearchParams();
             formData.append('action', 'save_otp');
             formData.append('otp', otp);
@@ -620,7 +574,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             const data = await res.json();
             if (!data.ok) throw new Error('Failed to store OTP');
 
-            // Send via EmailJS
             await emailjs.send('service_lcnrnrg', 'template_2e53yom', {
               to_email: this.email,
               to_name: this.firstName || 'there',
@@ -679,26 +632,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
           if (/[a-z]/.test(p)) score++;
           if (/[0-9]/.test(p)) score++;
           if (/[^A-Za-z0-9]/.test(p)) score++;
-
           const percent = [0, 25, 50, 75, 100][score] || 0;
           const label = ['Very weak', 'Weak', 'Okay', 'Good', 'Strong'][score-1] || 'Strength: —';
           const color = ['#ef4444', '#f59e0b', '#eab308', '#10b981', '#059669'][score-1] || '#e5e7eb';
           this.strength = { percent, label: 'Strength: ' + label, color };
         },
 
-        // Email availability check
-        async checkEmailAvailability(force = false) {
-          if (!this.validEmail(this.email)) {
-            this.emailExists = false;
-            return;
-          }
+        async checkEmailAvailability() {
+          if (!this.validEmail(this.email)) { this.emailExists = false; return; }
           this.checkingEmail = true;
           try {
             const formData = new URLSearchParams();
             formData.append('action', 'check_email');
             formData.append('email', this.email);
             formData.append('csrf_token', document.querySelector('input[name=csrf_token]').value);
-
             const res = await fetch(window.location.href, {
               method: 'POST',
               headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -706,27 +653,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             });
             const data = await res.json();
             this.emailExists = !!(data.ok && data.exists);
-          } catch (e) {
-            console.error(e);
-            this.emailExists = false; // fail open
-          } finally {
-            this.checkingEmail = false;
-          }
+          } catch (e) { console.error(e); this.emailExists = false; }
+          finally { this.checkingEmail = false; }
         },
 
-        // Username availability check
-        async checkUsernameAvailability(force = false) {
-          if (!/^[a-zA-Z0-9_]{4,20}$/.test(this.username)) {
-            this.usernameExists = false;
-            return;
-          }
+        async checkUsernameAvailability() {
+          if (!/^[a-zA-Z0-9_]{4,20}$/.test(this.username)) { this.usernameExists = false; return; }
           this.checkingUsername = true;
           try {
             const formData = new URLSearchParams();
             formData.append('action', 'check_username');
             formData.append('username', this.username);
             formData.append('csrf_token', document.querySelector('input[name=csrf_token]').value);
-
             const res = await fetch(window.location.href, {
               method: 'POST',
               headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -734,12 +672,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             });
             const data = await res.json();
             this.usernameExists = !!(data.ok && data.exists);
-          } catch (e) {
-            console.error(e);
-            this.usernameExists = false; // fail open
-          } finally {
-            this.checkingUsername = false;
-          }
+          } catch (e) { console.error(e); this.usernameExists = false; }
+          finally { this.checkingUsername = false; }
         },
       };
     }

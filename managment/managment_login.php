@@ -30,11 +30,15 @@ session_set_cookie_params([
 session_start();
 
 /* ---------- Portal config ---------- */
-$REQUIRED_ROLE = 'admin';
-$PORTAL_NAME   = 'Admin';
-$TITLE         = 'Admin Login - SynapZ';
+$ALLOWED_ROLES = ['admin','ceo','accountant']; // allow these roles on this login
+$ROLE_REDIRECT = [
+  'admin'      => 'admin_dashboard.php',
+  'ceo'        => 'managment/ceo_dashboard.php',
+  'accountant' => 'accountant_dashboard.php',
+];
 
-$error = "";
+$TITLE       = 'SynapZ Login – Admin / CEO / Accountant';
+$PORTAL_NAME = 'SynapZ';
 
 /* ---------- CSRF token ---------- */
 if (empty($_SESSION['csrf_token'])) {
@@ -42,15 +46,17 @@ if (empty($_SESSION['csrf_token'])) {
 }
 $csrfToken = $_SESSION['csrf_token'];
 
-/* ---------- Basic session-scoped rate limiting (per IP + portal) ---------- */
+/* ---------- Basic session-scoped rate limiting (per IP) ---------- */
 $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-$rateKey = 'login_rate_' . $REQUIRED_ROLE . '_' . $ip;
+$rateKey = 'login_rate_multi_' . $ip;
 $windowSeconds = 15 * 60; // 15 minutes
 $maxAttempts   = 5;
 
 if (!isset($_SESSION[$rateKey])) {
   $_SESSION[$rateKey] = ['count' => 0, 'first' => time()];
 }
+
+$error = "";
 
 /* ---------- Handle POST ---------- */
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -79,7 +85,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       );
 
       if ($stmt === false) {
-        error_log('Admin login prepare failed: ' . $conn->error);
+        error_log('Multi-login prepare failed: ' . $conn->error);
         $error = "❌ Something went wrong. Please try again.";
       } else {
         $stmt->bind_param("s", $username);
@@ -93,8 +99,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $verified = password_verify($password, $found ? $hash : $dummyHash);
 
         if ($found && $verified) {
-          if ($role !== $REQUIRED_ROLE) {
-            $error = "❌ Please use the {$role} portal.";
+          // Only allow the roles configured for this portal
+          if (!in_array($role, $ALLOWED_ROLES, true)) {
+            $error = "❌ Please use the correct portal for your role.";
             usleep(300000);
           } else {
             session_regenerate_id(true);
@@ -102,7 +109,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $_SESSION['role']      = $role;
             $_SESSION['last_auth'] = time();
             unset($_SESSION[$rateKey]); // reset attempts
-            header("Location: admin_dashboard.php");
+
+            $dest = $ROLE_REDIRECT[$role] ?? 'index.php';
+            header("Location: " . $dest);
             exit;
           }
         } else {
@@ -141,7 +150,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <div class="absolute inset-0 bg-white/30 backdrop-blur-[2px]"></div>
   </div>
 
-  <?php include 'components/navbar.php'; ?>
+  <?php if (file_exists(__DIR__ . '/components/navbar.php')) include __DIR__ . '/components/navbar.php'; ?>
 
   <main class="flex items-center justify-center py-16 px-4">
     <div class="w-full max-w-md fade-in mt-16">
@@ -149,7 +158,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <div class="rounded-2xl bg-white/80 backdrop-blur-xl ring-1 ring-white/60 p-8">
           <div class="mb-6 text-center">
             <h1 class="text-3xl font-extrabold text-blue-900 tracking-tight"><?= htmlspecialchars($PORTAL_NAME) ?> Login</h1>
-            <p class="text-blue-900/70 text-sm mt-2">Welcome back! Please sign in to continue.</p>
+            <p class="text-blue-900/70 text-sm mt-2">Admin • CEO • Accountant</p>
           </div>
 
           <?php if (!empty($error)): ?>
@@ -210,15 +219,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
               id="loginButton"
             >
               <span class="inline-block transition-transform group-hover:-translate-y-0.5">Login</span>
-              <svg class="h-5 w-5 opacity-90 transition-transform group-hover:translate-x-0.5" xmlns="http://www.w3.org/0/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <svg class="h-5 w-5 opacity-90 transition-transform group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
               </svg>
             </button>
 
             <p class="text-center text-sm text-blue-900/70">
-              Not an <?= htmlspecialchars($PORTAL_NAME) ?>?
-              <a href="teacher_login.php" class="text-blue-800 font-semibold hover:underline">Teacher login</a> ·
-              <a href="login.php" class="text-blue-800 font-semibold hover:underline">Student login</a>
+              Need a different portal?
+              <a href="teacher_login.php" class="text-blue-800 font-semibold hover:underline">Teacher</a> ·
+              <a href="login.php" class="text-blue-800 font-semibold hover:underline">Student</a>
             </p>
           </form>
         </div>

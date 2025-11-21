@@ -272,6 +272,13 @@ $stmt = $conn->prepare("
 $stmt->bind_param('ss', $startDt, $endDt);
 $stmt->execute();
 $payments = $stmt->get_result();
+
+// Quick range helpers
+$today = date('Y-m-d');
+$last7 = date('Y-m-d', strtotime('-6 days'));
+$monthStart = date('Y-m-01');
+$m = (int)date('n'); $y = (int)date('Y'); $qMonth = (int)(floor(($m-1)/3)*3 + 1);
+$qStart = date('Y-m-d', strtotime(sprintf('%04d-%02d-01', $y, $qMonth)));
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -282,6 +289,24 @@ $payments = $stmt->get_result();
 <script src="https://cdn.tailwindcss.com"></script>
 <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
 <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; }
+  .card { background:#fff; border:1px solid rgba(226,232,240,.9); border-radius:1rem; box-shadow:0 10px 20px -10px rgba(15,23,42,.12); }
+  .glass { background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.25); backdrop-filter: blur(10px); border-radius: .9rem; }
+  .chip { display:inline-flex; align-items:center; gap:.4rem; padding:.35rem .7rem; border:1px solid #e0e7ff; border-radius:9999px; background:#eef2ff; color:#4338ca; font-size:.78rem; }
+  .chip:hover { background:#e0e7ff; }
+  .badge { display:inline-block; padding:.2rem .45rem; border-radius:.5rem; font-size:.72rem; }
+  .table-sticky thead th { position: sticky; top: var(--thead-offset, 0px); z-index: 10; backdrop-filter: blur(8px); background: rgba(248,250,252,.9); }
+  .btn-primary { display:inline-flex; align-items:center; gap:.5rem; background:#059669; color:#fff; padding:.55rem .9rem; border-radius:.6rem; }
+  .btn-primary:hover { filter:brightness(1.05); }
+  .btn-ghost { display:inline-flex; align-items:center; gap:.45rem; padding:.5rem .8rem; border-radius:.6rem; border:1px solid #cbd5e1; background:#fff; color:#1e293b; }
+  .btn-ghost:hover { background:#f8fafc; }
+  .btn-disabled { opacity:.6; pointer-events:none; }
+  .countup { transition: color .2s ease; }
+</style>
 </head>
 <body class="bg-gray-50 min-h-screen">
 
@@ -303,8 +328,8 @@ $payments = $stmt->get_result();
     </div>
 
     <!-- Filters + Metrics -->
-    <div class="mt-5 grid grid-cols-1 lg:grid-cols-5 gap-3 max-w-7xl mx-auto">
-      <form method="get" class="bg-white/10 ring-1 ring-white/20 rounded-xl p-3 backdrop-blur grid grid-cols-2 gap-3 lg:col-span-2">
+    <div class="mt-6 grid grid-cols-1 lg:grid-cols-5 gap-3 max-w-7xl mx-auto">
+      <form method="get" class="glass p-3 grid grid-cols-2 gap-3 lg:col-span-2">
         <div>
           <label class="text-xs text-white/80">Start</label>
           <input type="date" name="start" value="<?= e($start) ?>" class="w-full rounded-md px-3 py-2 text-slate-900">
@@ -313,28 +338,32 @@ $payments = $stmt->get_result();
           <label class="text-xs text-white/80">End</label>
           <input type="date" name="end" value="<?= e($end) ?>" class="w-full rounded-md px-3 py-2 text-slate-900">
         </div>
-        <div class="col-span-2">
-          <button class="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-white/90 text-emerald-700 font-semibold px-4 py-2 shadow hover:shadow-lg">
-            <ion-icon name="options-outline"></ion-icon> Apply
-          </button>
+        <div class="col-span-2 flex items-center gap-2">
+          <button class="btn-ghost bg-white/90 text-emerald-700"><ion-icon name="options-outline"></ion-icon> Apply</button>
+          <div class="ml-auto flex flex-wrap gap-2">
+            <a class="chip" href="?start=<?= e($today) ?>&end=<?= e($today) ?>">Today</a>
+            <a class="chip" href="?start=<?= e($last7) ?>&end=<?= e($today) ?>">Last 7 days</a>
+            <a class="chip" href="?start=<?= e($monthStart) ?>&end=<?= e($today) ?>">This month</a>
+            <a class="chip" href="?start=<?= e($qStart) ?>&end=<?= e($today) ?>">This quarter</a>
+          </div>
         </div>
       </form>
 
-      <div class="bg-white/10 ring-1 ring-white/20 rounded-xl p-3 backdrop-blur text-white">
+      <div class="glass p-3 text-white">
         <div class="text-xs opacity-90 inline-flex items-center gap-1"><ion-icon name="cash-outline"></ion-icon> Paid out</div>
-        <div class="text-xl font-semibold mt-1">$<?= money($completedSum) ?></div>
+        <div class="text-2xl font-extrabold mt-1"><span class="countup" data-target="<?= (float)$completedSum ?>" data-decimals="2" data-prefix="$">0</span></div>
       </div>
-      <div class="bg-white/10 ring-1 ring-white/20 rounded-xl p-3 backdrop-blur text-white">
+      <div class="glass p-3 text-white">
         <div class="text-xs opacity-90 inline-flex items-center gap-1"><ion-icon name="time-outline"></ion-icon> Pending</div>
-        <div class="text-xl font-semibold mt-1"><?= (int)$pendingCount ?></div>
+        <div class="text-2xl font-extrabold mt-1"><span class="countup" data-target="<?= (int)$pendingCount ?>">0</span></div>
       </div>
-      <div class="bg-white/10 ring-1 ring-white/20 rounded-xl p-3 backdrop-blur text-white">
+      <div class="glass p-3 text-white">
         <div class="text-xs opacity-90 inline-flex items-center gap-1"><ion-icon name="checkmark-circle-outline"></ion-icon> Completed</div>
-        <div class="text-xl font-semibold mt-1"><?= (int)$completedCount ?></div>
+        <div class="text-2xl font-extrabold mt-1"><span class="countup" data-target="<?= (int)$completedCount ?>">0</span></div>
       </div>
-      <div class="bg-white/10 ring-1 ring-white/20 rounded-xl p-3 backdrop-blur text-white">
+      <div class="glass p-3 text-white">
         <div class="text-xs opacity-90 inline-flex items-center gap-1"><ion-icon name="alert-circle-outline"></ion-icon> Failed</div>
-        <div class="text-xl font-semibold mt-1"><?= (int)$failedCount ?></div>
+        <div class="text-2xl font-extrabold mt-1"><span class="countup" data-target="<?= (int)$failedCount ?>">0</span></div>
       </div>
     </div>
   </div>
@@ -354,7 +383,7 @@ $payments = $stmt->get_result();
   <?php endif; ?>
 
   <!-- Create payout -->
-  <section class="bg-white p-6 rounded-2xl shadow ring-1 ring-slate-200 mb-10">
+  <section class="card p-6 mb-10">
     <h2 class="text-xl font-semibold mb-4 inline-flex items-center gap-2">
       <ion-icon name="create-outline"></ion-icon> Create Teacher Payout
     </h2>
@@ -404,7 +433,7 @@ $payments = $stmt->get_result();
         <div id="previewBox" class="text-sm text-gray-700">
           Outstanding: — · Rate: — · Amount: —
         </div>
-        <button type="submit" class="bg-emerald-600 text-white px-6 py-2 rounded hover:bg-emerald-700 inline-flex items-center gap-2">
+        <button id="createBtn" type="submit" class="btn-primary btn-disabled">
           <ion-icon name="checkmark-outline"></ion-icon> Create Payout
         </button>
       </div>
@@ -412,54 +441,77 @@ $payments = $stmt->get_result();
   </section>
 
   <!-- Recent payments -->
-  <section class="bg-white p-6 rounded-2xl shadow ring-1 ring-slate-200">
-    <div class="flex items-center justify-between mb-4">
+  <section class="card p-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
       <h2 class="text-xl font-semibold inline-flex items-center gap-2">
         <ion-icon name="list-outline"></ion-icon> Recent Teacher Payments
       </h2>
-      <a href="export.php?type=teacher&start=<?= urlencode($start) ?>&end=<?= urlencode($end) ?>" class="text-sm text-emerald-700 hover:underline inline-flex items-center gap-1">
-        <ion-icon name="download-outline"></ion-icon> CSV
-      </a>
+      <div class="flex items-center gap-2">
+        <div class="relative">
+          <ion-icon name="search-outline" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400"></ion-icon>
+          <input id="searchPayments" type="text" placeholder="Search teacher, course, or method"
+                 class="pl-9 pr-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200" />
+        </div>
+        <select id="statusFilter" class="py-2 px-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200">
+          <option value="">All status</option>
+          <option value="pending">Pending</option>
+          <option value="completed">Completed</option>
+          <option value="failed">Failed</option>
+        </select>
+        <select id="methodFilter" class="py-2 px-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200">
+          <option value="">All methods</option>
+          <option value="bank_transfer">Bank Transfer</option>
+          <option value="card">Card</option>
+          <option value="cash">Cash</option>
+          <option value="other">Other</option>
+        </select>
+        <a href="export.php?type=teacher&start=<?= urlencode($start) ?>&end=<?= urlencode($end) ?>" class="btn-ghost">
+          <ion-icon name="download-outline"></ion-icon> CSV
+        </a>
+      </div>
     </div>
 
     <?php if ($payments && $payments->num_rows>0): ?>
       <div class="overflow-x-auto">
-        <table class="min-w-full table-auto text-sm border">
-          <thead class="bg-gray-100">
+        <table class="min-w-full table-auto text-sm border table-sticky">
+          <thead class="bg-slate-100">
             <tr>
-              <th class="px-3 py-2 border">ID</th>
-              <th class="px-3 py-2 border">Teacher</th>
-              <th class="px-3 py-2 border">Course</th>
-              <th class="px-3 py-2 border">Lessons</th>
-              <th class="px-3 py-2 border">Rate</th>
-              <th class="px-3 py-2 border">Amount</th>
-              <th class="px-3 py-2 border">Method</th>
-              <th class="px-3 py-2 border">Status</th>
-              <th class="px-3 py-2 border">Verified By</th>
-              <th class="px-3 py-2 border">Created At</th>
-              <th class="px-3 py-2 border">Actions</th>
+              <th class="px-3 py-2 border text-left">ID</th>
+              <th class="px-3 py-2 border text-left">Teacher</th>
+              <th class="px-3 py-2 border text-left">Course</th>
+              <th class="px-3 py-2 border text-center">Lessons</th>
+              <th class="px-3 py-2 border text-right">Rate</th>
+              <th class="px-3 py-2 border text-right">Amount</th>
+              <th class="px-3 py-2 border text-center">Method</th>
+              <th class="px-3 py-2 border text-center">Status</th>
+              <th class="px-3 py-2 border text-center">Verified By</th>
+              <th class="px-3 py-2 border text-left">Created At</th>
+              <th class="px-3 py-2 border text-center">Actions</th>
             </tr>
           </thead>
-          <tbody>
-            <?php while($p = $payments->fetch_assoc()): ?>
-              <tr class="hover:bg-gray-50">
+          <tbody id="paymentsBody">
+            <?php while($p = $payments->fetch_assoc()): 
+              $st = $p['payment_status'];
+              $badge = 'bg-gray-100 text-gray-800';
+              if ($st==='pending') $badge='bg-amber-100 text-amber-800';
+              if ($st==='completed') $badge='bg-green-100 text-green-800';
+              if ($st==='failed') $badge='bg-red-100 text-red-800';
+              $teacherFull = trim(($p['first_name'] ?? '').' '.($p['last_name'] ?? ''));
+              $method = $p['payment_method'] ?? '';
+              $courseName = $p['course_name'] ?? '—';
+            ?>
+              <tr class="hover:bg-gray-50"
+                  data-status="<?= e(strtolower($st)) ?>"
+                  data-method="<?= e(strtolower($method)) ?>"
+                  data-text="<?= e(strtolower($teacherFull.' '.$courseName.' '.$method)) ?>">
                 <td class="px-3 py-2 border"><?= (int)$p['teacher_payment_id'] ?></td>
-                <td class="px-3 py-2 border"><?= e($p['first_name'].' '.$p['last_name']) ?></td>
-                <td class="px-3 py-2 border"><?= e($p['course_name'] ?? '—') ?></td>
+                <td class="px-3 py-2 border"><?= e($teacherFull) ?></td>
+                <td class="px-3 py-2 border"><?= e($courseName) ?></td>
                 <td class="px-3 py-2 border text-center"><?= (int)$p['lesson_count'] ?></td>
                 <td class="px-3 py-2 border text-right">$<?= money($p['rate_per_lesson']) ?></td>
                 <td class="px-3 py-2 border text-right">$<?= money($p['amount']) ?></td>
-                <td class="px-3 py-2 border text-center"><?= e(ucwords(str_replace('_',' ',$p['payment_method']))) ?></td>
-                <td class="px-3 py-2 border text-center">
-                  <?php
-                    $st = $p['payment_status'];
-                    $badge = 'bg-gray-100 text-gray-800';
-                    if ($st==='pending') $badge='bg-amber-100 text-amber-800';
-                    if ($st==='completed') $badge='bg-green-100 text-green-800';
-                    if ($st==='failed') $badge='bg-red-100 text-red-800';
-                  ?>
-                  <span class="px-2 py-1 rounded text-xs <?= $badge ?>"><?= ucfirst($st) ?></span>
-                </td>
+                <td class="px-3 py-2 border text-center"><?= e(ucwords(str_replace('_',' ',$method))) ?></td>
+                <td class="px-3 py-2 border text-center"><span class="badge <?= $badge ?>"><?= ucfirst($st) ?></span></td>
                 <td class="px-3 py-2 border text-center">
                   <?= $p['verified_by'] ? e($p['verified_by_name']).' at '.date("Y-m-d H:i", strtotime($p['verified_at'])) : '—' ?>
                 </td>
@@ -470,19 +522,19 @@ $payments = $stmt->get_result();
                       <input type="hidden" name="csrf" value="<?= e($csrf) ?>">
                       <input type="hidden" name="action" value="verify_payment">
                       <input type="hidden" name="payment_id" value="<?= (int)$p['teacher_payment_id'] ?>">
-                      <button class="text-green-600 hover:text-green-800 mr-2"><ion-icon name="checkmark-circle-outline"></ion-icon></button>
+                      <button class="text-green-600 hover:text-green-800 mr-2" title="Verify"><ion-icon name="checkmark-circle-outline"></ion-icon></button>
                     </form>
                     <form method="POST" class="inline-block" onsubmit="return confirm('Mark as failed?');">
                       <input type="hidden" name="csrf" value="<?= e($csrf) ?>">
                       <input type="hidden" name="action" value="fail_payment">
                       <input type="hidden" name="payment_id" value="<?= (int)$p['teacher_payment_id'] ?>">
-                      <button class="text-amber-600 hover:text-amber-800 mr-2"><ion-icon name="close-circle-outline"></ion-icon></button>
+                      <button class="text-amber-600 hover:text-amber-800 mr-2" title="Fail"><ion-icon name="close-circle-outline"></ion-icon></button>
                     </form>
                     <form method="POST" class="inline-block" onsubmit="return confirm('Delete this pending payment?');">
                       <input type="hidden" name="csrf" value="<?= e($csrf) ?>">
                       <input type="hidden" name="action" value="delete_payment">
                       <input type="hidden" name="payment_id" value="<?= (int)$p['teacher_payment_id'] ?>">
-                      <button class="text-red-600 hover:text-red-800"><ion-icon name="trash-outline"></ion-icon></button>
+                      <button class="text-red-600 hover:text-red-800" title="Delete"><ion-icon name="trash-outline"></ion-icon></button>
                     </form>
                   <?php else: ?>
                     <span class="text-gray-400 text-xs">No actions</span>
@@ -490,6 +542,7 @@ $payments = $stmt->get_result();
                 </td>
               </tr>
             <?php endwhile; ?>
+            <tr id="noMatchRow" class="hidden"><td colspan="11" class="px-3 py-6 text-center text-slate-500">No payments match your filters.</td></tr>
           </tbody>
         </table>
       </div>
@@ -508,6 +561,7 @@ const teacherSelect = document.getElementById('teacherSelect');
 const courseSelect  = document.getElementById('courseSelect');
 const rateInput     = document.getElementById('rateInput');
 const previewBox    = document.getElementById('previewBox');
+const createBtn     = document.getElementById('createBtn');
 
 function populateCourses() {
   const tid = teacherSelect.value || '';
@@ -526,14 +580,16 @@ async function updatePreview() {
   const tid = teacherSelect.value;
   const cid = courseSelect.value;
   const rate = parseFloat(rateInput.value || '0');
+  createBtn.classList.add('btn-disabled');
   if (!tid || !cid) { previewBox.textContent = 'Outstanding: — · Rate: — · Amount: —'; return; }
   try {
     const res = await fetch(`?ajax=calc&teacher_id=${encodeURIComponent(tid)}&course_id=${encodeURIComponent(cid)}`, {credentials:'same-origin'});
     const data = await res.json();
-    if (!data.ok) { previewBox.textContent = data.error || 'Error calculating outstanding'; return; }
+    if (!data.ok) { previewBox.textContent = (data.error || 'Error calculating outstanding'); return; }
     const outstanding = Number(data.outstanding || 0);
     const amt = rate > 0 ? (outstanding * rate) : 0;
     previewBox.textContent = `Outstanding: ${outstanding} · Rate: ${rate>0?('$'+rate.toFixed(2)):'—'} · Amount: ${amt>0?('$'+amt.toFixed(2)):'—'}`;
+    if (outstanding > 0 && rate > 0) createBtn.classList.remove('btn-disabled');
   } catch {
     previewBox.textContent = 'Error calculating outstanding';
   }
@@ -542,6 +598,60 @@ async function updatePreview() {
 teacherSelect.addEventListener('change', populateCourses);
 courseSelect.addEventListener('change', updatePreview);
 rateInput.addEventListener('input', updatePreview);
+
+// Count-up stats
+(function() {
+  function animate(el){
+    const target = parseFloat(el.dataset.target || '0');
+    const decimals = parseInt(el.dataset.decimals || '0', 10);
+    const prefix = el.dataset.prefix || '';
+    const duration = 1200;
+    const start = performance.now();
+    const from = 0;
+    function tick(t){
+      const p = Math.min(1, (t - start) / duration);
+      const val = from + (target - from) * p;
+      el.textContent = prefix + val.toLocaleString(undefined, {minimumFractionDigits:decimals, maximumFractionDigits:decimals});
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+  document.querySelectorAll('.countup').forEach(animate);
+})();
+
+// Sticky table thead offset (if you have sticky nav, adjust if needed)
+document.documentElement.style.setProperty('--thead-offset', '0px');
+
+// Client-side filter for payments table
+(function() {
+  const tbody = document.getElementById('paymentsBody');
+  const rows = Array.from(tbody?.querySelectorAll('tr') || []).filter(r => r.id !== 'noMatchRow');
+  const search = document.getElementById('searchPayments');
+  const status = document.getElementById('statusFilter');
+  const method = document.getElementById('methodFilter');
+  const noRow = document.getElementById('noMatchRow');
+  if (!rows.length) return;
+
+  function apply() {
+    const q = (search.value || '').trim().toLowerCase();
+    const s = (status.value || '').trim();
+    const m = (method.value || '').trim();
+    let shown = 0;
+    rows.forEach(r => {
+      const mt = r.dataset.text || '';
+      const ms = r.dataset.status || '';
+      const mm = r.dataset.method || '';
+      const ok = (!q || mt.includes(q)) && (!s || s === ms) && (!m || m === mm);
+      r.style.display = ok ? '' : 'none';
+      if (ok) shown++;
+    });
+    if (noRow) noRow.classList.toggle('hidden', shown !== 0);
+  }
+  search?.addEventListener('input', apply);
+  status?.addEventListener('change', apply);
+  method?.addEventListener('change', apply);
+  apply();
+})();
 </script>
 
 </body>

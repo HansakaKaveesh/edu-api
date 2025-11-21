@@ -52,6 +52,8 @@ $sortSql   = $SORTS[$sortKey] ?? $SORTS['newest'];
 $page      = max(1, (int)($_GET['page'] ?? 1));
 $perPage   = 12;
 $offset    = ($page - 1) * $perPage;
+$view      = $_GET['view'] ?? 'grid';
+$view      = in_array($view, ['grid','list'], true) ? $view : 'grid';
 
 // Build WHERE
 $where = ["p.visibility='public'"];
@@ -188,9 +190,9 @@ $pagesArr = page_window($page, $totalPages);
     tailwind.config = {
       theme: {
         extend: {
-          fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial'] },
+          fontFamily: { sans: ['Inter','ui-sans-serif','system-ui','Segoe UI','Roboto','Helvetica Neue','Arial'] },
           colors: {
-            primary: {
+            brand: {
               50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',300:'#a5b4fc',
               400:'#818cf8',500:'#6366f1',600:'#4f46e5',700:'#4338ca',
               800:'#3730a3',900:'#312e81'
@@ -198,6 +200,7 @@ $pagesArr = page_window($page, $totalPages);
           },
           boxShadow: {
             soft: '0 10px 30px -12px rgba(99,102,241,.25)',
+            card: '0 10px 20px -10px rgba(15,23,42,.15)'
           }
         }
       }
@@ -205,247 +208,433 @@ $pagesArr = page_window($page, $totalPages);
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <style>
+    body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; }
+
+    .chip {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.25rem 0.625rem; border-radius: 9999px;
+      background: #eef2ff; color: #4338ca; border: 1px solid #e0e7ff;
+      font-size: 0.75rem; line-height: 1rem; transition: background-color .2s ease;
+    }
+    .chip:hover { background: #e0e7ff; }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: .5rem; color: #fff;
+      padding: 0.5rem 1rem; border-radius: 0.5rem;
+      background-image: linear-gradient(to right, #4f46e5, #6366f1);
+      box-shadow: 0 10px 30px -12px rgba(99,102,241,.25);
+      transition: filter .2s ease, box-shadow .2s ease, transform .15s ease;
+    }
+    .btn-primary:hover { filter: brightness(1.05); box-shadow: 0 14px 34px -12px rgba(99,102,241,.35); }
+
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: 0.5rem 0.75rem; border-radius: 0.5rem;
+      background: rgba(255,255,255,.85); color: #334155; border: 1px solid #cbd5e1;
+      transition: background-color .2s ease, color .2s ease, border-color .2s ease;
+    }
+    .btn-ghost:hover { background: #f1f5f9; }
+
+    .card {
+      background: #ffffff; border: 1px solid rgba(226,232,240,.9);
+      border-radius: 1.25rem; box-shadow: 0 10px 20px -10px rgba(15,23,42,.15);
+    }
+
+    .toolbar {
+      position: sticky; top: 0; z-index: 30;
+      backdrop-filter: blur(10px); background: rgba(255,255,255,.75);
+      border-bottom: 1px solid rgba(226,232,240,.9);
+    }
+  </style>
 </head>
-<body class="bg-gradient-to-br from-slate-50 via-white to-blue-50 text-gray-800 min-h-screen font-sans">
+<body class="bg-slate-50 text-gray-800 min-h-screen font-sans">
 <?php if (file_exists(__DIR__ . '/components/navbar.php')) include __DIR__ . '/components/navbar.php'; ?>
 
-<!-- Hero -->
-<section class="relative overflow-hidden rounded-3xl shadow soft max-w-7xl mx-auto mt-20 mb-8">
-  <div class="absolute inset-0 bg-gradient-to-br from-primary-900 via-indigo-700 to-primary-600"></div>
+<!-- Hero section -->
+<section class="relative overflow-hidden">
+  <!-- Soft background gradient and blobs -->
+  <div class="absolute inset-0 bg-gradient-to-br from-white via-brand-50 to-white"></div>
+  <div aria-hidden="true" class="pointer-events-none absolute -top-24 -left-24 h-64 w-64 rounded-full bg-indigo-100 blur-3xl"></div>
+  <div aria-hidden="true" class="pointer-events-none absolute -bottom-28 -right-24 h-72 w-72 rounded-full bg-blue-100 blur-3xl"></div>
 
-  <!-- Gradient orbs -->
-  <div aria-hidden="true" class="pointer-events-none absolute inset-0">
-    <div class="absolute -top-14 -left-10 h-56 w-56 rounded-full bg-cyan-400/30 blur-3xl"></div>
-    <div class="absolute -bottom-16 -right-8 h-64 w-64 rounded-full bg-fuchsia-400/30 blur-3xl"></div>
-  </div>
+  <div class="relative max-w-7xl mx-auto px-6 py-14 sm:py-20">
+    <div class="grid md:grid-cols-2 items-center gap-8">
+      <div class="max-w-2xl">
+        <h1 class="text-3xl sm:text-4xl font-extrabold leading-tight tracking-tight text-slate-900">
+          Find Past Papers Faster
+        </h1>
+        <p class="mt-2 text-slate-600">
+          Browse by board, level, subject, year, or session. Download question papers and mark schemes with one click.
+        </p>
 
-  <div class="relative z-10 text-white p-6 sm:p-8">
-    <div class="flex items-center justify-between gap-3">
-      <div class="text-xs sm:text-sm opacity-90 inline-flex items-center gap-2">
-        <i class="ph ph-file-text"></i> Past Papers Library
+        <!-- Hero search (preserves current filters) -->
+        <form method="get" action="past_papers.php" class="mt-5">
+          <div class="relative">
+            <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="text" name="q" value="<?= e($q) ?>" placeholder="Search subject, code (0620), or tags..."
+                   class="w-full rounded-lg border border-slate-300 bg-white/90 pl-10 pr-28 py-3 focus:outline-none focus:ring-2 focus:ring-brand-500 text-[15px]">
+            <button class="btn-primary absolute right-1 top-1/2 -translate-y-1/2 px-3 py-2">
+              <i class="ph ph-funnel"></i> Search
+            </button>
+          </div>
+          <!-- Preserve current filters -->
+          <input type="hidden" name="board" value="<?= e($board) ?>">
+          <input type="hidden" name="level" value="<?= e($level) ?>">
+          <input type="hidden" name="course" value="<?= (int)$courseId ?>">
+          <input type="hidden" name="session" value="<?= e($session) ?>">
+          <input type="hidden" name="year_from" value="<?= $yearFrom?:'' ?>">
+          <input type="hidden" name="year_to" value="<?= $yearTo?:'' ?>">
+          <input type="hidden" name="sort" value="<?= e($sortKey) ?>">
+          <input type="hidden" name="view" value="<?= e($view) ?>">
+        </form>
+
+        <!-- Quick filters -->
+        <div class="mt-4">
+          <div class="text-xs text-slate-500 mb-1">Quick filters:</div>
+          <div class="flex flex-wrap gap-2">
+            <?php foreach ($BOARD_OPTS as $b): ?>
+              <a class="chip" href="<?= e(qs(['board'=>$b,'course'=>0,'page'=>1])) ?>">
+                <i class="ph ph-buildings"></i> <?= e($b) ?>
+              </a>
+            <?php endforeach; ?>
+            <?php foreach ($LEVEL_OPTS as $lv): ?>
+              <a class="chip" href="<?= e(qs(['level'=>$lv,'course'=>0,'page'=>1])) ?>">
+                <i class="ph ph-graduation-cap"></i> <?= e($lv) ?>
+              </a>
+            <?php endforeach; ?>
+          </div>
+        </div>
+
+        <!-- CTA to filters -->
+        <div class="mt-5">
+          <a href="#filters" class="btn-ghost">
+            <i class="ph ph-sliders"></i> Explore all filters
+          </a>
+        </div>
       </div>
 
-      <span class="inline-flex items-center gap-2 bg-white/10 ring-1 ring-white/20 px-3 py-1 rounded-full text-xs">
-        <i class="ph ph-magnifying-glass"></i> Search & Filter
-      </span>
-    </div>
-
-    <div class="mt-3">
-      <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Find past papers and mark schemes</h1>
-      <p class="text-white/90 text-sm sm:text-base">Filter by board, level, subject, year, and session.</p>
+      <!-- Right: small stats card -->
+      <div class="card p-5 sm:p-6">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-brand-50 text-brand-700 flex items-center justify-center">
+            <i class="ph ph-file-text"></i>
+          </div>
+          <div>
+            <div class="text-sm text-slate-500">Available now</div>
+            <div class="text-2xl font-extrabold text-slate-900"><?= number_format($total) ?></div>
+          </div>
+        </div>
+        <ul class="mt-4 space-y-2 text-sm text-slate-600">
+          <li class="flex items-center gap-2"><i class="ph ph-check-circle text-emerald-500"></i> Instant QP downloads</li>
+          <li class="flex items-center gap-2"><i class="ph ph-check-circle text-emerald-500"></i> Mark schemes when available</li>
+          <li class="flex items-center gap-2"><i class="ph ph-check-circle text-emerald-500"></i> Optional video solutions</li>
+        </ul>
+      </div>
     </div>
   </div>
 </section>
 
-<main class="max-w-7xl mx-auto px-6 pb-24">
-  <!-- Filters -->
-  <form method="get" class="bg-white/80 backdrop-blur rounded-2xl border border-slate-200/70 shadow p-4 md:p-5 mb-6 sticky top-6 z-30">
-    <div class="grid grid-cols-2 md:grid-cols-6 gap-3">
-      <div class="md:col-span-2">
-        <label class="block text-xs text-slate-600 mb-1">Search</label>
-        <div class="relative">
-          <i class="ph ph-magnifying-glass absolute left-3 top-2.5 text-slate-400"></i>
-          <input type="text" name="q" value="<?= e($q) ?>" placeholder="Subject, code (0620), tags..."
-                 class="w-full rounded-lg border-slate-300 bg-white/70 pl-9 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500">
+<!-- Top toolbar (Search + Controls) -->
+<header class="toolbar" id="filters">
+  <div class="max-w-7xl mx-auto px-6 py-4">
+    <form method="get" class="flex flex-col gap-3">
+      <div class="flex items-center gap-2">
+        <h1 class="text-lg sm:text-xl font-extrabold text-slate-800 flex items-center gap-2">
+          <i class="ph ph-file-text text-brand-600"></i> Past Papers
+        </h1>
+        <div class="ml-auto flex items-center gap-1">
+          <!-- View toggle -->
+          <a href="<?= e(qs(['view'=>'grid','page'=>1])) ?>" class="btn-ghost <?= $view==='grid'?'ring-1 ring-brand-400 text-brand-700':'' ?>" title="Grid view">
+            <i class="ph ph-grid-four"></i>
+          </a>
+          <a href="<?= e(qs(['view'=>'list','page'=>1])) ?>" class="btn-ghost <?= $view==='list'?'ring-1 ring-brand-400 text-brand-700':'' ?>" title="List view">
+            <i class="ph ph-list"></i>
+          </a>
         </div>
       </div>
-      <div>
-        <label class="block text-xs text-slate-600 mb-1">Board</label>
-        <select name="board" id="boardSel" class="w-full rounded-lg border-slate-300 bg-white/70 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500">
-          <option value="">All</option>
-          <?php foreach ($BOARD_OPTS as $b): ?>
-            <option value="<?= e($b) ?>" <?= $board===$b?'selected':'' ?>><?= e($b) ?></option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-      <div>
-        <label class="block text-xs text-slate-600 mb-1">Level</label>
-        <select name="level" id="levelSel" class="w-full rounded-lg border-slate-300 bg-white/70 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500">
-          <option value="">All</option>
-          <?php foreach ($LEVEL_OPTS as $lv): ?>
-            <option value="<?= e($lv) ?>" <?= $level===$lv?'selected':'' ?>><?= e($lv) ?></option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-      <div>
-        <label class="block text-xs text-slate-600 mb-1">Subject (Course)</label>
-        <select name="course" id="courseSel" class="w-full rounded-lg border-slate-300 bg-white/70 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500">
-          <option value="0">All</option>
-          <!-- options populated by JS based on board/level -->
-        </select>
-      </div>
-      <div>
-        <label class="block text-xs text-slate-600 mb-1">Session</label>
-        <select name="session" class="w-full rounded-lg border-slate-300 bg-white/70 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500">
-          <option value="">All</option>
-          <?php foreach ($SESSIONS as $s): ?>
-            <option value="<?= e($s) ?>" <?= $session===$s?'selected':'' ?>><?= e($s) ?></option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-      <div>
-        <label class="block text-xs text-slate-600 mb-1">Year from</label>
-        <input type="number" name="year_from" min="2000" max="<?= date('Y') ?>" value="<?= $yearFrom?:'' ?>"
-               class="w-full rounded-lg border-slate-300 bg-white/70 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500">
-      </div>
-      <div>
-        <label class="block text-xs text-slate-600 mb-1">Year to</label>
-        <input type="number" name="year_to" min="2000" max="<?= date('Y') ?>" value="<?= $yearTo?:'' ?>"
-               class="w-full rounded-lg border-slate-300 bg-white/70 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500">
-      </div>
-      <div>
-        <label class="block text-xs text-slate-600 mb-1">Sort</label>
-        <select name="sort" class="w-full rounded-lg border-slate-300 bg-white/70 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500">
-          <option value="newest" <?= $sortKey==='newest'?'selected':'' ?>>Newest</option>
-          <option value="oldest" <?= $sortKey==='oldest'?'selected':'' ?>>Oldest</option>
-          <option value="popular" <?= $sortKey==='popular'?'selected':'' ?>>Most downloaded</option>
-          <option value="subject_az" <?= $sortKey==='subject_az'?'selected':'' ?>>Subject A–Z</option>
-        </select>
-      </div>
-    </div>
 
-    <!-- Active filters chips -->
-    <?php
-      $hasChips = $q || $board || $level || $courseId || $session || $yearFrom || $yearTo;
-      $chipCls = "inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-primary-50 text-primary-700 border border-primary-100 hover:bg-primary-100/80 text-xs";
-      $xCls = "ph ph-x text-[13px]";
-    ?>
-    <?php if ($hasChips): ?>
-      <div class="mt-3 flex flex-wrap gap-2">
-        <span class="text-xs text-slate-500 mr-2">Active:</span>
-        <?php if ($q): ?>
-          <a class="<?= $chipCls ?>" href="<?= e(qs(['q'=>''])) ?>" title="Clear search">
-            <i class="ph ph-magnifying-glass"></i> <?= e($q) ?> <i class="<?= $xCls ?>"></i>
+      <!-- Search bar -->
+      <div class="flex flex-col sm:flex-row gap-2">
+        <div class="relative flex-1">
+          <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input type="text" name="q" value="<?= e($q) ?>" placeholder="Search subject, code (0620), or tags..."
+                 class="w-full rounded-lg border border-slate-300 bg-white/90 pl-10 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500">
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="submit" class="btn-primary">
+            <i class="ph ph-funnel"></i> Apply
+          </button>
+          <a href="past_papers.php" class="btn-ghost">
+            <i class="ph ph-arrow-counter-clockwise"></i> Reset
           </a>
-        <?php endif; ?>
-        <?php if ($board): ?>
-          <a class="<?= $chipCls ?>" href="<?= e(qs(['board'=>'','course'=>0])) ?>" title="Clear board">
-            <i class="ph ph-buildings"></i> <?= e($board) ?> <i class="<?= $xCls ?>"></i>
-          </a>
-        <?php endif; ?>
-        <?php if ($level): ?>
-          <a class="<?= $chipCls ?>" href="<?= e(qs(['level'=>'','course'=>0])) ?>" title="Clear level">
-            <i class="ph ph-graduation-cap"></i> <?= e($level) ?> <i class="<?= $xCls ?>"></i>
-          </a>
-        <?php endif; ?>
-        <?php if ($courseId): ?>
-          <a class="<?= $chipCls ?>" href="<?= e(qs(['course'=>0])) ?>" title="Clear subject">
-            <i class="ph ph-book"></i> Subject <i class="<?= $xCls ?>"></i>
-          </a>
-        <?php endif; ?>
-        <?php if ($session): ?>
-          <a class="<?= $chipCls ?>" href="<?= e(qs(['session'=>''])) ?>" title="Clear session">
-            <i class="ph ph-calendar-blank"></i> <?= e($session) ?> <i class="<?= $xCls ?>"></i>
-          </a>
-        <?php endif; ?>
-        <?php if ($yearFrom || $yearTo): ?>
-          <a class="<?= $chipCls ?>" href="<?= e(qs(['year_from'=>'','year_to'=>''])) ?>" title="Clear year range">
-            <i class="ph ph-clock"></i> <?= $yearFrom?:'...' ?>–<?= $yearTo?:'...' ?> <i class="<?= $xCls ?>"></i>
-          </a>
-        <?php endif; ?>
+          <?php if (!empty($_SESSION['role']) && in_array($_SESSION['role'], ['admin','teacher'])): ?>
+            <a href="upload_paper.php" class="btn-ghost">
+              <i class="ph ph-upload-simple"></i> Upload
+            </a>
+          <?php endif; ?>
+        </div>
       </div>
-    <?php endif; ?>
 
-    <div class="mt-4 flex items-center gap-2">
-      <button class="inline-flex items-center gap-2 bg-gradient-to-r from-primary-600 to-indigo-600 text-gray px-4 py-2 rounded-lg shadow-soft hover:shadow-lg hover:from-primary-500 hover:to-indigo-500 transition">
-        <i class="ph ph-funnel"></i> Apply
-      </button>
-      <a href="past_papers.php" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">
-        <i class="ph ph-arrow-counter-clockwise"></i> Reset
-      </a>
-      <?php if (!empty($_SESSION['role']) && in_array($_SESSION['role'], ['admin','teacher'])): ?>
-        <a href="upload_paper.php" class="ml-auto inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white border border-primary-200 text-primary-700 hover:bg-primary-50">
-          <i class="ph ph-upload-simple"></i> Upload Paper
-        </a>
+      <!-- Advanced filters (collapsible) -->
+      <details class="group">
+        <summary class="cursor-pointer select-none flex items-center justify-between py-2 text-sm text-slate-600">
+          <span class="inline-flex items-center gap-2">
+            <i class="ph ph-sliders"></i> Advanced filters
+          </span>
+          <i class="ph ph-caret-down group-open:rotate-180 transition"></i>
+        </summary>
+
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-3 py-2">
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">Board</label>
+            <select name="board" id="boardSel" class="w-full rounded-lg border-slate-300 bg-white/90 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500">
+              <option value="">All</option>
+              <?php foreach ($BOARD_OPTS as $b): ?>
+                <option value="<?= e($b) ?>" <?= $board===$b?'selected':'' ?>><?= e($b) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">Level</label>
+            <select name="level" id="levelSel" class="w-full rounded-lg border-slate-300 bg-white/90 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500">
+              <option value="">All</option>
+              <?php foreach ($LEVEL_OPTS as $lv): ?>
+                <option value="<?= e($lv) ?>" <?= $level===$lv?'selected':'' ?>><?= e($lv) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-xs text-slate-500 mb-1">Subject (Course)</label>
+            <select name="course" id="courseSel" class="w-full rounded-lg border-slate-300 bg-white/90 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500">
+              <option value="0">All</option>
+              <!-- populated by JS -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">Session</label>
+            <select name="session" class="w-full rounded-lg border-slate-300 bg-white/90 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500">
+              <option value="">All</option>
+              <?php foreach ($SESSIONS as $s): ?>
+                <option value="<?= e($s) ?>" <?= $session===$s?'selected':'' ?>><?= e($s) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">Year from</label>
+            <input type="number" name="year_from" min="2000" max="<?= date('Y') ?>" value="<?= $yearFrom?:'' ?>"
+                   class="w-full rounded-lg border-slate-300 bg-white/90 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">Year to</label>
+            <input type="number" name="year_to" min="2000" max="<?= date('Y') ?>" value="<?= $yearTo?:'' ?>"
+                   class="w-full rounded-lg border-slate-300 bg-white/90 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">Sort</label>
+            <select name="sort" class="w-full rounded-lg border-slate-300 bg-white/90 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500">
+              <option value="newest" <?= $sortKey==='newest'?'selected':'' ?>>Newest</option>
+              <option value="oldest" <?= $sortKey==='oldest'?'selected':'' ?>>Oldest</option>
+              <option value="popular" <?= $sortKey==='popular'?'selected':'' ?>>Most downloaded</option>
+              <option value="subject_az" <?= $sortKey==='subject_az'?'selected':'' ?>>Subject A–Z</option>
+            </select>
+          </div>
+        </div>
+      </details>
+
+      <!-- Active chips -->
+      <?php
+        $hasChips = $q || $board || $level || $courseId || $session || $yearFrom || $yearTo;
+        $xCls = "ph ph-x text-[13px]";
+      ?>
+      <?php if ($hasChips): ?>
+        <div class="flex flex-wrap gap-2 pb-1">
+          <span class="text-xs text-slate-500 mr-1">Active:</span>
+          <?php if ($q): ?>
+            <a class="chip" href="<?= e(qs(['q'=>''])) ?>"><i class="ph ph-magnifying-glass"></i> <?= e($q) ?> <i class="<?= $xCls ?>"></i></a>
+          <?php endif; ?>
+          <?php if ($board): ?>
+            <a class="chip" href="<?= e(qs(['board'=>'','course'=>0])) ?>"><i class="ph ph-buildings"></i> <?= e($board) ?> <i class="<?= $xCls ?>"></i></a>
+          <?php endif; ?>
+          <?php if ($level): ?>
+            <a class="chip" href="<?= e(qs(['level'=>'','course'=>0])) ?>"><i class="ph ph-graduation-cap"></i> <?= e($level) ?> <i class="<?= $xCls ?>"></i></a>
+          <?php endif; ?>
+          <?php if ($courseId): ?>
+            <a class="chip" href="<?= e(qs(['course'=>0])) ?>"><i class="ph ph-book"></i> Subject <i class="<?= $xCls ?>"></i></a>
+          <?php endif; ?>
+          <?php if ($session): ?>
+            <a class="chip" href="<?= e(qs(['session'=>''])) ?>"><i class="ph ph-calendar-blank"></i> <?= e($session) ?> <i class="<?= $xCls ?>"></i></a>
+          <?php endif; ?>
+          <?php if ($yearFrom || $yearTo): ?>
+            <a class="chip" href="<?= e(qs(['year_from'=>'','year_to'=>''])) ?>"><i class="ph ph-clock"></i> <?= $yearFrom?:'...' ?>–<?= $yearTo?:'...' ?> <i class="<?= $xCls ?>"></i></a>
+          <?php endif; ?>
+        </div>
       <?php endif; ?>
-    </div>
-    <p class="mt-2 text-xs text-slate-500">
-      Showing <?= number_format($showFrom) ?>–<?= number_format($showTo) ?> of <?= number_format($total) ?> result(s).
-    </p>
-  </form>
 
+      <p class="text-xs text-slate-500">
+        Showing <?= number_format($showFrom) ?>–<?= number_format($showTo) ?> of <?= number_format($total) ?> result(s).
+      </p>
+    </form>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-6 py-6">
   <!-- Results -->
   <?php if (!$rows): ?>
-    <div class="bg-white/80 backdrop-blur rounded-2xl border border-slate-200/70 shadow p-10 text-center">
+    <div class="card p-10 text-center">
       <div class="mx-auto w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center">
         <i class="ph ph-folder-open text-xl text-slate-400"></i>
       </div>
-      <p class="mt-3 text-gray-600">No past papers found. Try adjusting filters.</p>
-      <a href="past_papers.php" class="mt-3 inline-flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50">
+      <p class="mt-3 text-slate-600">No past papers found. Try adjusting filters.</p>
+      <a href="past_papers.php" class="mt-3 btn-ghost">
         <i class="ph ph-sliders"></i> Reset filters
       </a>
     </div>
   <?php else: ?>
-    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      <?php foreach ($rows as $r): ?>
-        <article class="group bg-white/80 backdrop-blur rounded-2xl border border-slate-200/70 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition p-4">
-          <div class="flex items-start justify-between">
-            <div>
-              <h3 class="font-semibold text-slate-900"><?= e($r['course_name'] ?: '—') ?></h3>
-              <p class="text-xs text-slate-500"><?= e($r['board']) ?> · <?= e($r['level']) ?></p>
-            </div>
-            <span class="text-[11px] bg-slate-100 text-slate-700 px-2 py-1 rounded">
-              <?= e($r['year']) ?> <?= e($r['session']) ?>
-            </span>
-          </div>
 
-          <div class="mt-3 text-sm text-slate-700 space-y-1">
-            <?php if ($r['syllabus_code']): ?>
-              <div class="inline-flex items-center gap-2">
-                <span class="inline-flex items-center justify-center w-5 h-5 rounded bg-primary-50 text-primary-700"><i class="ph ph-hash text-[13px]"></i></span>
-                Syllabus: <span class="font-medium"><?= e($r['syllabus_code']) ?></span>
-              </div><br>
-            <?php endif; ?>
-            <?php if ($r['paper_code']): ?>
-              <div class="inline-flex items-center gap-2">
-                <span class="inline-flex items-center justify-center w-5 h-5 rounded bg-slate-100"><i class="ph ph-file text-[13px]"></i></span>
-                Paper: <span class="font-medium"><?= e($r['paper_code']) ?></span><?= $r['variant'] ? ' · '.e($r['variant']) : '' ?>
+    <?php if ($view === 'list'): ?>
+      <!-- List view -->
+      <div class="space-y-3">
+        <?php foreach ($rows as $r): ?>
+          <article class="card p-4">
+            <div class="flex flex-col lg:flex-row lg:items-center gap-3">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <h3 class="font-semibold text-slate-900 truncate"><?= e($r['course_name'] ?: '—') ?></h3>
+                    <p class="text-xs text-slate-500">
+                      <?= e($r['board']) ?> · <?= e($r['level']) ?> · <?= e($r['year']) ?> <?= e($r['session']) ?>
+                    </p>
+                    <div class="mt-1 text-sm text-slate-700 space-x-3">
+                      <?php if ($r['syllabus_code']): ?>
+                        <span class="inline-flex items-center gap-1">
+                          <i class="ph ph-hash text-slate-400"></i> <span class="font-medium"><?= e($r['syllabus_code']) ?></span>
+                        </span>
+                      <?php endif; ?>
+                      <?php if ($r['paper_code']): ?>
+                        <span class="inline-flex items-center gap-1">
+                          <i class="ph ph-file text-slate-400"></i>
+                          <span class="font-medium"><?= e($r['paper_code']) ?></span><?= $r['variant'] ? ' · '.e($r['variant']) : '' ?>
+                        </span>
+                      <?php endif; ?>
+                    </div>
+                  </div>
+                  <span class="text-[11px] bg-slate-100 text-slate-700 px-2 py-1 rounded self-start">
+                    <?= (int)$r['download_count'] ?> dl
+                  </span>
+                </div>
               </div>
-            <?php endif; ?>
-          </div>
 
-          <div class="mt-4 flex flex-wrap items-center gap-2">
-            <a href="<?= e(qs(['dl'=>$r['paper_id']])) ?>" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-primary-600 to-indigo-600 text-gray hover:from-primary-500 hover:to-indigo-500 shadow-soft transition">
-              <i class="ph ph-download-simple"></i> Download QP
-            </a>
-            <?php if (!empty($r['ms_url'])): ?>
-              <a href="<?= e($r['ms_url']) ?>" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">
-                <i class="ph ph-clipboard-text"></i> Mark Scheme
-              </a>
-            <?php else: ?>
-              <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 text-slate-400 cursor-not-allowed">
-                <i class="ph ph-clipboard-text"></i> Mark Scheme
+              <div class="flex flex-wrap items-center gap-2">
+                <a href="<?= e(qs(['dl'=>$r['paper_id']])) ?>" class="btn-primary">
+                  <i class="ph ph-download-simple"></i> QP
+                </a>
+                <?php if (!empty($r['ms_url'])): ?>
+                  <a href="<?= e($r['ms_url']) ?>" target="_blank" rel="noopener" class="btn-ghost">
+                    <i class="ph ph-clipboard-text"></i> Mark Scheme
+                  </a>
+                <?php else: ?>
+                  <span class="btn-ghost opacity-60 cursor-not-allowed">
+                    <i class="ph ph-clipboard-text"></i> Mark Scheme
+                  </span>
+                <?php endif; ?>
+                <?php if (!empty($r['solution_url'])): ?>
+                  <a href="<?= e($r['solution_url']) ?>" target="_blank" rel="noopener" class="btn-ghost">
+                    <i class="ph ph-play-circle"></i> Solution
+                  </a>
+                <?php endif; ?>
+                <button type="button" data-copy="<?= e((qs(['dl'=>$r['paper_id']]))) ?>" class="btn-ghost" title="Copy download link">
+                  <i class="ph ph-link-simple"></i>
+                </button>
+
+                <?php if (!empty($_SESSION['role']) && in_array($_SESSION['role'], ['admin','teacher'])): ?>
+                  <a href="edit_paper.php?id=<?= (int)$r['paper_id'] ?>" class="btn-ghost">
+                    <i class="ph ph-pencil-simple"></i> Edit
+                  </a>
+                <?php endif; ?>
+              </div>
+            </div>
+          </article>
+        <?php endforeach; ?>
+      </div>
+
+    <?php else: ?>
+      <!-- Grid view -->
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <?php foreach ($rows as $r): ?>
+          <article class="card p-4 hover:-translate-y-0.5 transition">
+            <div class="flex items-start justify-between">
+              <div>
+                <h3 class="font-semibold text-slate-900"><?= e($r['course_name'] ?: '—') ?></h3>
+                <p class="text-xs text-slate-500"><?= e($r['board']) ?> · <?= e($r['level']) ?></p>
+              </div>
+              <span class="text-[11px] bg-slate-100 text-slate-700 px-2 py-1 rounded">
+                <?= e($r['year']) ?> <?= e($r['session']) ?>
               </span>
-            <?php endif; ?>
-            <?php if (!empty($r['solution_url'])): ?>
-              <a href="<?= e($r['solution_url']) ?>" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">
-                <i class="ph ph-play-circle"></i> Solution
+            </div>
+
+            <div class="mt-3 text-sm text-slate-700 space-y-1">
+              <?php if ($r['syllabus_code']): ?>
+                <div class="inline-flex items-center gap-2">
+                  <span class="inline-flex items-center justify-center w-5 h-5 rounded bg-brand-50 text-brand-700">
+                    <i class="ph ph-hash text-[13px]"></i>
+                  </span>
+                  Syllabus: <span class="font-medium"><?= e($r['syllabus_code']) ?></span>
+                </div><br>
+              <?php endif; ?>
+              <?php if ($r['paper_code']): ?>
+                <div class="inline-flex items-center gap-2">
+                  <span class="inline-flex items-center justify-center w-5 h-5 rounded bg-slate-100">
+                    <i class="ph ph-file text-[13px]"></i>
+                  </span>
+                  Paper: <span class="font-medium"><?= e($r['paper_code']) ?></span><?= $r['variant'] ? ' · '.e($r['variant']) : '' ?>
+                </div>
+              <?php endif; ?>
+            </div>
+
+            <div class="mt-4 flex flex-wrap items-center gap-2">
+              <a href="<?= e(qs(['dl'=>$r['paper_id']])) ?>" class="btn-primary">
+                <i class="ph ph-download-simple"></i> Download QP
               </a>
-            <?php endif; ?>
+              <?php if (!empty($r['ms_url'])): ?>
+                <a href="<?= e($r['ms_url']) ?>" target="_blank" rel="noopener" class="btn-ghost">
+                  <i class="ph ph-clipboard-text"></i> Mark Scheme
+                </a>
+              <?php else: ?>
+                <span class="btn-ghost opacity-60 cursor-not-allowed">
+                  <i class="ph ph-clipboard-text"></i> Mark Scheme
+                </span>
+              <?php endif; ?>
+              <?php if (!empty($r['solution_url'])): ?>
+                <a href="<?= e($r['solution_url']) ?>" target="_blank" rel="noopener" class="btn-ghost">
+                  <i class="ph ph-play-circle"></i> Solution
+                </a>
+              <?php endif; ?>
+              <button type="button" data-copy="<?= e((qs(['dl'=>$r['paper_id']]))) ?>" class="btn-ghost" title="Copy download link">
+                <i class="ph ph-link-simple"></i>
+              </button>
+            </div>
 
-            <!-- Copy link -->
-            <button type="button" data-copy="<?= e((qs(['dl'=>$r['paper_id']]))) ?>" class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50" title="Copy download link">
-              <i class="ph ph-link-simple"></i>
-            </button>
-          </div>
-
-          <div class="mt-3 flex items-center justify-between text-xs text-slate-500">
-            <span class="inline-flex items-center gap-1">
-              <i class="ph ph-trend-up"></i> <?= (int)$r['download_count'] ?> downloads
-            </span>
-            <?php if (!empty($_SESSION['role']) && in_array($_SESSION['role'], ['admin','teacher'])): ?>
-              <a href="edit_paper.php?id=<?= (int)$r['paper_id'] ?>" class="text-primary-700 hover:underline inline-flex items-center gap-1"><i class="ph ph-pencil-simple"></i> Edit</a>
-            <?php endif; ?>
-          </div>
-        </article>
-      <?php endforeach; ?>
-    </div>
+            <div class="mt-3 flex items-center justify-between text-xs text-slate-500">
+              <span class="inline-flex items-center gap-1">
+                <i class="ph ph-trend-up"></i> <?= (int)$r['download_count'] ?> downloads
+              </span>
+              <?php if (!empty($_SESSION['role']) && in_array($_SESSION['role'], ['admin','teacher'])): ?>
+                <a href="edit_paper.php?id=<?= (int)$r['paper_id'] ?>" class="text-brand-700 hover:underline inline-flex items-center gap-1">
+                  <i class="ph ph-pencil-simple"></i> Edit
+                </a>
+              <?php endif; ?>
+            </div>
+          </article>
+        <?php endforeach; ?>
+      </div>
+    <?php endif; ?>
 
     <!-- Pagination -->
     <nav class="mt-8 flex items-center justify-between">
-      <a class="px-3 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 <?= $page<=1?'opacity-50 pointer-events-none':'' ?>"
-         href="<?= e(qs(['page'=>$page-1])) ?>">
-         <i class="ph ph-arrow-left"></i> Prev
+      <a class="btn-ghost <?= $page<=1?'opacity-50 pointer-events-none':'' ?>" href="<?= e(qs(['page'=>$page-1])) ?>">
+        <i class="ph ph-arrow-left"></i> Prev
       </a>
 
       <div class="flex items-center gap-1">
@@ -454,16 +643,15 @@ $pagesArr = page_window($page, $totalPages);
             <span class="px-2 text-slate-400">…</span>
           <?php else: ?>
             <a href="<?= e(qs(['page'=>$p])) ?>"
-               class="px-3 py-2 rounded-lg border <?= $p==$page ? 'bg-primary-600 border-primary-600 text-white' : 'border-slate-300 text-slate-700 hover:bg-slate-50' ?>">
+               class="px-3 py-2 rounded-lg border <?= $p==$page ? 'bg-gradient-to-r from-brand-600 to-indigo-600 border-brand-600 text-white' : 'border-slate-300 text-slate-700 hover:bg-slate-50' ?>">
                <?= $p ?>
             </a>
           <?php endif; ?>
         <?php endforeach; ?>
       </div>
 
-      <a class="px-3 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 <?= $page>=$totalPages?'opacity-50 pointer-events-none':'' ?>"
-         href="<?= e(qs(['page'=>$page+1])) ?>">
-         Next <i class="ph ph-arrow-right"></i>
+      <a class="btn-ghost <?= $page>=$totalPages?'opacity-50 pointer-events-none':'' ?>" href="<?= e(qs(['page'=>$page+1])) ?>">
+        Next <i class="ph ph-arrow-right"></i>
       </a>
     </nav>
   <?php endif; ?>
@@ -472,17 +660,18 @@ $pagesArr = page_window($page, $totalPages);
 <?php if (file_exists(__DIR__ . '/components/footer.php')) include __DIR__ . '/components/footer.php'; ?>
 
 <script>
-  // Courses map: board -> level -> [ {id, name} ]
+  // Courses dependent select
   const COURSES = <?= json_encode($coursesByBL, JSON_UNESCAPED_SLASHES|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;
   const boardSel  = document.getElementById('boardSel');
   const levelSel  = document.getElementById('levelSel');
   const courseSel = document.getElementById('courseSel');
 
   function populateCourses() {
-    const b = boardSel.value || '';
-    const l = levelSel.value || '';
+    const b = boardSel?.value || '';
+    const l = levelSel?.value || '';
     const list = (COURSES[b] && COURSES[b][l]) ? COURSES[b][l] : [];
     const selected = <?= (int)$courseId ?>;
+    if (!courseSel) return;
     courseSel.innerHTML = '<option value="0">All</option>';
     for (const c of list) {
       const opt = document.createElement('option');
@@ -492,10 +681,8 @@ $pagesArr = page_window($page, $totalPages);
       courseSel.appendChild(opt);
     }
   }
-
-  boardSel.addEventListener('change', populateCourses);
-  levelSel.addEventListener('change', populateCourses);
-  // initial populate
+  boardSel?.addEventListener('change', populateCourses);
+  levelSel?.addEventListener('change', populateCourses);
   populateCourses();
 
   // Copy link
@@ -504,8 +691,9 @@ $pagesArr = page_window($page, $totalPages);
       try {
         const url = new URL(btn.getAttribute('data-copy'), window.location.href).toString();
         await navigator.clipboard.writeText(url);
+        const prev = btn.innerHTML;
         btn.innerHTML = '<i class="ph ph-check-circle text-emerald-500"></i>';
-        setTimeout(() => btn.innerHTML = '<i class="ph ph-link-simple"></i>', 1200);
+        setTimeout(() => btn.innerHTML = prev, 1200);
       } catch (e) {
         alert('Failed to copy link');
       }

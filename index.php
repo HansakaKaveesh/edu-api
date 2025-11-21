@@ -92,7 +92,7 @@
     .aurora span {
       position: absolute; width: 42rem; height: 42rem;
       filter: blur(48px); opacity: .75; border-radius: 9999px;
-      animation: drift 24s ease-in-out infinite;
+      animation: drift 12s ease-in-out infinite;
     }
     .aurora .a1 {
       top: -12%; left: -10%;
@@ -142,6 +142,99 @@
       .aurora span { animation: none; }
       .tilt { transition: none; }
     }
+
+    /* ——— Upgrade Pack (overrides) ——— */
+    :root{
+      --aurora-indigo: 99,102,241;
+      --aurora-blue:   59,130,246;
+      --aurora-pink:  236, 72,153;
+      --aurora-cyan:   34,211,238;
+      --aurora-purple:168, 85,247;
+    }
+
+    /* Aurora v2: bigger, smoother, more vibrant */
+    .aurora {
+      position: absolute; inset: 0; overflow: hidden;
+      pointer-events: none; isolation: isolate; mix-blend-mode: screen;
+    }
+    .aurora span {
+      position: absolute; width: 46rem; height: 46rem; border-radius: 9999px;
+      opacity: .9; filter: blur(60px) saturate(1.15);
+      animation: drift 28s ease-in-out infinite; will-change: transform;
+    }
+    .aurora .a1{
+      top:-14%; left:-12%;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(var(--aurora-indigo), .50), transparent 60%),
+        radial-gradient(circle at 70% 70%, rgba(var(--aurora-purple), .35), transparent 60%);
+      animation-delay: 0s;
+    }
+    .aurora .a2{
+      right:-16%; bottom:-20%;
+      background:
+        radial-gradient(circle at 60% 40%, rgba(var(--aurora-blue), .45), transparent 60%),
+        radial-gradient(circle at 30% 70%, rgba(var(--aurora-cyan), .35), transparent 60%);
+      animation-delay: 7s;
+    }
+    .aurora .a3{
+      top:18%; right:22%;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(var(--aurora-pink), .35), transparent 60%),
+        radial-gradient(circle at 20% 80%, rgba(255,255,255,.08), transparent 60%);
+      animation-delay: 14s;
+    }
+
+    /* Soft bokeh sparkles */
+    .bokeh {
+      position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+      mix-blend-mode: screen; opacity: .9;
+    }
+    .bokeh span{
+      position: absolute; width: var(--s, 22px); height: var(--s, 22px);
+      border-radius: 9999px;
+      background: radial-gradient(circle at 40% 40%, rgba(255,255,255,.9), rgba(255,255,255,0) 60%);
+      opacity: .06; filter: blur(1px);
+      top: var(--t, 50%); left: var(--l, 50%);
+      animation: float var(--d, 16s) ease-in-out infinite; will-change: transform;
+    }
+    @keyframes float { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-30px) } }
+
+    /* Title shimmer (subtler, cleaner) */
+    .title-shimmer{
+      background: linear-gradient(90deg, #ffffff, #dbeafe, #ffffff);
+      background-size: 200% 100%;
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      animation: titleShine 8s linear infinite;
+    }
+    @keyframes titleShine { 0% {background-position: 0% 50%} 100% {background-position: 200% 50%} }
+
+    /* Glossy swipe for CTAs */
+    .btn-glossy{ position: relative; overflow: hidden; }
+    .btn-glossy::after{
+      content:""; position:absolute; inset:-150% -50% 0;
+      background: linear-gradient(120deg, transparent, rgba(255,255,255,.35), transparent);
+      transform: translateX(-100%); transition: transform .8s cubic-bezier(.19,1,.22,1);
+    }
+    .btn-glossy:hover::after{ transform: translateX(100%); }
+
+    /* Optional: gradient border utility */
+    .grad-border{ position: relative; border-radius: 1.25rem; }
+    .grad-border::before{
+      content:""; position:absolute; inset:0; padding:1px; border-radius:inherit;
+      background: linear-gradient(90deg, rgba(59,130,246,.6), rgba(168,85,247,.5), rgba(34,211,238,.6));
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor; mask-composite: exclude;
+    }
+    .grad-border > .inner{
+      border-radius: inherit; background: rgba(255,255,255,.86);
+      backdrop-filter: blur(8px);
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .aurora span, .bokeh span { animation: none; }
+      .btn-glossy::after { display: none; }
+      .title-shimmer { animation: none; }
+    }
   </style>
 </head>
 
@@ -165,6 +258,16 @@
     <img id="heroBg" src="./images/hero-bg.jpg" alt="" class="absolute inset-0 w-full h-full object-cover" fetchpriority="high" />
     <!-- Gradient overlay -->
     <div class="absolute inset-0 bg-gradient-to-br from-slate-900/80 via-blue-900/70 to-cyan-800/60"></div>
+
+    <!-- Bokeh sparkles -->
+    <div class="bokeh" aria-hidden="true">
+      <span style="--s:26px;--d:17s;--t:18%;--l:22%"></span>
+      <span style="--s:18px;--d:14s;--t:12%;--l:68%"></span>
+      <span style="--s:22px;--d:19s;--t:40%;--l:8%"></span>
+      <span style="--s:16px;--d:16s;--t:62%;--l:82%"></span>
+      <span style="--s:28px;--d:21s;--t:78%;--l:34%"></span>
+      <span style="--s:20px;--d:15s;--t:86%;--l:58%"></span>
+    </div>
 
     <!-- New: aurora + subtle texture -->
     <div class="aurora">
@@ -196,7 +299,7 @@
 
       <!-- Title -->
       <h1 class="reveal text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight mb-4 text-white">
-        <span class="shine">Welcome to</span>
+        <span class="title-shimmer">Welcome to</span>
         <span class="block">Synap<span class="text-yellow-300">Z</span></span>
       </h1>
 
@@ -223,15 +326,15 @@
       <div class="reveal flex justify-center flex-wrap gap-4 mt-8">
         <?php if (!empty($_SESSION['user_id'])): ?>
           <?php if (($_SESSION['role'] ?? '') === 'student'): ?>
-            <a href="student_dashboard.php" class="btn-glow inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
+            <a href="student_dashboard.php" class="btn-glow btn-glossy inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
               <ion-icon name="school-outline" class="text-xl"></ion-icon> Go to Dashboard
             </a>
           <?php elseif (($_SESSION['role'] ?? '') === 'teacher'): ?>
-            <a href="teacher_dashboard.php" class="btn-glow inline-flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-lg shadow hover:bg-purple-700 focus:ring-4 focus:ring-purple-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
+            <a href="teacher_dashboard.php" class="btn-glow btn-glossy inline-flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-lg shadow hover:bg-purple-700 focus:ring-4 focus:ring-purple-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
               <ion-icon name="easel-outline" class="text-xl"></ion-icon> Go to Dashboard
             </a>
           <?php else: ?>
-            <a href="admin_dashboard.php" class="btn-glow inline-flex items-center gap-2 bg-gray-700 text-white px-6 py-3 rounded-lg shadow hover:bg-gray-800 focus:ring-4 focus:ring-gray-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
+            <a href="admin_dashboard.php" class="btn-glow btn-glossy inline-flex items-center gap-2 bg-gray-700 text-white px-6 py-3 rounded-lg shadow hover:bg-gray-800 focus:ring-4 focus:ring-gray-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
               <ion-icon name="shield-checkmark-outline" class="text-xl"></ion-icon> Go to Dashboard
             </a>
           <?php endif; ?>
@@ -239,10 +342,10 @@
             <ion-icon name="log-out-outline"></ion-icon> Logout
           </a>
         <?php else: ?>
-          <a href="login.php" class="btn-glow inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
+          <a href="login.php" class="btn-glow btn-glossy inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
             <ion-icon name="log-in-outline" class="text-xl"></ion-icon> Login
           </a>
-          <a href="register.php" class="btn-glow inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg shadow hover:bg-green-700 focus:ring-4 focus:ring-green-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
+          <a href="register.php" class="btn-glow btn-glossy inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg shadow hover:bg-green-700 focus:ring-4 focus:ring-green-300 transition-all duration-300 transform hover:scale-105 focus:outline-none">
             <ion-icon name="person-add-outline" class="text-xl"></ion-icon> Register
           </a>
           <a href="#about" class="inline-flex items-center gap-2 text-white/90 hover:text-white px-6 py-3 rounded-lg border border-white/30 hover:bg-white/10 transition">
@@ -601,7 +704,7 @@
         </details>
         <details class="bg-white/90 border border-gray-100 rounded-xl p-5 shadow group">
           <summary class="cursor-pointer font-semibold text-gray-800 flex items-center justify-between">
-            <span class="inline-flex items-center gap-2"><ion-icon name="videocam-outline" class="text-blue-600"></ionicon> How do I join live sessions?</span>
+            <span class="inline-flex items-center gap-2"><ion-icon name="videocam-outline" class="text-blue-600"></ion-icon> How do I join live sessions?</span>
             <ion-icon name="chevron-down-outline" class="text-gray-400 group-open:rotate-180 transition"></ion-icon>
           </summary>
           <p class="mt-2 text-gray-600">Enrolled students receive links and reminders directly in their dashboard.</p>
@@ -624,7 +727,7 @@
         <p class="mt-2 text-white/90">Join thousands of learners and level up your skills today.</p>
         <div class="mt-6 flex justify-center gap-3 flex-wrap">
           <?php if (empty($_SESSION['user_id'])): ?>
-            <a href="register.php" class="btn-glow inline-flex items-center gap-2 bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg shadow hover:translate-y-[-1px] transition">
+            <a href="register.php" class="btn-glow btn-glossy inline-flex items-center gap-2 bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg shadow hover:translate-y-[-1px] transition">
               <ion-icon name="person-add-outline"></ion-icon> Get Started
             </a>
             <a href="login.php" class="inline-flex items-center gap-2 bg-indigo-900/30 text-white border border-white/30 px-6 py-3 rounded-lg hover:bg-indigo-900/40 transition">
@@ -632,15 +735,15 @@
             </a>
           <?php else: ?>
             <?php if (($_SESSION['role'] ?? '') === 'student'): ?>
-              <a href="student_dashboard.php" class="btn-glow inline-flex items-center gap-2 bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg shadow hover:translate-y-[-1px] transition">
+              <a href="student_dashboard.php" class="btn-glow btn-glossy inline-flex items-center gap-2 bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg shadow hover:translate-y-[-1px] transition">
                 <ion-icon name="open-outline"></ion-icon> Open Dashboard
               </a>
             <?php elseif (($_SESSION['role'] ?? '') === 'teacher'): ?>
-              <a href="teacher_dashboard.php" class="btn-glow inline-flex items-center gap-2 bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg shadow hover:translate-y-[-1px] transition">
+              <a href="teacher_dashboard.php" class="btn-glow btn-glossy inline-flex items-center gap-2 bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg shadow hover:translate-y-[-1px] transition">
                 <ion-icon name="open-outline"></ion-icon> Open Dashboard
               </a>
             <?php else: ?>
-              <a href="admin_dashboard.php" class="btn-glow inline-flex items-center gap-2 bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg shadow hover:translate-y-[-1px] transition">
+              <a href="admin_dashboard.php" class="btn-glow btn-glossy inline-flex items-center gap-2 bg-white text-indigo-700 font-semibold px-6 py-3 rounded-lg shadow hover:translate-y-[-1px] transition">
                 <ion-icon name="open-outline"></ion-icon> Open Dashboard
               </a>
             <?php endif; ?>
