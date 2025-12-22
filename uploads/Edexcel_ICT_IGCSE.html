@@ -1,0 +1,1105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unit 1: Digital Devices — Slide Lesson</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Print: one slide per page */
+    @media print {
+      .slide { page-break-after: always; }
+      #controls { display: none !important; }
+      body { background: white !important; }
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900 min-h-screen">
+  <!-- Top bar -->
+
+
+  <!-- Slides -->
+  <main class="max-w-6xl mx-auto px-4 py-6">
+    <div id="deck" class="space-y-6">
+
+      <!-- Slide 1 -->
+      <section class="slide relative rounded-2xl border border-slate-200 bg-white p-8 md:p-12" data-title="Title">
+        <div class="flex flex-col gap-8">
+          <div class="inline-flex items-center gap-2 w-fit px-3 py-1 rounded-full bg-cyan-50 border border-cyan-200 text-cyan-800 text-sm">
+            CHAPTER 1: DIGITAL DEVICES
+          </div>
+
+          <div>
+            <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-slate-900">UNIT 1: DIGITAL DEVICES</h1>
+            <p class="mt-3 text-slate-600 text-lg max-w-3xl">
+              Classification of digital devices grouped by type and functionality:
+              computers, mobile devices, key features, and peripheral devices.
+            </p>
+          </div>
+
+          <div class="grid md:grid-cols-3 gap-4">
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-5">
+              <div class="text-slate-900 font-semibold">What you’ll learn</div>
+              <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+                <li>Types of computers and their uses</li>
+                <li>Mobile devices and convergence</li>
+                <li>Features used to compare devices</li>
+                <li>Peripheral devices (input, output, storage)</li>
+              </ul>
+            </div>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-5">
+              <div class="text-slate-900 font-semibold">Skills</div>
+              <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+                <li>Classify devices correctly</li>
+                <li>Match devices to real-world tasks</li>
+                <li>Explain pros/cons and limitations</li>
+                <li>Basic performance calculations</li>
+              </ul>
+            </div>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-5">
+              <div class="text-slate-900 font-semibold">Starter prompt</div>
+              <p class="mt-3 text-slate-700 text-sm">
+                “Which device would you choose for a task—and why?”
+              </p>
+              <div class="mt-3 text-xs text-slate-500">
+                Example: “Editing 4K video” vs “Writing notes in class”
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 2 -->
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Objectives">
+        <h2 class="text-3xl font-bold text-slate-900">Lesson objectives</h2>
+        <div class="mt-6 grid md:grid-cols-2 gap-6">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">By the end, you can:</div>
+            <ul class="mt-4 space-y-2 text-slate-700 list-disc list-inside">
+              <li>Classify computers by <span class="text-slate-900">size</span>, <span class="text-slate-900">purpose</span>, or <span class="text-slate-900">architecture</span>.</li>
+              <li>Describe mainframe, minicomputer, microcomputer, desktop, and workstation.</li>
+              <li>Explain mobile device categories and <span class="text-slate-900">convergence</span>.</li>
+              <li>Compare devices using features: portability, performance, storage, UI, media support, energy use, expansion, security.</li>
+              <li>Identify input, output, and storage peripherals with pros/cons.</li>
+            </ul>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Key vocabulary</div>
+            <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
+              <div class="rounded-lg border border-slate-200 bg-white p-3">Convergence</div>
+              <div class="rounded-lg border border-slate-200 bg-white p-3">CPU</div>
+              <div class="rounded-lg border border-slate-200 bg-white p-3">RAM</div>
+              <div class="rounded-lg border border-slate-200 bg-white p-3">Virtual memory</div>
+              <div class="rounded-lg border border-slate-200 bg-white p-3">CLI / GUI</div>
+              <div class="rounded-lg border border-slate-200 bg-white p-3">Peripheral</div>
+            </div>
+            <div class="mt-5 text-slate-600 text-sm">
+              Tip: Always justify classification using <span class="text-slate-900">purpose + functionality</span>.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 3 -->
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Overview">
+        <h2 class="text-3xl font-bold text-slate-900">What is a digital device?</h2>
+        <p class="mt-4 text-slate-600 max-w-4xl">
+          A digital device processes data using binary (0s and 1s). Devices can be grouped by
+          <span class="text-slate-900">type</span> (computer, phone, tablet, console) and by
+          <span class="text-slate-900">functionality</span> (input, output, storage, communication).
+        </p>
+
+        <div class="mt-8 grid md:grid-cols-3 gap-5">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Computers</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Mainframe</li>
+              <li>Minicomputer</li>
+              <li>Microcomputer</li>
+              <li>Desktop</li>
+              <li>Workstation</li>
+            </ul>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Mobile & consumer devices</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Smartphones & specialist phones</li>
+              <li>Tablets</li>
+              <li>Cameras, consoles, smart TVs</li>
+              <li>GPS / navigation devices</li>
+            </ul>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Peripherals</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Input (keyboard, mouse, scanner…)</li>
+              <li>Output (monitor, printer, projector…)</li>
+              <li>Storage (HDD, SSD, USB, optical…)</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 4 -->
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Computers: classification">
+        <h2 class="text-3xl font-bold text-slate-900">1. Computers</h2>
+        <p class="mt-4 text-slate-600 max-w-4xl">
+          Computers can be classified by <span class="text-slate-900">size</span>,
+          <span class="text-slate-900">purpose</span>, or <span class="text-slate-900">architecture</span>.
+        </p>
+
+        <div class="mt-8 grid md:grid-cols-3 gap-5">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">By size</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Microcomputer → Desktop/Workstation</li>
+              <li>Minicomputer (midrange)</li>
+              <li>Mainframe</li>
+            </ul>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">By purpose</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Personal computing</li>
+              <li>Business/servers</li>
+              <li>Scientific/engineering</li>
+              <li>Mission-critical transactions</li>
+            </ul>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">By architecture</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Memory organization</li>
+              <li>I/O systems</li>
+              <li>Multi-user support</li>
+              <li>Parallel processing hardware</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 5 -->
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Computer types summary">
+        <h2 class="text-3xl font-bold text-slate-900">Computer types at a glance</h2>
+
+        <div class="mt-6 overflow-x-auto rounded-xl border border-slate-200 bg-white">
+          <table class="min-w-full text-sm">
+            <thead class="bg-slate-100">
+              <tr class="text-left">
+                <th class="p-4 font-semibold text-slate-900">Type</th>
+                <th class="p-4 font-semibold text-slate-900">Typical use</th>
+                <th class="p-4 font-semibold text-slate-900">Power</th>
+                <th class="p-4 font-semibold text-slate-900">Size</th>
+                <th class="p-4 font-semibold text-slate-900">Examples</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200">
+              <tr>
+                <td class="p-4 font-semibold text-slate-900">Mainframe</td>
+                <td class="p-4 text-slate-700">Massive transaction/data processing</td>
+                <td class="p-4 text-slate-700">Very high (BIPS)</td>
+                <td class="p-4 text-slate-700">Room/cabinet sized</td>
+                <td class="p-4 text-slate-700">Banks, airlines, governments</td>
+              </tr>
+              <tr>
+                <td class="p-4 font-semibold text-slate-900">Minicomputer</td>
+                <td class="p-4 text-slate-700">Multi-user business & labs</td>
+                <td class="p-4 text-slate-700">Moderate–high (MIPS)</td>
+                <td class="p-4 text-slate-700">Cabinet sized</td>
+                <td class="p-4 text-slate-700">University labs, manufacturing</td>
+              </tr>
+              <tr>
+                <td class="p-4 font-semibold text-slate-900">Microcomputer</td>
+                <td class="p-4 text-slate-700">Single-user personal tasks</td>
+                <td class="p-4 text-slate-700">Low–moderate (MIPS)</td>
+                <td class="p-4 text-slate-700">Compact</td>
+                <td class="p-4 text-slate-700">Home computers</td>
+              </tr>
+              <tr>
+                <td class="p-4 font-semibold text-slate-900">Desktop</td>
+                <td class="p-4 text-slate-700">Office, multitasking, light dev</td>
+                <td class="p-4 text-slate-700">Moderate–high (BIPS)</td>
+                <td class="p-4 text-slate-700">On/under desk</td>
+                <td class="p-4 text-slate-700">Office PCs, gaming PCs</td>
+              </tr>
+              <tr>
+                <td class="p-4 font-semibold text-slate-900">Workstation</td>
+                <td class="p-4 text-slate-700">CAD, video, scientific modeling</td>
+                <td class="p-4 text-slate-700">Very high (tens of BIPS)</td>
+                <td class="p-4 text-slate-700">Bulkier desktop</td>
+                <td class="p-4 text-slate-700">Studios, engineering firms</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-6 grid md:grid-cols-2 gap-5">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Quick check</div>
+            <p class="mt-3 text-slate-700 text-sm">
+              Which type best fits: <span class="text-slate-900">airline reservations</span>,
+              <span class="text-slate-900">student homework</span>,
+              <span class="text-slate-900">3D CAD design</span>?
+            </p>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Key idea</div>
+            <p class="mt-3 text-slate-700 text-sm">
+              Classification depends on the workload, number of users, and reliability needed.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 6 -->
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Mainframes">
+        <h2 class="text-3xl font-bold text-slate-900">Mainframe computers</h2>
+
+        <div class="mt-6 grid md:grid-cols-2 gap-6">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Use</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Large-scale data processing for banks, governments, airlines</li>
+              <li>Supports thousands of concurrent users/transactions</li>
+            </ul>
+
+            <div class="mt-5 font-semibold text-slate-900">Examples</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Financial transactions</li>
+              <li>Weather forecasting (large data processing)</li>
+              <li>Airline reservation systems</li>
+            </ul>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Key details</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li><span class="text-slate-900">OS:</span> IBM z/OS, Linux on zSystems</li>
+              <li><span class="text-slate-900">Size:</span> room-sized / large cabinet systems</li>
+              <li><span class="text-slate-900">Power:</span> exceptionally high (BIPS)</li>
+              <li><span class="text-slate-900">Advantages:</span> reliable, secure, mission-critical</li>
+              <li><span class="text-slate-900">Disadvantages:</span> expensive, trained staff required</li>
+              <li><span class="text-slate-900">Price:</span> ~$500,000 to $10M+</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 7 -->
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Minicomputers">
+        <h2 class="text-3xl font-bold text-slate-900">Minicomputers</h2>
+
+        <div class="mt-6 grid md:grid-cols-2 gap-6">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Use</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Small to medium businesses</li>
+              <li>Database management and ERP systems</li>
+              <li>Multi-user environments</li>
+            </ul>
+
+            <div class="mt-5 font-semibold text-slate-900">Examples</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Research labs</li>
+              <li>Manufacturing control</li>
+              <li>University labs</li>
+            </ul>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Key details</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li><span class="text-slate-900">OS:</span> UNIX, Linux, VMS</li>
+              <li><span class="text-slate-900">Size:</span> cabinet sized</li>
+              <li><span class="text-slate-900">Power:</span> moderate–high (MIPS)</li>
+              <li><span class="text-slate-900">Advantages:</span> cheaper than mainframes</li>
+              <li><span class="text-slate-900">Disadvantages:</span> limited scalability; less common today</li>
+              <li><span class="text-slate-900">Price:</span> ~$5,000 to $200,000</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 8 -->
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Microcomputers">
+        <h2 class="text-3xl font-bold text-slate-900">Microcomputers</h2>
+
+        <div class="mt-6 grid md:grid-cols-2 gap-6">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Use</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Web browsing, office work, gaming</li>
+              <li>Typically designed for a single user</li>
+            </ul>
+
+            <div class="mt-5 font-semibold text-slate-900">Technology</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Microprocessor-based CPUs (e.g., Intel Core, AMD Ryzen)</li>
+              <li><span class="text-slate-900">OS:</span> Windows, macOS, Linux</li>
+            </ul>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Pros / cons</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li><span class="text-slate-900">Advantages:</span> affordable, widely available</li>
+              <li><span class="text-slate-900">Disadvantages:</span> limited for intensive tasks</li>
+              <li><span class="text-slate-900">Price:</span> ~$300 to $2,000</li>
+              <li><span class="text-slate-900">Applications:</span> home use, small offices</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 9 -->
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Desktops">
+        <h2 class="text-3xl font-bold text-slate-900">Desktop computers</h2>
+
+        <div class="mt-6 grid md:grid-cols-2 gap-6">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Use & examples</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Document editing, gaming, light development</li>
+              <li>Office workstations, gaming PCs</li>
+            </ul>
+
+            <div class="mt-5 font-semibold text-slate-900">Technology</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Intel Core / AMD Ryzen (often with discrete GPUs)</li>
+              <li><span class="text-slate-900">OS:</span> Windows, macOS, Linux</li>
+            </ul>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Pros / cons</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li><span class="text-slate-900">Advantages:</span> customizable, upgradable, long lifespan</li>
+              <li><span class="text-slate-900">Disadvantages:</span> not portable; needs peripherals</li>
+              <li><span class="text-slate-900">Price:</span> ~$500 to $3,000+</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 10 -->
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Workstations">
+        <h2 class="text-3xl font-bold text-slate-900">Workstations</h2>
+
+        <div class="mt-6 grid md:grid-cols-2 gap-6">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Use</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Video editing, CAD design, scientific modeling</li>
+              <li>Professional studios and engineering environments</li>
+            </ul>
+
+            <div class="mt-5 font-semibold text-slate-900">Technology</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Multi-core CPUs (Intel Xeon, AMD Threadripper)</li>
+              <li>Professional GPUs</li>
+              <li><span class="text-slate-900">OS:</span> Windows Pro, macOS, Linux</li>
+            </ul>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Pros / cons</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li><span class="text-slate-900">Advantages:</span> reliability (ECC RAM), multi-monitor support</li>
+              <li><span class="text-slate-900">Disadvantages:</span> high cost, needs expertise</li>
+              <li><span class="text-slate-900">Price:</span> ~$2,000 to $10,000+</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 11 -->
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Mobile devices">
+        <h2 class="text-3xl font-bold text-slate-900">2. Mobile devices</h2>
+
+        <div class="mt-6 grid md:grid-cols-2 gap-6">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Main categories</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Mobile phones (smartphones, specialist phones)</li>
+              <li>Tablets</li>
+              <li>Consumer electronics (cameras, consoles, smart TVs)</li>
+              <li>Navigation devices (GPS)</li>
+              <li>Multifunctional / converged devices</li>
+            </ul>
+          </div>
+
+          <div class="rounded-xl border border-cyan-200 bg-cyan-50 p-6">
+            <div class="font-semibold text-cyan-900">Convergence</div>
+            <p class="mt-3 text-slate-700 text-sm">
+              Convergence means combining the functions of several devices into a single device.
+            </p>
+            <div class="mt-4 text-slate-700 text-sm">
+              <div class="font-semibold text-slate-900">Smartphone example:</div>
+              <ul class="mt-2 space-y-1 list-disc list-inside">
+                <li>Telephone (calls)</li>
+                <li>Camera (photos/videos)</li>
+                <li>Music player</li>
+                <li>GPS navigation</li>
+                <li>Computer (web, email, apps)</li>
+                <li>Gaming console</li>
+                <li>Calendar/organiser</li>
+              </ul>
+            </div>
+            <div class="mt-4 text-xs text-slate-600">
+              Why it matters: less to carry, cheaper overall, easier to sync/manage data.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 12 -->
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Phones">
+        <h2 class="text-3xl font-bold text-slate-900">Mobile phones</h2>
+
+        <div class="mt-6 grid md:grid-cols-2 gap-6">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Smartphones</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Apps, camera, GPS, internet, productivity tools</li>
+              <li><span class="text-slate-900">Applications:</span> social media, shopping, mobile banking, gaming, work tasks</li>
+              <li><span class="text-slate-900">Disadvantages:</span> battery life, fragility, cost</li>
+            </ul>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Specialist phones</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Designed for specific needs (rugged, simple interface)</li>
+              <li><span class="text-slate-900">Advantages:</span> durable, long battery life</li>
+              <li><span class="text-slate-900">Disadvantages:</span> fewer advanced features</li>
+              <li><span class="text-slate-900">Applications:</span> construction workers, hikers, elderly users</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 13 -->
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Tablets & consumer devices">
+        <h2 class="text-3xl font-bold text-slate-900">Tablets, consumer electronics & navigation</h2>
+
+        <div class="mt-6 grid lg:grid-cols-3 gap-6">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Tablets</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Portable touchscreen; between phone and laptop</li>
+              <li><span class="text-slate-900">Applications:</span> eBooks, e-learning, streaming, note-taking</li>
+              <li><span class="text-slate-900">Limitations:</span> less powerful than laptops; fragile</li>
+            </ul>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Consumer electronics</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Cameras/camcorders: high quality, optical zoom, 4K</li>
+              <li>Games consoles: optimized graphics + multiplayer</li>
+              <li>Home entertainment: smart TVs, home theatre</li>
+              <li>Media players: MP3/iPod (less common now)</li>
+            </ul>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Navigation devices (GPS)</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Real-time directions and tracking</li>
+              <li><span class="text-slate-900">Applications:</span> logistics, fleet management, hiking</li>
+              <li><span class="text-slate-900">Limitation:</span> replaced by smartphone GPS apps</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 14 -->
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Portability">
+        <h2 class="text-3xl font-bold text-slate-900">3. Features: portability</h2>
+
+        <div class="mt-6 grid md:grid-cols-2 gap-6">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Portability</div>
+            <p class="mt-3 text-slate-700 text-sm">
+              How easy a device is to carry and use in different locations (size + weight).
+            </p>
+            <ul class="mt-4 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Portable: laptops, tablets, smartphones, USB flash drives</li>
+              <li>Non-portable: desktop PCs, televisions, many printers</li>
+            </ul>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Examples & scenarios</div>
+            <div class="mt-4 overflow-x-auto rounded-lg border border-slate-200 bg-white">
+              <table class="min-w-full text-sm">
+                <thead class="bg-slate-100">
+                  <tr class="text-left">
+                    <th class="p-3 text-slate-900">Device</th>
+                    <th class="p-3 text-slate-900">Scenario</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                  <tr><td class="p-3 font-semibold text-slate-900">Laptop</td><td class="p-3 text-slate-700">Student takes notes and completes assignments</td></tr>
+                  <tr><td class="p-3 font-semibold text-slate-900">Tablet</td><td class="p-3 text-slate-700">Business presentation to a client</td></tr>
+                  <tr><td class="p-3 font-semibold text-slate-900">Smartphone</td><td class="p-3 text-slate-700">Tourist uses maps and navigation</td></tr>
+                  <tr><td class="p-3 font-semibold text-slate-900">USB Drive</td><td class="p-3 text-slate-700">Teacher transfers lesson files</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 15 -->
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Performance">
+        <h2 class="text-3xl font-bold text-slate-900">Performance</h2>
+        <p class="mt-4 text-slate-600 max-w-4xl">
+          A high-performance device runs tasks quickly and efficiently. Performance depends on hardware and software.
+        </p>
+
+        <div class="mt-6 grid md:grid-cols-2 gap-6">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Main factors</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-2 list-disc list-inside">
+              <li><span class="text-slate-900">CPU speed:</span> executes instructions</li>
+              <li><span class="text-slate-900">RAM capacity/speed:</span> supports multitasking</li>
+              <li><span class="text-slate-900">Storage speed:</span> SSD loads faster than HDD</li>
+              <li><span class="text-slate-900">Software efficiency:</span> well-written programs use fewer resources</li>
+            </ul>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Virtual memory (concept)</div>
+            <p class="mt-3 text-slate-700 text-sm">
+              If RAM is full, the system uses storage as “virtual memory.” It keeps programs running,
+              but it is slower than RAM.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 16 -->
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Calculations 1">
+        <h2 class="text-3xl font-bold text-slate-900">Performance practice: calculations</h2>
+
+        <div class="mt-6 grid md:grid-cols-2 gap-6">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Q1: Processor speed</div>
+            <p class="mt-3 text-slate-700 text-sm">
+              A processor executes <span class="text-slate-900">3 billion</span> instructions per second (3 GHz).
+              How many instructions in <span class="text-slate-900">10 seconds</span>?
+            </p>
+            <div class="mt-4 rounded-lg bg-white border border-slate-200 p-4 text-sm">
+              <div class="text-slate-700">3,000,000,000 × 10 =</div>
+              <div class="mt-1 text-slate-900 font-semibold">30,000,000,000 instructions (30 billion)</div>
+            </div>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Q2: RAM capacity</div>
+            <p class="mt-3 text-slate-700 text-sm">
+              A computer has <span class="text-slate-900">8 GB RAM</span>. Each program needs <span class="text-slate-900">500 MB</span>.
+              How many programs can run without virtual memory?
+            </p>
+            <div class="mt-4 rounded-lg bg-white border border-slate-200 p-4 text-sm">
+              <div class="text-slate-700">8 GB = 8 × 1024 = 8192 MB</div>
+              <div class="text-slate-700">8192 ÷ 500 = 16.384</div>
+              <div class="mt-1 text-slate-900 font-semibold">16 programs</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 17 -->
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Calculations 2">
+        <h2 class="text-3xl font-bold text-slate-900">Virtual memory & storage speed</h2>
+
+        <div class="mt-6 grid md:grid-cols-2 gap-6">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Q3: Virtual memory usage</div>
+            <p class="mt-3 text-slate-700 text-sm">
+              A system has <span class="text-slate-900">16 GB RAM</span>. If programs require <span class="text-slate-900">20 GB</span>,
+              how much virtual memory is needed?
+            </p>
+            <div class="mt-4 rounded-lg bg-white border border-slate-200 p-4 text-sm">
+              <div class="text-slate-700">20 GB − 16 GB =</div>
+              <div class="mt-1 text-slate-900 font-semibold">4 GB virtual memory</div>
+            </div>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Q4: Storage transfer speed</div>
+            <p class="mt-3 text-slate-700 text-sm">
+              An SSD transfers at <span class="text-slate-900">550 MB/s</span>. How long to load a <span class="text-slate-900">4 GB</span> file?
+            </p>
+            <div class="mt-4 rounded-lg bg-white border border-slate-200 p-4 text-sm">
+              <div class="text-slate-700">4 GB = 4096 MB</div>
+              <div class="text-slate-700">4096 ÷ 550 = 7.4472… s</div>
+              <div class="mt-1 text-slate-900 font-semibold">≈ 7.45 seconds</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-6">
+          <div class="font-semibold text-slate-900">Q5: Multitasking</div>
+          <p class="mt-3 text-slate-700 text-sm">
+            A computer has <span class="text-slate-900">16 GB RAM</span>. Each program needs <span class="text-slate-900">1 GB</span>.
+            If it runs <span class="text-slate-900">20 programs</span>, will it require virtual memory?
+          </p>
+          <div class="mt-4 rounded-lg bg-white border border-slate-200 p-4 text-sm">
+            <div class="text-slate-700">RAM required = 20 GB</div>
+            <div class="text-slate-700">Extra = 20 − 16 = 4 GB</div>
+            <div class="mt-1 text-slate-900 font-semibold">Yes — 4 GB virtual memory</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 18 -->
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Storage">
+        <h2 class="text-3xl font-bold text-slate-900">Storage</h2>
+        <p class="mt-4 text-slate-600 max-w-4xl">
+          Storage is where files, programs, and data are saved (non-volatile storage keeps data when power is off).
+        </p>
+
+        <div class="mt-6 grid lg:grid-cols-3 gap-6">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Primary storage</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-2 list-disc list-inside">
+              <li><span class="text-slate-900">RAM:</span> volatile; stores active programs/data</li>
+              <li><span class="text-slate-900">ROM:</span> non-volatile; stores startup instructions (e.g., BIOS)</li>
+            </ul>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Secondary storage</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-2 list-disc list-inside">
+              <li>Non-volatile: keeps data when off</li>
+              <li>Stores documents and installed apps</li>
+              <li>Provides virtual memory when RAM is full</li>
+              <li>Examples: HDD, SSD, USB, SD/microSD, optical discs, cloud</li>
+            </ul>
+          </div>
+
+          <div class="rounded-xl border border-cyan-200 bg-cyan-50 p-6">
+            <div class="font-semibold text-cyan-900">Media vs device</div>
+            <p class="mt-3 text-slate-700 text-sm">
+              <span class="text-slate-900 font-semibold">Media</span> = the material that holds data.<br />
+              <span class="text-slate-900 font-semibold">Device</span> = the hardware that reads/writes the media.
+            </p>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Magnetic media → HDD platters, tapes</li>
+              <li>Optical media → CD/DVD/Blu-ray</li>
+              <li>Solid-state media → flash chips (SSD/USB/SD)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="mt-6 grid md:grid-cols-2 gap-6">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">HDD (how it works)</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Spinning platters + moving read/write head</li>
+              <li>Tracks and sectors organize data</li>
+              <li>Deleting often marks space “free” until overwritten</li>
+            </ul>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">SSD & optical discs</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li><span class="text-slate-900">SSD:</span> flash memory, no moving parts, fast</li>
+              <li><span class="text-slate-900">Optical:</span> pits/lands read by a laser (CD/DVD)</li>
+              <li>Rewritable discs: CD-RW/DVD-RW can erase and rewrite</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 19 -->
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="User interface">
+        <h2 class="text-3xl font-bold text-slate-900">User interfaces</h2>
+        <p class="mt-4 text-slate-600 max-w-4xl">
+          A user interface (UI) is how a person interacts with a device.
+        </p>
+
+        <div class="mt-6 grid lg:grid-cols-3 gap-6">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">1) CLI</div>
+            <p class="mt-2 text-slate-700 text-sm">Type commands (text-based).</p>
+            <div class="mt-3 text-xs text-slate-500">
+              Examples: Windows Command Prompt, macOS Terminal, Linux Terminal
+            </div>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">2) Menu-driven</div>
+            <p class="mt-2 text-slate-700 text-sm">Choose options from menus.</p>
+            <div class="mt-3 text-xs text-slate-500">
+              Examples: ATMs, printer menus, car dashboard settings
+            </div>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">3) GUI</div>
+            <p class="mt-2 text-slate-700 text-sm">Windows/icons/menus/pointers (WIMP).</p>
+            <div class="mt-3 text-xs text-slate-500">
+              Examples: Microsoft Windows, macOS, Android/iOS apps
+            </div>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">4) Voice</div>
+            <p class="mt-2 text-slate-700 text-sm">Speak commands.</p>
+            <div class="mt-3 text-xs text-slate-500">
+              Examples: Siri, Alexa, Google Assistant
+            </div>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">5) Gesture</div>
+            <p class="mt-2 text-slate-700 text-sm">Swipes/pinches/hand movements.</p>
+            <div class="mt-3 text-xs text-slate-500">
+              Examples: smartphone gestures, tablets, motion remotes
+            </div>
+          </div>
+
+          <div class="rounded-xl border border-amber-200 bg-amber-50 p-6">
+            <div class="font-semibold text-amber-900">Compare UIs</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>CLI: fast for experts, hard for beginners</li>
+              <li>GUI: easy to use, needs more memory/storage</li>
+              <li>Voice: hands-free, can misinterpret speech</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 20 -->
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Connectivity, media, energy">
+        <h2 class="text-3xl font-bold text-slate-900">Connectivity, media support, energy</h2>
+
+        <div class="mt-6 grid md:grid-cols-2 gap-6">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Connectivity</div>
+            <p class="mt-3 text-slate-700 text-sm">
+              Devices connect to networks and other hardware using wired/wireless methods.
+            </p>
+            <ul class="mt-4 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Ports: USB, HDMI, audio, Ethernet</li>
+              <li>Wireless: Wi‑Fi, Bluetooth, cellular data</li>
+            </ul>
+            <div class="mt-4 text-xs text-slate-500">
+              Link to Unit 2: connectivity enables networks and shared resources.
+            </div>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Media support</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li><span class="text-slate-900">File formats:</span> .jpg/.png, .mp3/.wav, .mp4/.avi, .pdf/.docx</li>
+              <li><span class="text-slate-900">Storage media:</span> SD/microSD, DVD, USB, external drives</li>
+              <li><span class="text-slate-900">Codecs & drivers:</span> needed for compatibility</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-6">
+          <div class="font-semibold text-slate-900">Energy consumption & green computing</div>
+          <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+            <li>Energy use affects cost and environmental impact</li>
+            <li>Reduce usage: sleep/hibernate, auto shutdown, switch off</li>
+            <li>Efficient hardware: LED monitors, SSDs</li>
+            <li>Green computing: reduce power use and e-waste</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Slide 21 -->
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Expansion & security">
+        <h2 class="text-3xl font-bold text-slate-900">Expansion capability & security features</h2>
+
+        <div class="mt-6 grid md:grid-cols-2 gap-6">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Expansion capability</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-2 list-disc list-inside">
+              <li><span class="text-slate-900">Internal:</span> add RAM, upgrade GPU, add SSD/HDD</li>
+              <li><span class="text-slate-900">External:</span> connect devices via USB/HDMI</li>
+              <li><span class="text-slate-900">Mobile:</span> some support microSD expansion</li>
+            </ul>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Security features</div>
+            <div class="mt-4 grid gap-4">
+              <div class="rounded-lg border border-slate-200 bg-white p-4">
+                <div class="font-semibold text-slate-900 text-sm">Software security</div>
+                <ul class="mt-2 text-slate-700 text-sm space-y-1 list-disc list-inside">
+                  <li>Passwords / PINs</li>
+                  <li>Timeout lock, retry limits</li>
+                  <li>Biometrics (fingerprint / face)</li>
+                </ul>
+              </div>
+              <div class="rounded-lg border border-slate-200 bg-white p-4">
+                <div class="font-semibold text-slate-900 text-sm">Physical security</div>
+                <ul class="mt-2 text-slate-700 text-sm space-y-1 list-disc list-inside">
+                  <li>Security slots/cable locks</li>
+                  <li>Tamper-resistant screws</li>
+                  <li>Locked rooms / alarms</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 22 -->
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Peripherals overview">
+        <h2 class="text-3xl font-bold text-slate-900">4. Peripheral devices</h2>
+        <p class="mt-4 text-slate-600 max-w-4xl">
+          Peripheral devices extend a computer’s functionality. They are grouped into:
+          <span class="text-slate-900">input</span>, <span class="text-slate-900">output</span>, and <span class="text-slate-900">storage</span>.
+        </p>
+
+        <div class="mt-6 grid md:grid-cols-3 gap-6">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Input</div>
+            <p class="mt-3 text-slate-700 text-sm">Sends data to the computer.</p>
+            <div class="mt-3 text-xs text-slate-500">Keyboard, mouse, scanner, microphone, webcam, sensors…</div>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Output</div>
+            <p class="mt-3 text-slate-700 text-sm">Displays results from the computer.</p>
+            <div class="mt-3 text-xs text-slate-500">Monitor, printer, plotter, projector, speakers, actuators…</div>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Storage</div>
+            <p class="mt-3 text-slate-700 text-sm">Stores data and programs.</p>
+            <div class="mt-3 text-xs text-slate-500">HDD, SSD, USB flash drive, optical discs, SD cards…</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 23 -->
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Input devices">
+        <h2 class="text-3xl font-bold text-slate-900">Input devices</h2>
+
+        <div class="mt-6 overflow-x-auto rounded-xl border border-slate-200 bg-white">
+          <table class="min-w-full text-sm">
+            <thead class="bg-slate-100">
+              <tr class="text-left">
+                <th class="p-4 font-semibold text-slate-900">Device</th>
+                <th class="p-4 font-semibold text-slate-900">Use</th>
+                <th class="p-4 font-semibold text-slate-900">Advantages</th>
+                <th class="p-4 font-semibold text-slate-900">Disadvantages</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200">
+              <tr>
+                <td class="p-4 font-semibold text-slate-900">Keyboard</td>
+                <td class="p-4 text-slate-700">Typing text/commands</td>
+                <td class="p-4 text-slate-700">Accurate, familiar</td>
+                <td class="p-4 text-slate-700">Can be slow; fatigue</td>
+              </tr>
+              <tr>
+                <td class="p-4 font-semibold text-slate-900">Mouse</td>
+                <td class="p-4 text-slate-700">Pointer control in GUI</td>
+                <td class="p-4 text-slate-700">Precise, easy</td>
+                <td class="p-4 text-slate-700">Needs surface; not ideal for mobility</td>
+              </tr>
+              <tr>
+                <td class="p-4 font-semibold text-slate-900">Touchscreen</td>
+                <td class="p-4 text-slate-700">Direct screen interaction</td>
+                <td class="p-4 text-slate-700">Intuitive; no extra device</td>
+                <td class="p-4 text-slate-700">Smudges; less precise</td>
+              </tr>
+              <tr>
+                <td class="p-4 font-semibold text-slate-900">Microphone</td>
+                <td class="p-4 text-slate-700">Voice input / recording</td>
+                <td class="p-4 text-slate-700">Hands-free; fast</td>
+                <td class="p-4 text-slate-700">Noise; misinterpretation</td>
+              </tr>
+              <tr>
+                <td class="p-4 font-semibold text-slate-900">Scanner</td>
+                <td class="p-4 text-slate-700">Paper → digital</td>
+                <td class="p-4 text-slate-700">Preserves documents/photos</td>
+                <td class="p-4 text-slate-700">Bulky; slower for many pages</td>
+              </tr>
+              <tr>
+                <td class="p-4 font-semibold text-slate-900">Webcam</td>
+                <td class="p-4 text-slate-700">Video capture</td>
+                <td class="p-4 text-slate-700">Video calls, streaming</td>
+                <td class="p-4 text-slate-700">Privacy; lighting affects quality</td>
+              </tr>
+              <tr>
+                <td class="p-4 font-semibold text-slate-900">Biometric scanner</td>
+                <td class="p-4 text-slate-700">Identity verification</td>
+                <td class="p-4 text-slate-700">Fast login; strong security</td>
+                <td class="p-4 text-slate-700">Can fail; privacy concerns</td>
+              </tr>
+              <tr>
+                <td class="p-4 font-semibold text-slate-900">Card reader</td>
+                <td class="p-4 text-slate-700">Read ID/payment cards</td>
+                <td class="p-4 text-slate-700">Quick transactions/access</td>
+                <td class="p-4 text-slate-700">Risk of cloning/skimming</td>
+              </tr>
+              <tr>
+                <td class="p-4 font-semibold text-slate-900">Sensors</td>
+                <td class="p-4 text-slate-700">Detect environment changes</td>
+                <td class="p-4 text-slate-700">Automation; IoT</td>
+                <td class="p-4 text-slate-700">Cost; calibration errors</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Slide 24 -->
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Output devices">
+        <h2 class="text-3xl font-bold text-slate-900">Output devices</h2>
+
+        <div class="mt-6 grid lg:grid-cols-3 gap-6">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Monitor</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Displays text/images/video</li>
+              <li>Types: LCD/LED/OLED</li>
+              <li>Resolution: HD, Full HD, 4K</li>
+              <li>Can cause eye strain over long periods</li>
+            </ul>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Printers & plotters</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Inkjet: great photos, slower</li>
+              <li>Laser: fast text, good for volume</li>
+              <li>3D printer: builds objects layer-by-layer</li>
+              <li>Plotter: precise large drawings (maps/blueprints)</li>
+            </ul>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Projectors, speakers, control devices</div>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Projector: large audience viewing (classrooms)</li>
+              <li>Speakers: audio output</li>
+              <li>Actuators: motors, valves, heaters</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 25 -->
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Review">
+        <h2 class="text-3xl font-bold text-slate-900">Review & exit ticket</h2>
+
+        <div class="mt-6 grid md:grid-cols-2 gap-6">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div class="font-semibold text-slate-900">Answer in 1–2 sentences</div>
+            <ol class="mt-4 text-slate-700 text-sm space-y-2 list-decimal list-inside">
+              <li>What is convergence? Give one example.</li>
+              <li>Why are mainframes used by banks and airlines?</li>
+              <li>Give two reasons a workstation is different from a normal desktop.</li>
+              <li>Explain virtual memory and why it can slow a computer.</li>
+              <li>Give one software and one physical security method.</li>
+            </ol>
+          </div>
+
+          <div class="rounded-xl border border-cyan-200 bg-cyan-50 p-6">
+            <div class="font-semibold text-cyan-900">Challenge classification</div>
+            <p class="mt-3 text-slate-700 text-sm">
+              Classify each as input/output/storage and justify:
+            </p>
+            <ul class="mt-3 text-slate-700 text-sm space-y-1 list-disc list-inside">
+              <li>Webcam</li>
+              <li>Plotter</li>
+              <li>USB flash drive</li>
+              <li>Microphone</li>
+              <li>Monitor</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Controls -->
+  <div id="controls" class="fixed bottom-4 left-0 right-0 z-50">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white/85 backdrop-blur px-4 py-3">
+        <div class="flex items-center gap-3">
+          <button id="prevBtn" class="px-3 py-2 rounded-xl bg-slate-100 border border-slate-300 hover:bg-slate-200 transition text-sm">
+            Prev
+          </button>
+          <button id="nextBtn" class="px-3 py-2 rounded-xl bg-cyan-50 border border-cyan-200 hover:bg-cyan-100 transition text-sm text-cyan-900">
+            Next
+          </button>
+
+          <div class="hidden sm:flex items-center gap-2 text-sm text-slate-600">
+            <span id="counter" class="font-medium text-slate-900">1 / 1</span>
+            <span class="text-slate-400">•</span>
+            <span id="title" class="text-slate-600">Title</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div class="w-44 sm:w-64 h-2 rounded-full bg-slate-200 overflow-hidden border border-slate-300">
+            <div id="progress" class="h-full bg-cyan-400 w-0"></div>
+          </div>
+          <button id="printBtn" class="px-3 py-2 rounded-xl bg-slate-100 border border-slate-300 hover:bg-slate-200 transition text-sm">
+            Print
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    const counter = document.getElementById("counter");
+    const title = document.getElementById("title");
+    const progress = document.getElementById("progress");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const printBtn = document.getElementById("printBtn");
+
+    let index = 0;
+
+    function show(i) {
+      index = Math.max(0, Math.min(i, slides.length - 1));
+      slides.forEach((s, k) => s.classList.toggle("hidden", k !== index));
+
+      const t = slides[index].dataset.title || `Slide ${index + 1}`;
+      counter.textContent = `${index + 1} / ${slides.length}`;
+      title.textContent = t;
+
+      const pct = slides.length === 1 ? 100 : (index / (slides.length - 1)) * 100;
+      progress.style.width = `${pct}%`;
+
+      prevBtn.disabled = index === 0;
+      nextBtn.disabled = index === slides.length - 1;
+
+      prevBtn.classList.toggle("opacity-50", prevBtn.disabled);
+      nextBtn.classList.toggle("opacity-50", nextBtn.disabled);
+    }
+
+    prevBtn.addEventListener("click", () => show(index - 1));
+    nextBtn.addEventListener("click", () => show(index + 1));
+    printBtn.addEventListener("click", () => window.print());
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft") show(index - 1);
+      if (e.key === "ArrowRight") show(index + 1);
+      if (e.key.toLowerCase() === "p") window.print();
+    });
+
+    show(0);
+  </script>
+</body>
+</html>

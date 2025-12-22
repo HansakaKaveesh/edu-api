@@ -156,11 +156,11 @@ function sanitize_html($html) {
 }
 
 // Persist posted values so the form can re-render with them after an error
-$postedType    = $_POST['type'] ?? 'lesson';
-$postedTitle   = $_POST['title'] ?? '';
-$postedLessonBody = $_POST['lesson_body'] ?? ''; // TinyMCE HTML (lesson)
-$postedGenericBody = $_POST['body'] ?? '';       // Generic body (non-lesson)
-$postedUrl     = $_POST['file_url'] ?? '';
+$postedType        = $_POST['type'] ?? 'lesson';
+$postedTitle       = $_POST['title'] ?? '';
+$postedLessonBody  = $_POST['lesson_body'] ?? ''; // TinyMCE HTML (lesson)
+$postedGenericBody = $_POST['body'] ?? '';        // Generic body (non-lesson)
+$postedUrl         = $_POST['file_url'] ?? '';
 $postedLessonTopic = $_POST['lesson_topic'] ?? '';
 $postedSubtopics   = isset($_POST['subtopics']) && is_array($_POST['subtopics']) ? $_POST['subtopics'] : [];
 $postedTables      = isset($_POST['table_csv']) && is_array($_POST['table_csv']) ? $_POST['table_csv'] : [];
@@ -188,17 +188,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errors[] = 'Title (Topic) is required.';
         }
 
-        // File upload: only for non-lesson types
-        if ($type !== 'lesson' && isset($_FILES['upload_file']) && is_array($_FILES['upload_file']) && $_FILES['upload_file']['error'] !== UPLOAD_ERR_NO_FILE) {
+        // File upload: optional for ALL types
+        // For lessons: allowed extensions = pdf, html
+        // For other types: pdf, mp4, html
+        if (isset($_FILES['upload_file']) && is_array($_FILES['upload_file']) && $_FILES['upload_file']['error'] !== UPLOAD_ERR_NO_FILE) {
             $fileErr = $_FILES['upload_file']['error'];
+
             if ($fileErr === UPLOAD_ERR_OK) {
                 $fileTmpPath = $_FILES['upload_file']['tmp_name'];
                 $origName    = $_FILES['upload_file']['name'];
                 $ext         = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
-                $allowedExtensions = ['pdf', 'mp4', 'html'];
+
+                if ($type === 'lesson') {
+                    $allowedExtensions = ['pdf', 'html'];
+                } else {
+                    $allowedExtensions = ['pdf', 'mp4', 'html'];
+                }
 
                 if (!in_array($ext, $allowedExtensions, true)) {
-                    $errors[] = "Invalid file type. Only PDF, MP4, and HTML allowed.";
+                    if ($type === 'lesson') {
+                        $errors[] = "Invalid file type. For lessons only PDF and HTML files are allowed.";
+                    } else {
+                        $errors[] = "Invalid file type. Only PDF, MP4, and HTML allowed.";
+                    }
                 } else {
                     $uploadFolder = __DIR__ . '/uploads/';
                     if (!is_dir($uploadFolder)) {
@@ -259,8 +271,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$errors) {
             if ($type === 'lesson') {
                 $topic = ($postedLessonTopic !== '') ? $postedLessonTopic : $title;
-                $subtopics = array_values(array_filter(array_map('trim', $postedSubtopics ?? []), 'strlen'));
-                $editorHtml = $postedLessonBody; // get TinyMCE HTML from lesson_body
+                $subtopics  = array_values(array_filter(array_map('trim', $postedSubtopics ?? []), 'strlen'));
+                $editorHtml = $postedLessonBody; // TinyMCE HTML from lesson_body
 
                 $html = '<article class="prose max-w-none">';
                 $html .= '<header>';
@@ -298,9 +310,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $html .= '</article>';
 
                 $body = sanitize_html($html);
-                $url = '';
+                // keep $url as uploaded/manual attachment (PDF/HTML)
             } else {
-                $body = trim($postedGenericBody); // use generic body for non-lessons
+                $body = trim($postedGenericBody); // for non-lessons
             }
 
             // Determine next position
@@ -320,14 +332,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $message = "✅ Content added successfully.";
                     $messageType = 'success';
                     // Clear form values after success
-                    $postedType = 'lesson';
-                    $postedTitle = '';
-                    $postedLessonBody = '';
+                    $postedType        = 'lesson';
+                    $postedTitle       = '';
+                    $postedLessonBody  = '';
                     $postedGenericBody = '';
-                    $postedUrl = '';
+                    $postedUrl         = '';
                     $postedLessonTopic = '';
-                    $postedSubtopics = [];
-                    $postedTables = [];
+                    $postedSubtopics   = [];
+                    $postedTables      = [];
                 } else {
                     $message = "❌ Database error: " . $stmt->error;
                     $messageType = 'error';
@@ -352,6 +364,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <title>Add Course Content</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link rel="icon" type="image/png" href="./images/logo.png" />
   <!-- Tiny Cloud (use your API key) -->
   <script src="https://cdn.tiny.cloud/1/g8mt75h3w9do0k4wd7m8qjf6v08bn0jr69vnqaulhphfnv8c/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
@@ -362,133 +375,342 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .prose table th{background:#f8fafc;font-weight:600}
   </style>
 </head>
-<body class="bg-gray-100 text-gray-800 min-h-screen flex items-start justify-center px-4 py-8">
+<body class="bg-slate-100 text-slate-800 min-h-screen antialiased">
   <?php include 'components/navbar.php'; ?>
 
-  <div class="w-full max-w-7xl bg-white p-8 rounded-lg shadow mt-20">
-    <h2 class="text-3xl font-bold mb-6 text-center">📘 Add Content to Course ID: <?= e($course_id) ?></h2>
-
-    <?php if ($message): ?>
-      <div class="mb-4 border px-4 py-2 rounded <?= $messageType === 'success' ? 'text-green-700 bg-green-100 border-green-200' : 'text-red-700 bg-red-100 border-red-200' ?>">
-        <?= e($message) ?>
-      </div>
-    <?php endif; ?>
-
-    <form method="POST" action="?course_id=<?= e($course_id) ?>" enctype="multipart/form-data" class="space-y-6" id="contentForm">
-      <div>
-        <label class="block font-medium mb-1">Type:</label>
-        <select name="type" id="typeSel" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-400" required>
-          <option value="lesson" <?= $postedType === 'lesson' ? 'selected' : '' ?>>Lesson (Rich HTML)</option>
-          <option value="pdf"    <?= $postedType === 'pdf' ? 'selected' : '' ?>>PDF</option>
-          <option value="video"  <?= $postedType === 'video' ? 'selected' : '' ?>>Video</option>
-          <option value="quiz"   <?= $postedType === 'quiz' ? 'selected' : '' ?>>Quiz</option>
-          <option value="forum"  <?= $postedType === 'forum' ? 'selected' : '' ?>>Forum</option>
-        </select>
-      </div>
-
-      <!-- Title/Topic -->
-      <div id="titleRow">
-        <label id="titleLabel" class="block font-medium mb-1"><?= ($postedType==='lesson' ? 'Topic:' : 'Title:') ?></label>
-        <input type="text" name="title" value="<?= e($postedTitle) ?>" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-400" />
-      </div>
-
-      <!-- LESSON BUILDER -->
-      <div id="lessonBuilder" class="<?= $postedType==='lesson' ? '' : 'hidden' ?> space-y-6">
-        <div>
-          <label class="block font-medium mb-1">Topic (overrides Title):</label>
-          <input type="text" name="lesson_topic" value="<?= e($postedLessonTopic) ?>" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-400" placeholder="e.g., Unit 1: Digital Devices" />
-        </div>
-
-        <div>
-          <div class="flex items-center justify-between">
-            <label class="block font-medium mb-1">Subtopics:</label>
-            <button type="button" id="addSubtopic" class="text-sm text-blue-600 hover:text-blue-700">+ Add subtopic</button>
+  <main class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 pt-24">
+    <!-- Hero header -->
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-500 text-white shadow-lg mb-8">
+      <div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_top,_#fff,_transparent_60%)]"></div>
+      <div class="relative p-6 sm:p-8">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+          <div class="flex items-start gap-4">
+            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/30">
+              <i class="ph ph-book-open text-2xl"></i>
+            </div>
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-[0.22em] text-blue-100">
+                Course Content Builder
+              </p>
+              <h1 class="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight">
+                Add Content to Course
+              </h1>
+              <p class="mt-1 text-sm text-blue-100/90">
+                Course ID: <span class="font-semibold">#<?= e($course_id) ?></span>
+              </p>
+              <p class="mt-2 text-xs sm:text-sm text-blue-100/90 max-w-2xl">
+                Create rich lessons with text, images, tables, and attachments, or upload PDFs, videos, quizzes, and forums for your students.
+              </p>
+            </div>
           </div>
-          <div id="subtopicsWrap" class="space-y-2">
-            <?php if ($postedSubtopics): ?>
-              <?php foreach ($postedSubtopics as $st): ?>
-                <div class="flex gap-2">
-                  <input type="text" name="subtopics[]" value="<?= e($st) ?>" class="w-full px-3 py-2 border rounded" />
-                  <button type="button" class="removeRow text-sm text-red-600 px-2">✕</button>
-                </div>
-              <?php endforeach; ?>
-            <?php else: ?>
-              <div class="flex gap-2">
-                <input type="text" name="subtopics[]" class="w-full px-3 py-2 border rounded" placeholder="Subtopic 1" />
-                <button type="button" class="removeRow text-sm text-red-600 px-2">✕</button>
+          <div class="flex flex-col items-start sm:items-end gap-3">
+            <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-[11px] font-medium uppercase tracking-[0.2em]">
+              <span class="h-1.5 w-1.5 rounded-full bg-emerald-300"></span>
+              TEACHER MODE
+            </span>
+            <a href="teacher_dashboard.php"
+               class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-blue-50 hover:bg-white/20 transition">
+              <i class="ph ph-arrow-left text-sm"></i>
+              Back to dashboard
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form card -->
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm">
+      <div class="border-b border-slate-200 px-5 py-4 flex items-center justify-between gap-3">
+        <div>
+          <h2 class="text-sm font-semibold text-slate-900 uppercase tracking-[0.18em]">
+            New Content
+          </h2>
+          <p class="mt-1 text-xs text-slate-500">
+            Fill out the fields below. Options change depending on the selected content type.
+          </p>
+        </div>
+        <div class="hidden sm:flex items-center gap-1 text-[11px] text-slate-400">
+          <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+          <span>Autosave not enabled – remember to submit</span>
+        </div>
+      </div>
+
+      <div class="px-5 py-6 sm:px-8 sm:py-8">
+        <?php if ($message): ?>
+          <div class="mb-5 rounded-xl border px-4 py-3 text-sm flex items-start gap-2
+            <?= $messageType === 'success'
+                ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                : 'border-rose-200 bg-rose-50 text-rose-800' ?>">
+            <div class="mt-0.5">
+              <i class="ph <?= $messageType === 'success' ? 'ph-check-circle' : 'ph-warning-circle' ?> text-lg"></i>
+            </div>
+            <div>
+              <?= e($message) ?>
+            </div>
+          </div>
+        <?php endif; ?>
+
+        <form method="POST"
+              action="?course_id=<?= e($course_id) ?>"
+              enctype="multipart/form-data"
+              class="space-y-8"
+              id="contentForm">
+
+          <!-- Section 1: Basic info -->
+          <section class="space-y-4">
+            <div class="flex items-center justify-between gap-2">
+              <h3 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-50 text-blue-600 text-xs font-semibold">1</span>
+                Basic information
+              </h3>
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">
+                  Content Type
+                </label>
+                <select name="type"
+                        id="typeSel"
+                        class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200/70"
+                        required>
+                  <option value="lesson" <?= $postedType === 'lesson' ? 'selected' : '' ?>>Lesson (Rich HTML)</option>
+                  <option value="pdf"    <?= $postedType === 'pdf' ? 'selected' : '' ?>>PDF</option>
+                  <option value="video"  <?= $postedType === 'video' ? 'selected' : '' ?>>Video</option>
+                  <option value="quiz"   <?= $postedType === 'quiz' ? 'selected' : '' ?>>Quiz</option>
+                  <option value="forum"  <?= $postedType === 'forum' ? 'selected' : '' ?>>Forum</option>
+                </select>
               </div>
-            <?php endif; ?>
-          </div>
-        </div>
 
-        <!-- TinyMCE Editor (name changed to lesson_body) -->
-        <div>
-          <label class="block font-medium mb-1">Content (Rich HTML with TinyMCE):</label>
-          <textarea id="editor" name="lesson_body" rows="12" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-400"><?= e($postedLessonBody) ?></textarea>
-          <p class="text-xs text-gray-500 mt-1">Use headings, sub‑headings, colors, images, tables, lists, etc. Images are uploaded to the server.</p>
-        </div>
+              <div id="titleRow">
+                <label id="titleLabel" class="block text-sm font-medium text-slate-700 mb-1">
+                  <?= ($postedType==='lesson' ? 'Topic:' : 'Title:') ?>
+                </label>
+                <input type="text"
+                       name="title"
+                       value="<?= e($postedTitle) ?>"
+                       required
+                       class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-800 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200/70" />
+              </div>
+            </div>
+          </section>
 
-        <!-- Optional CSV-to-table blocks -->
-        <div>
-          <div class="flex items-center justify-between">
-            <label class="block font-medium mb-1">Tables (CSV paste, optional):</label>
-            <button type="button" id="addTable" class="text-sm text-blue-600 hover:text-blue-700">+ Add table</button>
-          </div>
-          <div id="tablesWrap" class="space-y-3">
-            <?php if ($postedTables): ?>
-              <?php foreach ($postedTables as $csv): ?>
-                <div class="flex gap-2 items-start">
-                  <textarea name="table_csv[]" rows="4" class="w-full px-3 py-2 border rounded" placeholder="col1,col2
+          <!-- Section 2: Lesson Builder -->
+          <section id="lessonBuilder" class="<?= $postedType==='lesson' ? '' : 'hidden' ?> space-y-6 border-t border-slate-100 pt-6">
+            <div class="flex items-center justify-between gap-2">
+              <h3 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 text-xs font-semibold">2</span>
+                Lesson builder
+              </h3>
+              <p class="text-xs text-slate-500">
+                Design a rich lesson page with structure, text, tables, and images.
+              </p>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">
+                  Topic (overrides Title)
+                </label>
+                <input type="text"
+                       name="lesson_topic"
+                       value="<?= e($postedLessonTopic) ?>"
+                       class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-800 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200/70"
+                       placeholder="e.g., Unit 1: Digital Devices" />
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between">
+                  <label class="block text-sm font-medium text-slate-700 mb-1">
+                    Subtopics
+                  </label>
+                  <button type="button"
+                          id="addSubtopic"
+                          class="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700">
+                    <i class="ph ph-plus-circle text-sm"></i> Add subtopic
+                  </button>
+                </div>
+                <div id="subtopicsWrap" class="mt-1 space-y-2">
+                  <?php if ($postedSubtopics): ?>
+                    <?php foreach ($postedSubtopics as $st): ?>
+                      <div class="flex gap-2">
+                        <input type="text"
+                               name="subtopics[]"
+                               value="<?= e($st) ?>"
+                               class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200/70" />
+                        <button type="button"
+                                class="removeRow inline-flex items-center justify-center rounded-lg border border-transparent px-2 text-xs text-rose-600 hover:bg-rose-50">
+                          ✕
+                        </button>
+                      </div>
+                    <?php endforeach; ?>
+                  <?php else: ?>
+                    <div class="flex gap-2">
+                      <input type="text"
+                             name="subtopics[]"
+                             class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200/70"
+                             placeholder="Subtopic 1" />
+                      <button type="button"
+                              class="removeRow inline-flex items-center justify-center rounded-lg border border-transparent px-2 text-xs text-rose-600 hover:bg-rose-50">
+                        ✕
+                      </button>
+                    </div>
+                  <?php endif; ?>
+                </div>
+              </div>
+            </div>
+
+            <!-- TinyMCE Editor -->
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">
+                Content (Rich HTML with TinyMCE)
+              </label>
+              <div class="rounded-xl border border-slate-200 bg-slate-50/60 p-2">
+                <textarea id="editor"
+                          name="lesson_body"
+                          rows="12"
+                          class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none">
+<?= e($postedLessonBody) ?></textarea>
+              </div>
+              <p class="mt-1 text-xs text-slate-500">
+                Use headings, colors, code blocks, images, and tables. Images uploaded here are stored on the server.
+              </p>
+            </div>
+
+            <!-- Optional CSV-to-table blocks -->
+            <div>
+              <div class="flex items-center justify-between">
+                <label class="block text-sm font-medium text-slate-700 mb-1">
+                  Tables (CSV paste, optional)
+                </label>
+                <button type="button"
+                        id="addTable"
+                        class="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700">
+                  <i class="ph ph-plus-circle text-sm"></i> Add table
+                </button>
+              </div>
+              <div id="tablesWrap" class="mt-2 space-y-3">
+                <?php if ($postedTables): ?>
+                  <?php foreach ($postedTables as $csv): ?>
+                    <div class="flex gap-2 items-start">
+                      <textarea name="table_csv[]"
+                                rows="4"
+                                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200/70"
+                                placeholder="col1,col2
 val1,val2"><?= e($csv) ?></textarea>
-                  <button type="button" class="removeBlock text-sm text-red-600 px-2 mt-2">✕</button>
-                </div>
-              <?php endforeach; ?>
-            <?php else: ?>
-              <div class="flex gap-2 items-start">
-                <textarea name="table_csv[]" rows="4" class="w-full px-3 py-2 border rounded" placeholder="col1,col2
+                      <button type="button"
+                              class="removeBlock mt-1 inline-flex items-center justify-center rounded-lg border border-transparent px-2 text-xs text-rose-600 hover:bg-rose-50">
+                        ✕
+                      </button>
+                    </div>
+                  <?php endforeach; ?>
+                <?php else: ?>
+                  <div class="flex gap-2 items-start">
+                    <textarea name="table_csv[]"
+                              rows="4"
+                              class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200/70"
+                              placeholder="col1,col2
 val1,val2"></textarea>
-                <button type="button" class="removeBlock text-sm text-red-600 px-2 mt-2">✕</button>
+                    <button type="button"
+                            class="removeBlock mt-1 inline-flex items-center justify-center rounded-lg border border-transparent px-2 text-xs text-rose-600 hover:bg-rose-50">
+                      ✕
+                    </button>
+                  </div>
+                <?php endif; ?>
               </div>
-            <?php endif; ?>
+              <p class="mt-1 text-xs text-slate-500">
+                Tip: you can also insert tables directly inside the editor (<span class="font-semibold">Insert → Table</span>).
+              </p>
+            </div>
+
+            <!-- Optional additional images (outside editor) -->
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">
+                Extra Images (optional gallery)
+              </label>
+              <input type="file"
+                     name="lesson_images[]"
+                     multiple
+                     accept=".jpg,.jpeg,.png,.gif,.webp,image/*"
+                     class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200/70" />
+              <p class="mt-1 text-xs text-slate-500">
+                These images will appear as a gallery below your lesson. For inline images, use the editor’s <span class="font-semibold">Insert → Image</span>.
+              </p>
+            </div>
+          </section>
+
+          <!-- Section 3: Body for non-lesson types -->
+          <section id="genericBody"
+                   class="<?= $postedType==='lesson' ? 'hidden' : '' ?> space-y-3 border-t border-slate-100 pt-6">
+            <div class="flex items-center justify-between gap-2">
+              <h3 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-sky-50 text-sky-600 text-xs font-semibold">2</span>
+                Description / Body
+              </h3>
+              <p class="text-xs text-slate-500">
+                Optional description shown before the file, quiz, or forum.
+              </p>
+            </div>
+            <textarea name="body"
+                      rows="5"
+                      class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-800 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200/70"><?= e($postedGenericBody) ?></textarea>
+          </section>
+
+          <!-- Section 4: Links & files (all types) -->
+          <section class="space-y-4 border-t border-slate-100 pt-6">
+            <div class="flex items-center justify-between gap-2">
+              <h3 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 text-xs font-semibold">3</span>
+                Links & Attachments
+              </h3>
+            </div>
+
+            <!-- Manual URL -->
+            <div id="manualUrl">
+              <label class="block text-sm font-medium text-slate-700 mb-1">
+                Manual URL (optional)
+              </label>
+              <input type="text"
+                     name="file_url"
+                     value="<?= e($postedUrl) ?>"
+                     class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-800 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200/70"
+                     placeholder="https://example.com/resource" />
+              <p class="mt-1 text-xs text-slate-500">
+                Use this for external resources (YouTube, external PDFs, interactive pages, etc.).
+              </p>
+            </div>
+
+            <!-- File upload (ALL types) -->
+            <div id="fileUpload" class="pt-1">
+              <label id="fileUploadLabel" class="block text-sm font-medium text-slate-700 mb-1">
+                Upload File (PDF, Video, or HTML)
+              </label>
+              <input type="hidden" name="MAX_FILE_SIZE" value="220200960" />
+              <input
+                type="file"
+                name="upload_file"
+                id="uploadFileInput"
+                accept=".pdf,.mp4,.html,text/html,application/pdf,video/mp4"
+                class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-800 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200/70"
+              />
+              <p id="fileUploadHelp" class="mt-1 text-xs text-slate-500">
+                For lessons: PDF or HTML attachments only. For other types: PDF, MP4, or HTML files.
+              </p>
+            </div>
+          </section>
+
+          <!-- Submit -->
+          <div class="pt-4 border-t border-slate-100 flex justify-center">
+            <button type="submit"
+                    class="inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-white">
+              <i class="ph ph-upload-simple text-lg"></i>
+              Upload Content
+            </button>
           </div>
-          <p class="text-xs text-gray-500">Tip: You can also insert tables directly inside the editor (Insert → Table).</p>
-        </div>
-
-        <!-- Optional additional images (outside editor) -->
-        <div>
-          <label class="block font-medium mb-1">Extra Images (optional):</label>
-          <input type="file" name="lesson_images[]" multiple accept=".jpg,.jpeg,.png,.gif,.webp,image/*" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-400" />
-          <p class="text-xs text-gray-500 mt-1">These will be displayed as a gallery below your content. For inline images, use the editor’s Insert → Image.</p>
-        </div>
+        </form>
       </div>
-
-      <!-- Generic body (for non-lesson types) -->
-      <div id="genericBody" class="<?= $postedType==='lesson' ? 'hidden' : '' ?>">
-        <label class="block font-medium mb-1">Body (description or text):</label>
-        <textarea name="body" rows="5" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-400"><?= e($postedGenericBody) ?></textarea>
-      </div>
-
-      <!-- Manual URL (all types) -->
-      <div id="manualUrl">
-        <label class="block font-medium mb-1">Manual URL (optional):</label>
-        <input type="text" name="file_url" value="<?= e($postedUrl) ?>" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-400" />
-      </div>
-
-      <!-- File upload (non-lesson) -->
-      <div id="fileUpload" class="<?= $postedType==='lesson' ? 'hidden' : '' ?>">
-        <label class="block font-medium mb-1">Upload File (PDF, Video, or HTML):</label>
-        <input type="hidden" name="MAX_FILE_SIZE" value="220200960" />
-        <input type="file" name="upload_file" accept=".pdf,.mp4,.html,text/html,application/pdf,video/mp4" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-400" />
-        <p class="text-sm text-gray-500 mt-1">Allowed types: .pdf, .mp4, .html</p>
-      </div>
-
-      <div class="text-center">
-        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 shadow">
-          📤 Upload Content
-        </button>
-      </div>
-    </form>
-  </div>
+    </div>
+  </main>
 
 <script>
   // Initialize TinyMCE (Tiny Cloud)
@@ -497,7 +719,9 @@ val1,val2"></textarea>
     height: 480,
     menubar: 'file edit view insert format tools table',
     plugins: 'lists link image table code codesample advlist charmap hr paste wordcount autolink quickbars',
-    toolbar: 'undo redo | blocks fontsize | bold italic underline forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | table link image | removeformat | code',
+    toolbar: 'undo redo | blocks fontsize | bold italic underline forecolor backcolor | ' +
+             'alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | ' +
+             'table link image | removeformat | code',
     toolbar_mode: 'sliding',
     quickbars_selection_toolbar: 'bold italic | quicklink h2 h3 | forecolor backcolor',
     image_caption: true,
@@ -506,25 +730,48 @@ val1,val2"></textarea>
     images_file_types: 'jpg,jpeg,png,gif,webp',
     paste_data_images: true,
     images_upload_credentials: true,
-    content_style: 'body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial; font-size:16px; line-height:1.65;} img{max-width:100%; height:auto;} table{border-collapse:collapse;} th,td{border:1px solid #e5e7eb; padding:6px;} th{background:#f8fafc;}'
+    content_style:
+      'body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial; font-size:16px; line-height:1.65;}' +
+      'img{max-width:100%; height:auto;}' +
+      'table{border-collapse:collapse;}' +
+      'th,td{border:1px solid #e5e7eb; padding:6px;}' +
+      'th{background:#f8fafc;}'
   });
 
-  const form = document.getElementById('contentForm');
-  const typeSel = document.getElementById('typeSel');
-  const lessonBuilder = document.getElementById('lessonBuilder');
-  const genericBody = document.getElementById('genericBody');
-  const fileUpload = document.getElementById('fileUpload');
-  const titleLabel = document.getElementById('titleLabel');
+  const form            = document.getElementById('contentForm');
+  const typeSel         = document.getElementById('typeSel');
+  const lessonBuilder   = document.getElementById('lessonBuilder');
+  const genericBody     = document.getElementById('genericBody');
+  const titleLabel      = document.getElementById('titleLabel');
+  const fileUploadLabel = document.getElementById('fileUploadLabel');
+  const fileUploadHelp  = document.getElementById('fileUploadHelp');
+  const fileInput       = document.getElementById('uploadFileInput');
 
   function toggleMode() {
     const isLesson = typeSel.value === 'lesson';
+
     lessonBuilder.classList.toggle('hidden', !isLesson);
     genericBody.classList.toggle('hidden', isLesson);
-    fileUpload.classList.toggle('hidden', isLesson);
+
     titleLabel.textContent = isLesson ? 'Topic:' : 'Title:';
+
+    if (isLesson) {
+      fileUploadLabel.textContent = 'Upload Attachment (PDF or HTML, optional)';
+      fileUploadHelp.textContent  = 'For lessons you can attach a PDF or HTML handout. For videos, choose the "Video" content type instead.';
+      if (fileInput) {
+        fileInput.accept = '.pdf,.html,text/html,application/pdf';
+      }
+    } else {
+      fileUploadLabel.textContent = 'Upload File (PDF, Video, or HTML)';
+      fileUploadHelp.textContent  = 'Allowed types: .pdf, .mp4, .html';
+      if (fileInput) {
+        fileInput.accept = '.pdf,.mp4,.html,text/html,application/pdf,video/mp4';
+      }
+    }
   }
+
   typeSel.addEventListener('change', toggleMode);
-  toggleMode();
+  toggleMode(); // initial
 
   // Ensure TinyMCE pushes content back into the textarea before submit
   form.addEventListener('submit', () => {
@@ -538,10 +785,14 @@ val1,val2"></textarea>
   document.getElementById('addSubtopic').addEventListener('click', () => {
     const row = document.createElement('div');
     row.className = 'flex gap-2 mt-2';
-    row.innerHTML = '<input type="text" name="subtopics[]" class="w-full px-3 py-2 border rounded" placeholder="Another subtopic" />' +
-                    '<button type="button" class="removeRow text-sm text-red-600 px-2">✕</button>';
+    row.innerHTML =
+      '<input type="text" name="subtopics[]" ' +
+      'class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200/70" ' +
+      'placeholder="Another subtopic" />' +
+      '<button type="button" class="removeRow inline-flex items-center justify-center rounded-lg border border-transparent px-2 text-xs text-rose-600 hover:bg-rose-50">✕</button>';
     subtopicsWrap.appendChild(row);
   });
+
   subtopicsWrap.addEventListener('click', (e) => {
     if (e.target.classList.contains('removeRow')) {
       e.target.closest('div').remove();
@@ -553,10 +804,14 @@ val1,val2"></textarea>
   document.getElementById('addTable').addEventListener('click', () => {
     const block = document.createElement('div');
     block.className = 'flex gap-2 items-start';
-    block.innerHTML = '<textarea name="table_csv[]" rows="4" class="w-full px-3 py-2 border rounded" placeholder="col1,col2\nval1,val2"></textarea>' +
-                      '<button type="button" class="removeBlock text-sm text-red-600 px-2 mt-2">✕</button>';
+    block.innerHTML =
+      '<textarea name="table_csv[]" rows="4" ' +
+      'class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200/70" ' +
+      'placeholder="col1,col2\nval1,val2"></textarea>' +
+      '<button type="button" class="removeBlock mt-1 inline-flex items-center justify-center rounded-lg border border-transparent px-2 text-xs text-rose-600 hover:bg-rose-50">✕</button>';
     tablesWrap.appendChild(block);
   });
+
   tablesWrap.addEventListener('click', (e) => {
     if (e.target.classList.contains('removeBlock')) {
       e.target.closest('div').remove();
