@@ -226,6 +226,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 autocomplete="current-password"
                 class="w-full pl-10 pr-12 py-3 rounded-xl border border-blue-900/10 bg-white/70 backdrop-blur placeholder:text-blue-900/40 text-blue-900 shadow-inner focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition"
                 placeholder="Password"
+                onpaste="return false;"
+                ondrop="return false;"
               />
               <button type="button" onclick="togglePassword()" class="absolute right-3 top-1/2 -translate-y-1/2 text-blue-900/50 hover:text-blue-900/80 transition" aria-label="Toggle password visibility">
                 <!-- eye icon -->
@@ -277,6 +279,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       input.type = isPass ? 'text' : 'password';
       eye.setAttribute('fill', isPass ? '#1f2937' : '#111827');
     }
+
     function handleSubmit(form) {
       const btn = document.getElementById('loginButton');
       btn.disabled = true;
@@ -284,6 +287,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       btn.innerHTML = '<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-30" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg><span class="ml-2">Signing in...</span>';
       return true;
     }
+
+    // Extra protection: disable paste & drop into password field via JS
+    document.addEventListener('DOMContentLoaded', () => {
+      const pwd = document.getElementById('password');
+      if (!pwd) return;
+      pwd.addEventListener('paste', e => e.preventDefault());
+      pwd.addEventListener('drop', e => e.preventDefault());
+    });
   </script>
 </body>
 </html>
