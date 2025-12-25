@@ -70,6 +70,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['use
                 $stmt->execute();
                 $stmt->close();
             }
+            // NEW: delete from course_coordinators
+            if ($stmt = $conn->prepare("DELETE FROM course_coordinators WHERE user_id = ?")) {
+                $stmt->bind_param("i", $user_id);
+                $stmt->execute();
+                $stmt->close();
+            }
             if ($stmt = $conn->prepare("DELETE FROM users WHERE user_id = ?")) {
                 $stmt->bind_param("i", $user_id);
                 $stmt->execute();
@@ -90,20 +96,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['use
     exit;
 }
 
-// Fetch users with joined role info (added accountants as 'ac')
+// Fetch users with joined role info (added accountants as 'ac', coordinators as 'cc')
 $query = $conn->query("
     SELECT 
         u.user_id, u.username, u.role, u.status, u.created_at,
-        COALESCE(s.first_name, t.first_name, a.first_name, c.first_name, ac.first_name) AS first_name,
-        COALESCE(s.last_name, t.last_name, a.last_name, c.last_name, ac.last_name) AS last_name,
-        COALESCE(s.email, t.email, a.email, c.email, ac.email) AS email,
-        COALESCE(s.contact_number, a.contact_number, c.contact_number, ac.contact_number) AS contact_number
+        COALESCE(
+            s.first_name, t.first_name, a.first_name,
+            c.first_name, ac.first_name, cc.first_name
+        ) AS first_name,
+        COALESCE(
+            s.last_name, t.last_name, a.last_name,
+            c.last_name, ac.last_name, cc.last_name
+        ) AS last_name,
+        COALESCE(
+            s.email, t.email, a.email,
+            c.email, ac.email, cc.email
+        ) AS email,
+        COALESCE(
+            s.contact_number, a.contact_number,
+            c.contact_number, ac.contact_number
+        ) AS contact_number
     FROM users u
     LEFT JOIN students s ON u.user_id = s.user_id
     LEFT JOIN teachers t ON u.user_id = t.user_id
     LEFT JOIN admins a ON u.user_id = a.user_id
     LEFT JOIN ceo c ON u.user_id = c.user_id
     LEFT JOIN accountants ac ON u.user_id = ac.user_id
+    LEFT JOIN course_coordinators cc ON u.user_id = cc.user_id
     ORDER BY u.created_at DESC
 ");
 ?>
@@ -247,6 +266,7 @@ $query = $conn->query("
               <option value="student">Student</option>
               <option value="ceo">CEO</option>
               <option value="accountant">Accountant</option>
+              <option value="coordinator">Coordinator</option>
             </select>
           </div>
           <div class="flex gap-2">
@@ -255,8 +275,8 @@ $query = $conn->query("
                     aria-label="Filter by status">
               <option value="">All statuses</option>
               <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
               <option value="suspended">Suspended</option>
-              <option value="pending">Pending</option>
             </select>
             <button id="clearFilters"
                     class="hidden md:inline-flex items-center gap-1.5 px-2.5 py-2 rounded-lg border border-slate-200 text-[11px] sm:text-xs text-slate-600 hover:bg-slate-50"
@@ -304,14 +324,25 @@ $query = $conn->query("
                 elseif ($role === 'student')   { $roleBadge = 'bg-emerald-100 text-emerald-700'; $roleIcon = 'fa-user-graduate'; }
                 elseif ($role === 'ceo')       { $roleBadge = 'bg-blue-100 text-blue-700';       $roleIcon = 'fa-user-tie'; }
                 elseif ($role === 'accountant'){ $roleBadge = 'bg-cyan-100 text-cyan-700';       $roleIcon = 'fa-calculator'; }
+                elseif ($role === 'coordinator'){ $roleBadge = 'bg-fuchsia-100 text-fuchsia-700'; $roleIcon = 'fa-user-gear'; }
 
                 $statusBadge = 'bg-gray-100 text-gray-700';
                 $statusIcon  = 'fa-circle-question';
-                if ($status === 'active')      { $statusBadge = 'bg-emerald-100 text-emerald-700'; $statusIcon = 'fa-circle-check'; }
-                elseif ($status === 'suspended'){ $statusBadge = 'bg-amber-100 text-amber-700';    $statusIcon = 'fa-ban'; }
-                elseif ($status === 'pending')  { $statusBadge = 'bg-slate-100 text-slate-700';    $statusIcon = 'fa-hourglass-half'; }
-                elseif ($status && !in_array($status, ['active','suspended','pending'])) {
-                  $statusBadge = 'bg-red-100 text-red-700'; $statusIcon = 'fa-triangle-exclamation';
+                if ($status === 'active') {
+                    $statusBadge = 'bg-emerald-100 text-emerald-700'; 
+                    $statusIcon = 'fa-circle-check';
+                } elseif ($status === 'suspended') {
+                    $statusBadge = 'bg-amber-100 text-amber-700';    
+                    $statusIcon = 'fa-ban';
+                } elseif ($status === 'inactive') {
+                    $statusBadge = 'bg-slate-100 text-slate-700';
+                    $statusIcon = 'fa-circle-minus';
+                } elseif ($status === 'pending') { // legacy support if it still exists
+                    $statusBadge = 'bg-slate-100 text-slate-700';
+                    $statusIcon = 'fa-hourglass-half';
+                } elseif ($status && !in_array($status, ['active','inactive','suspended','pending'])) {
+                    $statusBadge = 'bg-red-100 text-red-700'; 
+                    $statusIcon = 'fa-triangle-exclamation';
                 }
 
                 $createdFmt = !empty($user['created_at']) ? date('M j, Y', strtotime($user['created_at'])) : '';
@@ -490,6 +521,7 @@ $query = $conn->query("
               <option value="student">Student</option>
               <option value="ceo">CEO</option>
               <option value="accountant">Accountant</option>
+              <option value="coordinator">Coordinator</option>
             </select>
           </div>
 
@@ -497,8 +529,8 @@ $query = $conn->query("
             <label class="block text-[11px] font-medium text-slate-700 uppercase tracking-wide">Status</label>
             <select name="status"
                     class="mt-0.5 w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.75 text-sm shadow-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-300">
-              <option value="pending">Pending</option>
               <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
               <option value="suspended">Suspended</option>
             </select>
           </div>

@@ -21,39 +21,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Trim inputs and sanitize
-    $username = trim($_POST['username'] ?? '');
-    $role = $_POST['role'] ?? '';
-    $status = $_POST['status'] ?? 'active';
-
-    $first_name = trim($_POST['first_name'] ?? '');
-    $last_name = trim($_POST['last_name'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $contact_number = trim($_POST['contact_number'] ?? '');
-    $dob = $_POST['dob'] ?? null;
+    $username        = trim($_POST['username'] ?? '');
+    $role            = $_POST['role'] ?? '';
+    $status          = $_POST['status'] ?? 'active';
+    $first_name      = trim($_POST['first_name'] ?? '');
+    $last_name       = trim($_POST['last_name'] ?? '');
+    $email           = trim($_POST['email'] ?? '');
+    $contact_number  = trim($_POST['contact_number'] ?? '');
+    $dob             = $_POST['dob'] ?? null;
+    if ($dob === '') $dob = null;
 
     $password = (string)($_POST['password'] ?? '');
 
     // Normalize, allowed values
-    $allowedRoles = ['student', 'teacher', 'admin', 'ceo', 'accountant']; // extended
-    $allowedStatuses = ['active', 'pending', 'suspended'];
+    $allowedRoles    = ['student', 'teacher', 'admin', 'ceo', 'accountant', 'coordinator'];
+    $allowedStatuses = ['active', 'inactive', 'suspended'];
 
-    // If "inactive" comes from older UI, map it safely
-    if ($status === 'inactive') $status = 'suspended';
+    // Backward compatibility for older UIs
+    if ($status === 'pending') {
+        $status = 'inactive';
+    }
 
     // Validation
-    if ($username === '') $errors[] = "Username is required.";
-    elseif (!preg_match('/^[A-Za-z0-9_.-]{3,32}$/', $username)) $errors[] = "Username must be 3–32 chars (letters, numbers, _ . -).";
+    if ($username === '') {
+        $errors[] = "Username is required.";
+    } elseif (!preg_match('/^[A-Za-z0-9_.-]{3,32}$/', $username)) {
+        $errors[] = "Username must be 3–32 chars (letters, numbers, _ . -).";
+    }
 
-    if (!in_array($role, $allowedRoles, true)) $errors[] = "Invalid role selected.";
-    if ($first_name === '') $errors[] = "First name is required.";
-    if ($last_name === '') $errors[] = "Last name is required.";
-    if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "Valid email is required.";
-    if ($role === 'student' && !$dob) $errors[] = "Date of birth is required for students.";
+    if (!in_array($role, $allowedRoles, true)) {
+        $errors[] = "Invalid role selected.";
+    }
+
+    if ($first_name === '') {
+        $errors[] = "First name is required.";
+    }
+
+    if ($last_name === '') {
+        $errors[] = "Last name is required.";
+    }
+
+    if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = "Valid email is required.";
+    }
+
+    if ($role === 'student' && !$dob) {
+        $errors[] = "Date of birth is required for students.";
+    }
 
     $minLen = 8; // recommend 12+ in policy
-    if ($password === '' || strlen($password) < $minLen) $errors[] = "Password is required (min {$minLen} characters).";
+    if ($password === '' || strlen($password) < $minLen) {
+        $errors[] = "Password is required (min {$minLen} characters).";
+    }
 
-    if (!in_array($status, $allowedStatuses, true)) $errors[] = "Invalid status.";
+    if (!in_array($status, $allowedStatuses, true)) {
+        $errors[] = "Invalid status.";
+    }
 
     // Check username uniqueness
     if (empty($errors)) {
@@ -103,28 +126,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Insert into role-specific table
             if ($role === 'student') {
-                $stmt = $conn->prepare("INSERT INTO students (user_id, first_name, last_name, dob, contact_number, email) VALUES (?, ?, ?, ?, ?, ?)");
+                $stmt = $conn->prepare("
+                    INSERT INTO students (user_id, first_name, last_name, dob, contact_number, email)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                ");
                 $stmt->bind_param("isssss", $user_id, $first_name, $last_name, $dob, $contact_number, $email);
                 $stmt->execute();
                 $stmt->close();
+
             } elseif ($role === 'teacher') {
-                $stmt = $conn->prepare("INSERT INTO teachers (user_id, first_name, last_name, email) VALUES (?, ?, ?, ?)");
+                $stmt = $conn->prepare("
+                    INSERT INTO teachers (user_id, first_name, last_name, email)
+                    VALUES (?, ?, ?, ?)
+                ");
                 $stmt->bind_param("isss", $user_id, $first_name, $last_name, $email);
                 $stmt->execute();
                 $stmt->close();
+
             } elseif ($role === 'admin') {
-                $stmt = $conn->prepare("INSERT INTO admins (user_id, first_name, last_name, email, contact_number) VALUES (?, ?, ?, ?, ?)");
+                $stmt = $conn->prepare("
+                    INSERT INTO admins (user_id, first_name, last_name, email, contact_number)
+                    VALUES (?, ?, ?, ?, ?)
+                ");
                 $stmt->bind_param("issss", $user_id, $first_name, $last_name, $email, $contact_number);
                 $stmt->execute();
                 $stmt->close();
+
             } elseif ($role === 'ceo') {
-                $stmt = $conn->prepare("INSERT INTO ceo (user_id, first_name, last_name, email, contact_number) VALUES (?, ?, ?, ?, ?)");
+                $stmt = $conn->prepare("
+                    INSERT INTO ceo (user_id, first_name, last_name, email, contact_number)
+                    VALUES (?, ?, ?, ?, ?)
+                ");
                 $stmt->bind_param("issss", $user_id, $first_name, $last_name, $email, $contact_number);
                 $stmt->execute();
                 $stmt->close();
+
             } elseif ($role === 'accountant') {
-                $stmt = $conn->prepare("INSERT INTO accountants (user_id, first_name, last_name, email, contact_number) VALUES (?, ?, ?, ?, ?)");
+                $stmt = $conn->prepare("
+                    INSERT INTO accountants (user_id, first_name, last_name, email, contact_number)
+                    VALUES (?, ?, ?, ?, ?)
+                ");
                 $stmt->bind_param("issss", $user_id, $first_name, $last_name, $email, $contact_number);
+                $stmt->execute();
+                $stmt->close();
+
+            } elseif ($role === 'coordinator') {
+                // NEW: course coordinators table
+                $stmt = $conn->prepare("
+                    INSERT INTO course_coordinators (user_id, first_name, last_name, email)
+                    VALUES (?, ?, ?, ?)
+                ");
+                $stmt->bind_param("isss", $user_id, $first_name, $last_name, $email);
                 $stmt->execute();
                 $stmt->close();
             }
@@ -143,7 +195,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -187,20 +238,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <label for="role" class="block mb-1 font-medium">Role *</label>
             <select id="role" name="role" onchange="onRoleChange()" required
                     class="w-full border rounded px-3 py-2">
-                <option value="student" <?= (($_POST['role'] ?? '') === 'student') ? 'selected' : '' ?>>Student</option>
-                <option value="teacher" <?= (($_POST['role'] ?? '') === 'teacher') ? 'selected' : '' ?>>Teacher</option>
-                <option value="admin" <?= (($_POST['role'] ?? '') === 'admin') ? 'selected' : '' ?>>Admin</option>
-                <option value="ceo" <?= (($_POST['role'] ?? '') === 'ceo') ? 'selected' : '' ?>>CEO</option>
+                <option value="student"    <?= (($_POST['role'] ?? '') === 'student')    ? 'selected' : '' ?>>Student</option>
+                <option value="teacher"    <?= (($_POST['role'] ?? '') === 'teacher')    ? 'selected' : '' ?>>Teacher</option>
+                <option value="admin"      <?= (($_POST['role'] ?? '') === 'admin')      ? 'selected' : '' ?>>Admin</option>
+                <option value="ceo"        <?= (($_POST['role'] ?? '') === 'ceo')        ? 'selected' : '' ?>>CEO</option>
                 <option value="accountant" <?= (($_POST['role'] ?? '') === 'accountant') ? 'selected' : '' ?>>Accountant</option>
+                <option value="coordinator" <?= (($_POST['role'] ?? '') === 'coordinator') ? 'selected' : '' ?>>Coordinator</option>
             </select>
         </div>
 
+        <?php $statusPost = $_POST['status'] ?? 'active'; ?>
         <div>
             <label for="status" class="block mb-1 font-medium">Status *</label>
             <select id="status" name="status" required class="w-full border rounded px-3 py-2">
-                <option value="active" <?= (($_POST['status'] ?? '') === 'active') ? 'selected' : '' ?>>Active</option>
-                <option value="pending" <?= (($_POST['status'] ?? '') === 'pending') ? 'selected' : '' ?>>Pending</option>
-                <option value="suspended" <?= (($_POST['status'] ?? '') === 'suspended') ? 'selected' : '' ?>>Suspended</option>
+                <option value="active"    <?= ($statusPost === 'active')    ? 'selected' : '' ?>>Active</option>
+                <option value="inactive"  <?= ($statusPost === 'inactive' || $statusPost === 'pending') ? 'selected' : '' ?>>Inactive</option>
+                <option value="suspended" <?= ($statusPost === 'suspended') ? 'selected' : '' ?>>Suspended</option>
             </select>
         </div>
 

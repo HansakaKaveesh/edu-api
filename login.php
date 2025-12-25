@@ -19,7 +19,7 @@ $usingHttps = (
 );
 
 session_set_cookie_params([
-  'lifetime' => 0,
+  'lifetime' => 0,       // session cookie (browser session)
   'path'     => '/',
   'domain'   => '',
   'secure'   => $usingHttps,
@@ -30,6 +30,75 @@ session_set_cookie_params([
 session_start();
 
 $error = "";
+
+/* ---------- Helper: redirect based on role ---------- */
+function redirect_by_role(string $role): void {
+  switch ($role) {
+    case 'admin':
+      header('Location: admin_dashboard.php');
+      exit;
+    case 'teacher':
+      header('Location: teacher_dashboard.php');
+      exit;
+    case 'student':
+      header('Location: student_dashboard.php');
+      exit;
+    default:
+      return;
+  }
+}
+
+/* ---------- Auto-login from remember-me cookie (if not POST) ---------- */
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' && empty($_SESSION['user_id']) && !empty($_COOKIE['remember_me'])) {
+  $raw = $_COOKIE['remember_me'];
+
+  if (strpos($raw, ':') !== false) {
+    [$selector, $validator] = explode(':', $raw, 2);
+
+    $stmt = $conn->prepare(
+      "SELECT urt.user_id, urt.token_hash, UNIX_TIMESTAMP(urt.expires_at) AS exp, u.role
+         FROM user_remember_tokens urt
+         JOIN users u ON urt.user_id = u.user_id
+        WHERE urt.selector = ?"
+    );
+
+    if ($stmt) {
+      $stmt->bind_param('s', $selector);
+      $stmt->execute();
+      $stmt->bind_result($uid, $tokenHash, $expiresAt, $role);
+      $foundToken = $stmt->fetch();
+      $stmt->close();
+
+      if ($foundToken && $expiresAt >= time()) {
+        $calcHash = hash('sha256', $validator);
+        if (hash_equals($tokenHash, $calcHash)) {
+          // Valid remember‑me token → log user in
+          session_regenerate_id(true);
+          $_SESSION['user_id']   = $uid;
+          $_SESSION['role']      = $role;
+          $_SESSION['last_auth'] = time();
+
+          redirect_by_role($role);
+        }
+      }
+    }
+
+    // If token invalid/expired → clear cookie
+    setcookie('remember_me', '', [
+      'expires'  => time() - 3600,
+      'path'     => '/',
+      'domain'   => '',
+      'secure'   => $usingHttps,
+      'httponly' => true,
+      'samesite' => 'Lax',
+    ]);
+  }
+}
+
+/* ---------- If already logged in (via normal session) redirect ---------- */
+if (!empty($_SESSION['user_id']) && !empty($_SESSION['role'])) {
+  redirect_by_role($_SESSION['role']);
+}
 
 /* ---------- CSRF token ---------- */
 if (empty($_SESSION['csrf_token'])) {
@@ -47,7 +116,7 @@ if (!isset($_SESSION[$rateKey])) {
   $_SESSION[$rateKey] = ['count' => 0, 'first' => time()];
 }
 
-/* ---------- Handle POST ---------- */
+/* ---------- Handle POST (login attempt) ---------- */
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   // CSRF validation
   $postedToken = $_POST['csrf_token'] ?? '';
@@ -65,6 +134,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       $username = trim($_POST['username'] ?? '');
       $username = mb_substr($username, 0, 150); // sanity limit
       $password = $_POST['password'] ?? '';
+      $remember = !empty($_POST['remember']);   // true if "Remember me" checked
 
       $stmt = $conn->prepare(
         "SELECT u.user_id, u.role, p.password_hash
@@ -74,7 +144,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       );
 
       if ($stmt === false) {
-        // Do not leak DB errors to users
         error_log('Login prepare failed: ' . $conn->error);
         $error = "❌ Something went wrong. Please try again.";
       } else {
@@ -86,7 +155,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $stmt->close();
 
         // Constant-time style verification to reduce username enumeration
-        // Static bcrypt of the string "dummy_password"
         $dummyHash = '$2y$10$KIX/CR0iYc6eZ/EuKQGhFeD69L0/MO6c.pwSdN1JPBUuJIUl0P8y6';
         $verified = password_verify($password, $found ? $hash : $dummyHash);
 
@@ -97,12 +165,55 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           $_SESSION['last_auth'] = time();
           unset($_SESSION[$rateKey]); // reset attempts
 
-          switch ($role) {
-            case 'admin':   header("Location: admin_dashboard.php");   exit;
-            case 'teacher': header("Location: teacher_dashboard.php"); exit;
-            case 'student': header("Location: student_dashboard.php"); exit;
-            default:        $error = "❌ Unknown role.";
+          /* ---------- Handle remember-me token ---------- */
+          if ($remember) {
+            // (Optional) clear old tokens for this user
+            $del = $conn->prepare("DELETE FROM user_remember_tokens WHERE user_id = ?");
+            if ($del) {
+              $del->bind_param('i', $user_id);
+              $del->execute();
+              $del->close();
+            }
+
+            $selector  = bin2hex(random_bytes(9));   // 18 chars
+            $validator = bin2hex(random_bytes(32));  // 64 chars
+            $tokenHash = hash('sha256', $validator);
+            $expires   = time() + 60 * 60 * 24 * 30; // 30 days
+
+            $ins = $conn->prepare(
+              "INSERT INTO user_remember_tokens (user_id, selector, token_hash, expires_at)
+               VALUES (?, ?, ?, FROM_UNIXTIME(?))"
+            );
+            if ($ins) {
+              $ins->bind_param('issi', $user_id, $selector, $tokenHash, $expires);
+              $ins->execute();
+              $ins->close();
+
+              $cookieValue = $selector . ':' . $validator;
+              setcookie('remember_me', $cookieValue, [
+                'expires'  => $expires,
+                'path'     => '/',
+                'domain'   => '',
+                'secure'   => $usingHttps,
+                'httponly' => true,
+                'samesite' => 'Lax',
+              ]);
+            }
+          } else {
+            // Clear any existing remember_me cookie if box is NOT checked
+            if (!empty($_COOKIE['remember_me'])) {
+              setcookie('remember_me', '', [
+                'expires'  => time() - 3600,
+                'path'     => '/',
+                'domain'   => '',
+                'secure'   => $usingHttps,
+                'httponly' => true,
+                'samesite' => 'Lax',
+              ]);
+            }
           }
+
+          redirect_by_role($role);
         } else {
           $_SESSION[$rateKey]['count']++;
           $error = "❌ Invalid credentials";
@@ -238,14 +349,32 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             </div>
 
             <div class="flex items-center justify-between text-sm">
-              <label class="inline-flex items-center gap-2 select-none">
-                <input type="checkbox" name="remember" class="sr-only peer">
-                <span class="w-10 h-6 rounded-full bg-blue-900/10 relative transition peer-checked:bg-blue-600/90">
-                  <span class="absolute top-0.5 left-0.5 h-5 w-5 bg-white rounded-full shadow-sm transition peer-checked:translate-x-4"></span>
+              <!-- Remember me button-style toggle -->
+              <label for="remember" class="inline-flex items-center gap-2 select-none cursor-pointer">
+                <input
+                  id="remember"
+                  type="checkbox"
+                  name="remember"
+                  class="sr-only peer"
+                  <?= (!empty($_POST) && !empty($_POST['remember'])) ? 'checked' : '' ?>
+                >
+
+                <!-- Visible button -->
+                <span class="inline-flex items-center gap-1 rounded-full border border-blue-900/20 bg-white px-3 py-1 text-xs font-semibold text-blue-900/70 shadow-sm transition
+                             peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600">
+                  <!-- Check icon (visible when checked) -->
+                  <svg class="h-3 w-3 opacity-0 transition-opacity peer-checked:opacity-100" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7.25 7.25a1 1 0 01-1.414 0l-3-3A1 1 0 016.757 9.79L8.5 11.536l6.543-6.543a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                  <span>Remember</span>
                 </span>
-                <span class="text-blue-900/80">Remember me</span>
+
+                <span class="text-blue-900/80">Keep me signed in</span>
               </label>
-              <a href="forgot_password.php" class="font-medium text-blue-700 hover:text-blue-800 hover:underline">Forgot password?</a>
+
+              <a href="forgot_password.php" class="font-medium text-blue-700 hover:text-blue-800 hover:underline">
+                Forgot password?
+              </a>
             </div>
 
             <button

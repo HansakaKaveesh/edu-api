@@ -19,37 +19,38 @@ function activeClass(bool $isActive, string $extra = '') {
   return $isActive ? "text-yellow-300 $extra" : "hover:text-yellow-300 $extra";
 }
 
-/* Dashboard routes (now includes CEO and CTO) */
+/* Dashboard routes (includes CEO, CTO, Coordinator) */
 $dashMap = [
-  'student'    => 'student_dashboard.php',
-  'teacher'    => 'teacher_dashboard.php',
-  'admin'      => 'admin_dashboard.php',
-  'accountant' => 'accountant_dashboard.php', // New
-  'ceo'        => '/edu-api/managment/ceo_dashboard.php',
-  'cto'        => 'cto_dashboard.php',
+  'student'     => 'student_dashboard.php',
+  'teacher'     => 'teacher_dashboard.php',
+  'admin'       => 'admin_dashboard.php',
+  'accountant'  => 'accountant_dashboard.php',
+  'ceo'         => '/edu-api/managment/ceo_dashboard.php',
+  'cto'         => 'cto_dashboard.php',
+  'coordinator' => 'coordinator_dashboard.php', // NEW
 ];
 $dashboardLink = $dashMap[$role] ?? '';
 
-
-/* Profile/Settings routes per role (includes CEO/CTO) */
+/* Profile/Settings routes per role (includes CEO/CTO/Coordinator) */
 $profileMap = [
-  'student'    => 'student_settings.php',
-  'teacher'    => 'teacher_profile.php',
-  'admin'      => 'admin_profile.php',
-  'accountant' => 'accountant_profile.php', // New
-  'ceo'        => '/edu-api/managment/ceo_settings.php',
-  'cto'        => 'cto_profile.php',
+  'student'     => 'student_settings.php',
+  'teacher'     => 'teacher_profile.php',
+  'admin'       => 'admin_profile.php',
+  'accountant'  => 'accountant_profile.php',
+  'ceo'         => '/edu-api/managment/ceo_settings.php',
+  'cto'         => 'cto_profile.php',
+  'coordinator' => 'coordinator_profile.php', // NEW
 ];
 
 $settingsMap = [
-  'student'    => 'student_settings.php',
-  'teacher'    => 'teacher_settings.php',
-  'admin'      => 'admin_settings.php',
-  'accountant' => 'accountant_settings.php', // New
-  'ceo'        => '/edu-api/managment/ceo_settings.php',
-  'cto'        => 'cto_settings.php',
+  'student'     => 'student_settings.php',
+  'teacher'     => 'teacher_settings.php',
+  'admin'       => 'admin_settings.php',
+  'accountant'  => 'accountant_settings.php',
+  'ceo'         => '/edu-api/managment/ceo_settings.php',
+  'cto'         => 'cto_settings.php',
+  'coordinator' => 'coordinator_settings.php', // NEW
 ];
-
 
 $profileLink  = $profileMap[$role]  ?? 'admin_profile.php';
 $settingsLink = $settingsMap[$role] ?? 'admin_settings.php';
@@ -60,12 +61,14 @@ if ($isLoggedIn) {
   $displayName = $_SESSION['full_name'] ?? $_SESSION['username'] ?? ucfirst($role ?? 'User');
 
   if (isset($conn) && $conn instanceof mysqli) {
-$tbl = $role === 'student' ? 'students'
-     : ($role === 'teacher' ? 'teachers'
-     : ($role === 'admin'   ? 'admins'
-     : ($role === 'ceo'     ? 'ceo'
-     : ($role === 'cto'     ? 'cto'
-     : ($role === 'accountant' ? 'accountants' : null)))));
+    // Map role to the correct person-detail table (includes coordinator -> course_coordinators)
+    $tbl = $role === 'student' ? 'students'
+         : ($role === 'teacher' ? 'teachers'
+         : ($role === 'admin'   ? 'admins'
+         : ($role === 'ceo'     ? 'ceo'
+         : ($role === 'cto'     ? 'cto'
+         : ($role === 'accountant' ? 'accountants'
+         : ($role === 'coordinator' ? 'course_coordinators' : null))))));
 
     if ($tbl && $stmt = $conn->prepare("SELECT first_name, last_name FROM {$tbl} WHERE user_id = ? LIMIT 1")) {
       $stmt->bind_param('i', $userId);
@@ -131,13 +134,7 @@ if ($isLoggedIn && isset($conn) && $conn instanceof mysqli) {
 
     <!-- Desktop Nav -->
     <ul class="hidden md:flex items-center space-x-6 font-medium text-[15px]">
-      <li>
-        <a href="/edu-api/index.php"
-           class="<?= activeClass($isHome) ?> flex items-center gap-2 transition"
-           <?= $isHome ? 'aria-current="page"' : '' ?>>
-           <ion-icon name="home-outline" class="text-yellow-300/80"></ion-icon> Home
-        </a>
-      </li>
+      <li><a href="index.php" class="<?= activeClass($isHome) ?> flex items-center gap-2 transition" <?= $isHome ? 'aria-current="page"' : '' ?>> <ion-icon name="home-outline" class="text-yellow-300/80"></ion-icon> Home</a></li>
       <li><a href="past_papers.php" class="flex items-center gap-2 <?= activeClass(false) ?>"><ion-icon name="information-circle-outline" class="text-yellow-300/80"></ion-icon> Past Papers</a></li>
       <li><a href="courseus.php" class="flex items-center gap-2 <?= activeClass(false) ?>"><ion-icon name="library-outline" class="text-yellow-300/80"></ion-icon> Courses</a></li>
       <li><a href="#tutors" class="flex items-center gap-2 <?= activeClass(false) ?>"><ion-icon name="people-outline" class="text-yellow-300/80"></ion-icon> Tutors</a></li>
@@ -213,7 +210,7 @@ if ($isLoggedIn && isset($conn) && $conn instanceof mysqli) {
     <a href="index.php" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50" role="menuitem">
       <ion-icon name="home-outline"></ion-icon> Home
     </a>
-    <a href="#past-papers" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50" role="menuitem">
+    <a href="past-papers" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50" role="menuitem">
       <ion-icon name="information-circle-outline"></ion-icon> Past Papers
     </a>
     <a href="#courses" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50" role="menuitem">

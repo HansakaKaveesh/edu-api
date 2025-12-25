@@ -30,14 +30,17 @@ session_set_cookie_params([
 session_start();
 
 /* ---------- Portal config ---------- */
-$ALLOWED_ROLES = ['admin','ceo','accountant']; // allow these roles on this login
+// Allow these roles to use this portal
+$ALLOWED_ROLES = ['admin','ceo','accountant','coordinator'];
+
 $ROLE_REDIRECT = [
-  'admin'      => 'admin_dashboard.php',
-  'ceo'        => 'managment/ceo_dashboard.php',
-  'accountant' => 'accountant_dashboard.php',
+  'admin'       => 'admin_dashboard.php',
+  'ceo'         => 'managment/ceo_dashboard.php',
+  'accountant'  => 'accountant_dashboard.php',
+  'coordinator' => 'coordinator_dashboard.php', // adjust path if you use a different filename
 ];
 
-$TITLE       = 'SynapZ Login – Admin / CEO / Accountant';
+$TITLE       = 'SynapZ Login – Admin / CEO / Accountant / Coordinator';
 $PORTAL_NAME = 'SynapZ';
 
 /* ---------- CSRF token ---------- */
@@ -78,7 +81,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       $password = $_POST['password'] ?? '';
 
       $stmt = $conn->prepare(
-        "SELECT u.user_id, u.role, p.password_hash
+        "SELECT u.user_id, u.role, u.status, p.password_hash
            FROM users u
            JOIN passwords p ON u.user_id = p.user_id AND p.is_current = 1
           WHERE u.username = ?"
@@ -90,7 +93,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       } else {
         $stmt->bind_param("s", $username);
         $stmt->execute();
-        $stmt->bind_result($user_id, $role, $hash);
+        $stmt->bind_result($user_id, $role, $status, $hash);
         $found = $stmt->fetch();
         $stmt->close();
 
@@ -102,6 +105,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           // Only allow the roles configured for this portal
           if (!in_array($role, $ALLOWED_ROLES, true)) {
             $error = "❌ Please use the correct portal for your role.";
+            usleep(300000);
+          }
+          // Ensure only active accounts can log in
+          elseif ($status !== 'active') {
+            $error = "❌ Your account is not active. Please contact support.";
             usleep(300000);
           } else {
             session_regenerate_id(true);
@@ -158,7 +166,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <div class="rounded-2xl bg-white/80 backdrop-blur-xl ring-1 ring-white/60 p-8">
           <div class="mb-6 text-center">
             <h1 class="text-3xl font-extrabold text-blue-900 tracking-tight"><?= htmlspecialchars($PORTAL_NAME) ?> Login</h1>
-            <p class="text-blue-900/70 text-sm mt-2">Admin • CEO • Accountant</p>
+            <p class="text-blue-900/70 text-sm mt-2">Admin • CEO • Accountant • Coordinator</p>
           </div>
 
           <?php if (!empty($error)): ?>

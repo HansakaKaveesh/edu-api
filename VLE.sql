@@ -2,7 +2,7 @@ vlevlevle-- Authentication & Users
  CREATE TABLE users (
   user_id INT PRIMARY KEY AUTO_INCREMENT,
   username VARCHAR(100) UNIQUE NOT NULL,
-  role ENUM('student', 'teacher', 'admin', 'ceo', 'cto','accountant') NOT NULL,
+  role ENUM('student', 'teacher', 'admin', 'ceo', 'cto','accountant','coordinator') NOT NULL,
   status ENUM('active','inactive','suspended') DEFAULT 'active',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
  );
@@ -57,6 +57,10 @@ vlevlevle-- Authentication & Users
   course_type_id INT NOT NULL,
   FOREIGN KEY (course_type_id) REFERENCES course_types(course_type_id)
  );
+ 
+ ALTER TABLE courses
+  ADD COLUMN cover_image VARCHAR(255) NULL AFTER price;
+ 
  CREATE TABLE teacher_courses (
   teacher_id INT NOT NULL,
   course_id INT NOT NULL,
@@ -353,4 +357,29 @@ CREATE TABLE past_papers (
 );
 
 CREATE INDEX idx_papers_filters ON past_papers (board, level, year, course_id);
-CREATE INDEX idx_papers_subject ON past_papers (subject);
+CREATE INDEX idx_papers_subject ON past_papers (SUBJECT);
+
+CREATE TABLE user_remember_tokens (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NOT NULL,
+  selector CHAR(18) NOT NULL UNIQUE,
+  token_hash CHAR(64) NOT NULL,
+  expires_at DATETIME NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE course_coordinators (
+  coordinator_id INT PRIMARY KEY AUTO_INCREMENT,
+  user_id INT UNIQUE NOT NULL,
+  first_name VARCHAR(50),
+  last_name VARCHAR(50),
+  email VARCHAR(100),
+  FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+ALTER TABLE contents
+  ADD COLUMN description TEXT NULL AFTER title;
+  
+ALTER TABLE contents
+  ADD COLUMN created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP AFTER resource_url;

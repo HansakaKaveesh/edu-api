@@ -3,7 +3,7 @@ session_start();
 include 'db_connect.php';
 
 // --- ROLE & BASIC ACCESS CHECK -----------------------------------
-$role = $_SESSION['role'] ?? '';
+$role    = $_SESSION['role'] ?? '';
 $user_id = (int)($_SESSION['user_id'] ?? 0);
 
 if (!$user_id || !$role) {
@@ -47,9 +47,9 @@ if ($res->num_rows === 0) {
     http_response_code(404);
     die('Content not found.');
 }
-$content       = $res->fetch_assoc();
-$course_id     = (int)$content['course_id'];
-$content_type  = $content['type'] ?? 'lesson';
+$content      = $res->fetch_assoc();
+$course_id    = (int)$content['course_id'];
+$content_type = $content['type'] ?? 'lesson';
 $stmt->close();
 
 // --- ACCESS CONTROL: STUDENT vs TEACHER --------------------------
@@ -281,10 +281,10 @@ $typeIcon  = $iconByType[$content_type] ?? 'document-text-outline';
 $typeBadge = $badgeByType[$content_type] ?? 'bg-gray-100 text-gray-700';
 
 // --- Preload for quiz review (students only) ---------------------
-$latest_attempt = null; 
-$answersMap = []; 
-$questions_review = null; 
-$attempts = 0;
+$latest_attempt   = null;
+$answersMap       = [];
+$questions_review = null;
+$attempts         = 0;
 
 if ($role === 'student' && $content_type === 'quiz') {
     // Assignment id again (prepared)
@@ -382,413 +382,435 @@ if ($role === 'student' && $content_type === 'quiz') {
 <body class="bg-gradient-to-br from-blue-50 via-white to-indigo-50 text-gray-800 min-h-screen">
 <?php include 'components/navbar.php'; ?>
 
-<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-10" x-data="{ showModal: false }">
-  <!-- Header -->
-  <div class="relative overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 p-6 mb-6">
-    <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10">
-      <div class="absolute -top-16 -right-20 w-72 h-72 bg-blue-200/40 rounded-full blur-3xl"></div>
-      <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-indigo-200/40 rounded-full blur-3xl"></div>
-    </div>
-    <div class="flex flex-col md:flex-row items-start justify-between gap-4">
-      <div class="min-w-0">
-        <h1 class="text-3xl font-extrabold text-blue-700 tracking-tight flex items-center gap-2">
-          <ion-icon name="<?= h($typeIcon) ?>" class="text-blue-700"></ion-icon>
-          <?= h($content['title']) ?>
-        </h1>
-        <p class="text-sm text-gray-600 mt-1">
-          <span class="inline-flex items<center gap-1 mr-2">
-            <ion-icon name="school-outline"></ion-icon> <?= h($content['course_name']) ?>
-          </span>
-          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <?= $typeBadge ?>">
-            <ion-icon name="<?= h($typeIcon) ?>"></ion-icon> <?= ucfirst($content_type) ?>
-          </span>
-        </p>
+<!-- Layout with sidebar -->
+<div class="flex flex-col lg:flex-row max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-12 gap-8"
+     x-data="{ showModal: false }">
+
+  <!-- Sidebar (role-based) -->
+  <?php if ($role === 'student'): ?>
+    <?php include 'components/sidebar_student.php'; ?>
+  <?php elseif ($role === 'teacher'): ?>
+    <?php
+      // Change the path/file name if your teacher sidebar is named differently
+      if (file_exists(__DIR__ . '/components/sidebar_teacher.php')) {
+          include 'components/sidebar_teacher.php';
+      }
+    ?>
+  <?php endif; ?>
+
+  <!-- Main Content -->
+  <main class="w-full space-y-6">
+
+    <!-- Header -->
+    <div class="relative overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 p-6">
+      <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10">
+        <div class="absolute -top-16 -right-20 w-72 h-72 bg-blue-200/40 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-indigo-200/40 rounded-full blur-3xl"></div>
       </div>
-      <div class="flex items-center gap-2">
-        <?php if ($role === 'student'): ?>
-          <a href="student_courses.php"
-             class="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-white px-4 py-2 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition">
-            <ion-icon name="arrow-back-outline"></ion-icon> Back to My Courses
-          </a>
-        <?php elseif ($role === 'teacher'): ?>
-          <a href="manage_course.php?course_id=<?= (int)$course_id ?>"
-             class="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-white px-4 py-2 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition">
-            <ion-icon name="arrow-back-outline"></ion-icon> Back to Manage Course
-          </a>
-        <?php endif; ?>
-
-        <?php if (!empty($content['file_url'])): ?>
-          <a href="<?= h($content['file_url']) ?>" target="_blank" rel="noopener"
-             class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50 transition">
-            <ion-icon name="open-outline"></ion-icon> Open in new tab
-          </a>
-        <?php endif; ?>
-      </div>
-    </div>
-  </div>
-
-  <!-- Body -->
-  <div class="bg-white rounded-2xl shadow-sm ring-1 ring-gray-200 p-6">
-    <?php if (!empty($content['body'])): ?>
-      <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 leading-relaxed text-gray-700">
-        <?= nl2br(h($content['body'])) ?>
-      </div>
-    <?php endif; ?>
-
-    <?php if (!empty($content['file_url'])): ?>
-      <?php
-        $extPath = parse_url($content['file_url'], PHP_URL_PATH) ?? '';
-        $ext     = strtolower(pathinfo($extPath, PATHINFO_EXTENSION));
-        $isVideo = ($content_type === 'video' || $ext === 'mp4' || $ext === 'webm' || $ext === 'ogg');
-        $isPdf   = ($content_type === 'pdf'   || $ext === 'pdf');
-      ?>
-      <div class="mt-5 flex items-center gap-2">
-        <button @click="showModal = true"
-                class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow">
-          <ion-icon name="eye-outline"></ion-icon> View Attached Content
-        </button>
-        <a class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg"
-           href="<?= h($content['file_url']) ?>" download>
-          <ion-icon name="download-outline"></ion-icon> Download
-        </a>
-      </div>
-
-      <!-- Modal viewer -->
-      <div x-show="showModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
-        <div class="absolute inset-0 bg-black/70" @click="showModal = false" aria-hidden="true"></div>
-        <div class="relative bg-white w-[95%] max-w-6xl rounded-2xl shadow-xl ring-1 ring-gray-200 p-4">
-          <button @click="showModal = false" class="absolute top-2 right-2 text-gray-600 hover:text-red-600 text-2xl" aria-label="Close">
-            &times;
-          </button>
-          <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
-            <ion-icon name="<?= h($typeIcon) ?>" class="text-blue-700"></ion-icon> <?= h($content['title']) ?>
-          </h2>
-
-          <?php if ($isVideo): ?>
-            <video controls class="w-full max-h-[70vh] rounded bg-black">
-              <source src="<?= h($content['file_url']) ?>">
-              Your browser does not support the video tag.
-            </video>
-          <?php elseif ($isPdf): ?>
-            <iframe src="<?= h($content['file_url']) ?>" class="w-full h-[75vh] rounded" frameborder="0"></iframe>
-          <?php else: ?>
-            <iframe src="<?= h($content['file_url']) ?>" class="w-full h-[75vh] rounded" frameborder="0"></iframe>
-          <?php endif; ?>
+      <div class="flex flex-col md:flex-row items-start justify-between gap-4">
+        <div class="min-w-0">
+          <h1 class="text-3xl font-extrabold text-blue-700 tracking-tight flex items-center gap-2">
+            <ion-icon name="<?= h($typeIcon) ?>" class="text-blue-700"></ion-icon>
+            <?= h($content['title']) ?>
+          </h1>
+          <p class="text-sm text-gray-600 mt-1">
+            <span class="inline-flex items-center gap-1 mr-2">
+              <ion-icon name="school-outline"></ion-icon> <?= h($content['course_name']) ?>
+            </span>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <?= $typeBadge ?>">
+              <ion-icon name="<?= h($typeIcon) ?>"></ion-icon> <?= ucfirst($content_type) ?>
+            </span>
+          </p>
         </div>
-      </div>
-    <?php endif; ?>
-
-    <!-- Linked Assignment (for lessons) -->
-    <?php if ($content_type === 'lesson'): ?>
-      <h2 class="text-xl font-semibold mt-8 mb-3 inline-flex items-center gap-2">
-        <ion-icon name="create-outline" class="text-amber-600"></ion-icon> Linked Assignment
-      </h2>
-      <?php
-        $assStmt = $conn->prepare("
-            SELECT assignment_id, title, description, due_date, total_marks, passing_score 
-            FROM assignments 
-            WHERE lesson_id = ? 
-            LIMIT 1
-        ");
-        $assStmt->bind_param("i", $content_id);
-        $assStmt->execute();
-        $assignment = $assStmt->get_result()->fetch_assoc();
-        $assStmt->close();
-      ?>
-      <?php if ($assignment): ?>
-        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
-          <p class="mb-2"><strong><?= h($assignment['title']) ?></strong></p>
-          <p class="text-gray-700"><?= nl2br(h($assignment['description'])) ?></p>
-          <div class="mt-2 text-sm text-gray-600 flex flex-wrap gap-3">
-            <span class="inline-flex items-center gap-1">
-              <ion-icon name="calendar-outline"></ion-icon> Due: <?= h($assignment['due_date']) ?>
-            </span>
-            <span class="inline-flex items-center gap-1">
-              <ion-icon name="trophy-outline"></ion-icon> Total: <?= (int)$assignment['total_marks'] ?>
-            </span>
-            <span class="inline-flex items-center gap-1">
-              <ion-icon name="shield-checkmark-outline"></ion-icon> Pass: <?= (int)$assignment['passing_score'] ?>
-            </span>
-          </div>
+        <div class="flex flex-wrap items-center gap-2">
           <?php if ($role === 'student'): ?>
-            <a href="attempt_assignment.php?assignment_id=<?= (int)$assignment['assignment_id'] ?>"
-               class="inline-flex items-center gap-2 text-blue-700 mt-3 hover:underline">
-              <ion-icon name="play-outline"></ion-icon> Attempt Assignment
+            <a href="student_courses.php"
+               class="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-white px-4 py-2 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition">
+              <ion-icon name="arrow-back-outline"></ion-icon> Back to My Courses
             </a>
-          <?php else: ?>
-            <p class="text-xs text-gray-500 mt-3">
-              (Teacher preview – students will see an “Attempt Assignment” button here.)
-            </p>
-          <?php endif; ?>
-        </div>
-      <?php else: ?>
-        <p class="text-gray-600"><em>No assignment linked.</em></p>
-      <?php endif; ?>
-    <?php endif; ?>
-
-    <!-- Quiz (Unlimited attempts) with Summary/Review -->
-    <?php if ($content_type === 'quiz'): ?>
-      <h2 class="text-xl font-semibold mt-8 mb-3 inline-flex items-center gap-2">
-        <ion-icon name="trophy-outline" class="text-emerald-600"></ion-icon> Quiz
-      </h2>
-      <?php
-        // For rendering the quiz questions (fresh)
-        $aidStmt = $conn->prepare("
-            SELECT assignment_id 
-            FROM assignments 
-            WHERE lesson_id = ? 
-            LIMIT 1
-        ");
-        $aidStmt->bind_param("i", $content_id);
-        $aidStmt->execute();
-        $aidRow = $aidStmt->get_result()->fetch_assoc();
-        $aidStmt->close();
-        $assignment_id = (int)($aidRow['assignment_id'] ?? 0);
-
-        $questionsList = null;
-        if ($assignment_id) {
-            $qList = $conn->prepare("
-                SELECT question_id, question_text, option_a, option_b, option_c, option_d 
-                FROM assignment_questions 
-                WHERE assignment_id = ?
-            ");
-            $qList->bind_param("i", $assignment_id);
-            $qList->execute();
-            $questionsList = $qList->get_result();
-        }
-      ?>
-
-      <?php if (!empty($assignment_id)): ?>
-        <div x-data="{ showSummary:false, showReview:false }" class="space-y-4">
-          <?php if ($role === 'student' && $latest_attempt): ?>
-            <div class="flex flex-wrap items-center gap-2">
-              <button @click="showSummary = !showSummary" 
-                      class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition">
-                <ion-icon name="clipboard-outline"></ion-icon> Last Attempt Summary
-              </button>
-              <button @click="showReview = !showReview" 
-                      class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition">
-                <ion-icon name="eye-outline"></ion-icon> Review Answers
-              </button>
-            </div>
-
-            <!-- Summary -->
-            <div x-show="showSummary" x-cloak
-                 x-transition:enter="transition ease-out duration-200"
-                 x-transition:enter-start="opacity-0 -translate-y-1"
-                 x-transition:enter-end="opacity-100 translate-y-0"
-                 class="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
-              <h3 class="text-lg font-bold mb-2 text-emerald-700 inline-flex items-center gap-1">
-                <ion-icon name="checkmark-done-outline"></ion-icon> Your Last Attempt
-              </h3>
-              <?php
-                $totalQ = $questions_review ? $questions_review->num_rows : 0;
-                $attemptDt = $latest_attempt['attempted_at'] ? date('Y-m-d H:i:s', strtotime($latest_attempt['attempted_at'])) : '';
-                $passedTxt = $latest_attempt['passed'] ? '<span class="text-emerald-700 font-bold">Pass</span>' : '<span class="text-rose-600 font-bold">Fail</span>';
-              ?>
-              <p class="text-sm mb-2">
-                Score: <span class="font-semibold text-blue-700"><?= (int)$latest_attempt['score'] ?></span> /
-                <span class="font-semibold text-blue-700"><?= (int)$totalQ ?></span> |
-                Result: <?= $passedTxt ?>
-              </p>
-              <p class="text-xs text-gray-600 inline-flex items-center gap-1">
-                <ion-icon name="time-outline"></ion-icon> <?= h($attemptDt) ?> · Attempts so far: <?= (int)$attempts ?>
-              </p>
-            </div>
-
-            <!-- Review -->
-            <div x-show="showReview" x-cloak
-                 x-transition:enter="transition ease-out duration-200"
-                 x-transition:enter-start="opacity-0 -translate-y-1"
-                 x-transition:enter-end="opacity-100 translate-y-0"
-                 class="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
-              <h3 class="text-lg font-bold mb-3 text-indigo-700 inline-flex items-center gap-1">
-                <ion-icon name="document-text-outline"></ion-icon> Answer Review
-              </h3>
-              <?php if ($questions_review && $questions_review->num_rows > 0): ?>
-                <div class="space-y-3">
-                  <?php foreach ($questions_review as $q):
-                    $qid       = (int)$q['question_id'];
-                    $selected  = $answersMap[$qid]['selected_option'] ?? null;
-                    $is_correct= (int)($answersMap[$qid]['is_correct'] ?? 0);
-                    $correct   = $q['correct_option'];
-                  ?>
-                    <div class="p-3 rounded border <?= $is_correct ? 'border-emerald-300 bg-emerald-50' : 'border-rose-300 bg-rose-50' ?>">
-                      <div class="font-medium mb-1"><?= h($q['question_text']) ?></div>
-                      <?php foreach (['A','B','C','D'] as $opt):
-                        $txt = h($q['option_'.strtolower($opt)]);
-                        $isUser = ($selected === $opt);
-                        $isAnswer = ($correct === $opt);
-                      ?>
-                        <div class="ml-4 flex items-center text-sm">
-                          <?php if ($isUser && $isAnswer): ?>
-                            <ion-icon name="checkmark-circle-outline" class="text-emerald-600 mr-2"></ion-icon>
-                          <?php elseif ($isUser && !$isAnswer): ?>
-                            <ion-icon name="close-circle-outline" class="text-rose-600 mr-2"></ion-icon>
-                          <?php else: ?>
-                            <span class="w-5 inline-block"></span>
-                          <?php endif; ?>
-                          <span class="<?= $isAnswer ? 'font-semibold underline text-emerald-700' : ($isUser ? 'text-rose-700' : '') ?>">
-                            <?= $opt ?>) <?= $txt ?>
-                          </span>
-                          <?php if ($isUser): ?><span class="ml-2 text-xs text-gray-500">(Your answer)</span><?php endif; ?>
-                          <?php if ($isAnswer): ?><span class="ml-2 text-xs text-emerald-700">(Correct answer)</span><?php endif; ?>
-                        </div>
-                      <?php endforeach; ?>
-                    </div>
-                  <?php endforeach; ?>
-                </div>
-              <?php else: ?>
-                <p class="text-gray-600">No questions to review.</p>
-              <?php endif; ?>
-            </div>
           <?php elseif ($role === 'teacher'): ?>
-            <p class="text-xs text-gray-500">
-              (Teacher preview – students will see attempt summary and review here.)
-            </p>
+            <a href="manage_course.php?course_id=<?= (int)$course_id ?>"
+               class="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-white px-4 py-2 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition">
+              <ion-icon name="arrow-back-outline"></ion-icon> Back to Manage Course
+            </a>
+          <?php endif; ?>
+
+          <?php if (!empty($content['file_url'])): ?>
+            <a href="<?= h($content['file_url']) ?>" target="_blank" rel="noopener"
+               class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50 transition">
+              <ion-icon name="open-outline"></ion-icon> Open in new tab
+            </a>
           <?php endif; ?>
         </div>
+      </div>
+    </div>
 
-        <!-- Submission form / preview of questions -->
-        <?php if ($questionsList && $questionsList->num_rows > 0): ?>
-          <?php if ($role === 'student'): ?>
-            <form method="post" class="space-y-4 mt-6">
-              <input type="hidden" name="csrf_token" value="<?= h($csrf) ?>">
-              <?php foreach ($questionsList as $q): ?>
-                <div class="rounded-lg border border-gray-100 p-3">
-                  <p class="font-medium"><?= h($q['question_text']) ?></p>
-                  <?php foreach (['A','B','C','D'] as $opt): ?>
-                    <label class="block ml-4 mt-1 text-gray-700">
-                      <input type="radio" name="quiz[<?= (int)$q['question_id'] ?>]" value="<?= $opt ?>" required class="mr-2 accent-blue-600">
-                      <?= $opt ?>) <?= h($q['option_'.strtolower($opt)]) ?>
-                    </label>
-                  <?php endforeach; ?>
-                </div>
-              <?php endforeach; ?>
-              <button type="submit" name="submit_quiz"
-                      class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
-                <ion-icon name="send-outline"></ion-icon> Submit Quiz
-              </button>
-              <p class="text-sm text-gray-500 mt-1">Attempts so far: <?= (int)$attempts ?></p>
-            </form>
-          <?php else: ?>
-            <div class="space-y-4 mt-6">
-              <?php foreach ($questionsList as $q): ?>
-                <div class="rounded-lg border border-gray-100 p-3">
-                  <p class="font-medium"><?= h($q['question_text']) ?></p>
-                  <?php foreach (['A','B','C','D'] as $opt): ?>
-                    <p class="ml-4 mt-1 text-gray-700">
-                      <?= $opt ?>) <?= h($q['option_'.strtolower($opt)]) ?>
-                    </p>
-                  <?php endforeach; ?>
-                </div>
-              <?php endforeach; ?>
+    <!-- Body card -->
+    <div class="bg-white rounded-2xl shadow-sm ring-1 ring-gray-200 p-6">
+
+      <?php if (!empty($content['body'])): ?>
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 leading-relaxed text-gray-700">
+          <?= nl2br(h($content['body'])) ?>
+        </div>
+      <?php endif; ?>
+
+      <?php if (!empty($content['file_url'])): ?>
+        <?php
+          $extPath = parse_url($content['file_url'], PHP_URL_PATH) ?? '';
+          $ext     = strtolower(pathinfo($extPath, PATHINFO_EXTENSION));
+          $isVideo = ($content_type === 'video' || $ext === 'mp4' || $ext === 'webm' || $ext === 'ogg');
+          $isPdf   = ($content_type === 'pdf'   || $ext === 'pdf');
+        ?>
+        <div class="mt-5 flex flex-wrap items-center gap-2">
+          <button @click="showModal = true"
+                  class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow">
+            <ion-icon name="eye-outline"></ion-icon> View Attached Content
+          </button>
+          <a class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg"
+             href="<?= h($content['file_url']) ?>" download>
+            <ion-icon name="download-outline"></ion-icon> Download
+          </a>
+        </div>
+
+        <!-- Modal viewer -->
+        <div x-show="showModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
+          <div class="absolute inset-0 bg-black/70" @click="showModal = false" aria-hidden="true"></div>
+          <div class="relative bg-white w-[95%] max-w-6xl rounded-2xl shadow-xl ring-1 ring-gray-200 p-4">
+            <button @click="showModal = false" class="absolute top-2 right-2 text-gray-600 hover:text-red-600 text-2xl" aria-label="Close">
+              &times;
+            </button>
+            <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
+              <ion-icon name="<?= h($typeIcon) ?>" class="text-blue-700"></ion-icon> <?= h($content['title']) ?>
+            </h2>
+
+            <?php if ($isVideo): ?>
+              <video controls class="w-full max-h-[70vh] rounded bg-black">
+                <source src="<?= h($content['file_url']) ?>">
+                Your browser does not support the video tag.
+              </video>
+            <?php elseif ($isPdf): ?>
+              <iframe src="<?= h($content['file_url']) ?>" class="w-full h-[75vh] rounded" frameborder="0"></iframe>
+            <?php else: ?>
+              <iframe src="<?= h($content['file_url']) ?>" class="w-full h-[75vh] rounded" frameborder="0"></iframe>
+            <?php endif; ?>
+          </div>
+        </div>
+      <?php endif; ?>
+
+      <!-- Linked Assignment (for lessons) -->
+      <?php if ($content_type === 'lesson'): ?>
+        <h2 class="text-xl font-semibold mt-8 mb-3 inline-flex items-center gap-2">
+          <ion-icon name="create-outline" class="text-amber-600"></ion-icon> Linked Assignment
+        </h2>
+        <?php
+          $assStmt = $conn->prepare("
+              SELECT assignment_id, title, description, due_date, total_marks, passing_score 
+              FROM assignments 
+              WHERE lesson_id = ? 
+              LIMIT 1
+          ");
+          $assStmt->bind_param("i", $content_id);
+          $assStmt->execute();
+          $assignment = $assStmt->get_result()->fetch_assoc();
+          $assStmt->close();
+        ?>
+        <?php if ($assignment): ?>
+          <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <p class="mb-2 font-semibold"><?= h($assignment['title']) ?></p>
+            <p class="text-gray-700"><?= nl2br(h($assignment['description'])) ?></p>
+            <div class="mt-2 text-sm text-gray-600 flex flex-wrap gap-3">
+              <span class="inline-flex items-center gap-1">
+                <ion-icon name="calendar-outline"></ion-icon> Due: <?= h($assignment['due_date']) ?>
+              </span>
+              <span class="inline-flex items-center gap-1">
+                <ion-icon name="trophy-outline"></ion-icon> Total: <?= (int)$assignment['total_marks'] ?>
+              </span>
+              <span class="inline-flex items-center gap-1">
+                <ion-icon name="shield-checkmark-outline"></ion-icon> Pass: <?= (int)$assignment['passing_score'] ?>
+              </span>
             </div>
-            <p class="text-xs text-gray-500 mt-2">
-              (Teacher preview – quiz submission is available only for students.)
-            </p>
+            <?php if ($role === 'student'): ?>
+              <a href="attempt_assignment.php?assignment_id=<?= (int)$assignment['assignment_id'] ?>"
+                 class="inline-flex items-center gap-2 text-blue-700 mt-3 hover:underline">
+                <ion-icon name="play-outline"></ion-icon> Attempt Assignment
+              </a>
+            <?php else: ?>
+              <p class="text-xs text-gray-500 mt-3">
+                (Teacher preview – students will see an “Attempt Assignment” button here.)
+              </p>
+            <?php endif; ?>
+          </div>
+        <?php else: ?>
+          <p class="text-gray-600"><em>No assignment linked.</em></p>
+        <?php endif; ?>
+      <?php endif; ?>
+
+      <!-- Quiz (Unlimited attempts) with Summary/Review -->
+      <?php if ($content_type === 'quiz'): ?>
+        <h2 class="text-xl font-semibold mt-8 mb-3 inline-flex items-center gap-2">
+          <ion-icon name="trophy-outline" class="text-emerald-600"></ion-icon> Quiz
+        </h2>
+        <?php
+          // For rendering the quiz questions (fresh)
+          $aidStmt = $conn->prepare("
+              SELECT assignment_id 
+              FROM assignments 
+              WHERE lesson_id = ? 
+              LIMIT 1
+          ");
+          $aidStmt->bind_param("i", $content_id);
+          $aidStmt->execute();
+          $aidRow = $aidStmt->get_result()->fetch_assoc();
+          $aidStmt->close();
+          $assignment_id = (int)($aidRow['assignment_id'] ?? 0);
+
+          $questionsList = null;
+          if ($assignment_id) {
+              $qList = $conn->prepare("
+                  SELECT question_id, question_text, option_a, option_b, option_c, option_d 
+                  FROM assignment_questions 
+                  WHERE assignment_id = ?
+              ");
+              $qList->bind_param("i", $assignment_id);
+              $qList->execute();
+              $questionsList = $qList->get_result();
+          }
+        ?>
+
+        <?php if (!empty($assignment_id)): ?>
+          <div x-data="{ showSummary:false, showReview:false }" class="space-y-4">
+            <?php if ($role === 'student' && $latest_attempt): ?>
+              <div class="flex flex-wrap items-center gap-2">
+                <button @click="showSummary = !showSummary"
+                        class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition">
+                  <ion-icon name="clipboard-outline"></ion-icon> Last Attempt Summary
+                </button>
+                <button @click="showReview = !showReview"
+                        class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition">
+                  <ion-icon name="eye-outline"></ion-icon> Review Answers
+                </button>
+              </div>
+
+              <!-- Summary -->
+              <div x-show="showSummary" x-cloak
+                   x-transition:enter="transition ease-out duration-200"
+                   x-transition:enter-start="opacity-0 -translate-y-1"
+                   x-transition:enter-end="opacity-100 translate-y-0"
+                   class="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+                <h3 class="text-lg font-bold mb-2 text-emerald-700 inline-flex items-center gap-1">
+                  <ion-icon name="checkmark-done-outline"></ion-icon> Your Last Attempt
+                </h3>
+                <?php
+                  $totalQ   = $questions_review ? $questions_review->num_rows : 0;
+                  $attemptDt= $latest_attempt['attempted_at'] ? date('Y-m-d H:i:s', strtotime($latest_attempt['attempted_at'])) : '';
+                  $passedTxt= $latest_attempt['passed'] ? '<span class="text-emerald-700 font-bold">Pass</span>' : '<span class="text-rose-600 font-bold">Fail</span>';
+                ?>
+                <p class="text-sm mb-2">
+                  Score: <span class="font-semibold text-blue-700"><?= (int)$latest_attempt['score'] ?></span> /
+                  <span class="font-semibold text-blue-700"><?= (int)$totalQ ?></span> |
+                  Result: <?= $passedTxt ?>
+                </p>
+                <p class="text-xs text-gray-600 inline-flex items-center gap-1">
+                  <ion-icon name="time-outline"></ion-icon> <?= h($attemptDt) ?> · Attempts so far: <?= (int)$attempts ?>
+                </p>
+              </div>
+
+              <!-- Review -->
+              <div x-show="showReview" x-cloak
+                   x-transition:enter="transition ease-out duration-200"
+                   x-transition:enter-start="opacity-0 -translate-y-1"
+                   x-transition:enter-end="opacity-100 translate-y-0"
+                   class="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+                <h3 class="text-lg font-bold mb-3 text-indigo-700 inline-flex items-center gap-1">
+                  <ion-icon name="document-text-outline"></ion-icon> Answer Review
+                </h3>
+                <?php if ($questions_review && $questions_review->num_rows > 0): ?>
+                  <div class="space-y-3">
+                    <?php foreach ($questions_review as $q):
+                      $qid       = (int)$q['question_id'];
+                      $selected  = $answersMap[$qid]['selected_option'] ?? null;
+                      $is_correct= (int)($answersMap[$qid]['is_correct'] ?? 0);
+                      $correct   = $q['correct_option'];
+                    ?>
+                      <div class="p-3 rounded border <?= $is_correct ? 'border-emerald-300 bg-emerald-50' : 'border-rose-300 bg-rose-50' ?>">
+                        <div class="font-medium mb-1"><?= h($q['question_text']) ?></div>
+                        <?php foreach (['A','B','C','D'] as $opt):
+                          $txt = h($q['option_'.strtolower($opt)]);
+                          $isUser   = ($selected === $opt);
+                          $isAnswer = ($correct === $opt);
+                        ?>
+                          <div class="ml-4 flex items-center text-sm">
+                            <?php if ($isUser && $isAnswer): ?>
+                              <ion-icon name="checkmark-circle-outline" class="text-emerald-600 mr-2"></ion-icon>
+                            <?php elseif ($isUser && !$isAnswer): ?>
+                              <ion-icon name="close-circle-outline" class="text-rose-600 mr-2"></ion-icon>
+                            <?php else: ?>
+                              <span class="w-5 inline-block"></span>
+                            <?php endif; ?>
+                            <span class="<?= $isAnswer ? 'font-semibold underline text-emerald-700' : ($isUser ? 'text-rose-700' : '') ?>">
+                              <?= $opt ?>) <?= $txt ?>
+                            </span>
+                            <?php if ($isUser): ?><span class="ml-2 text-xs text-gray-500">(Your answer)</span><?php endif; ?>
+                            <?php if ($isAnswer): ?><span class="ml-2 text-xs text-emerald-700">(Correct answer)</span><?php endif; ?>
+                          </div>
+                        <?php endforeach; ?>
+                      </div>
+                    <?php endforeach; ?>
+                  </div>
+                <?php else: ?>
+                  <p class="text-gray-600">No questions to review.</p>
+                <?php endif; ?>
+              </div>
+            <?php elseif ($role === 'teacher'): ?>
+              <p class="text-xs text-gray-500">
+                (Teacher preview – students will see attempt summary and review here.)
+              </p>
+            <?php endif; ?>
+          </div>
+
+          <!-- Submission form / preview of questions -->
+          <?php if ($questionsList && $questionsList->num_rows > 0): ?>
+            <?php if ($role === 'student'): ?>
+              <form method="post" class="space-y-4 mt-6">
+                <input type="hidden" name="csrf_token" value="<?= h($csrf) ?>">
+                <?php foreach ($questionsList as $q): ?>
+                  <div class="rounded-lg border border-gray-100 p-3">
+                    <p class="font-medium"><?= h($q['question_text']) ?></p>
+                    <?php foreach (['A','B','C','D'] as $opt): ?>
+                      <label class="block ml-4 mt-1 text-gray-700">
+                        <input type="radio" name="quiz[<?= (int)$q['question_id'] ?>]" value="<?= $opt ?>" required class="mr-2 accent-blue-600">
+                        <?= $opt ?>) <?= h($q['option_'.strtolower($opt)]) ?>
+                      </label>
+                    <?php endforeach; ?>
+                  </div>
+                <?php endforeach; ?>
+                <button type="submit" name="submit_quiz"
+                        class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                  <ion-icon name="send-outline"></ion-icon> Submit Quiz
+                </button>
+                <p class="text-sm text-gray-500 mt-1">Attempts so far: <?= (int)$attempts ?></p>
+              </form>
+            <?php else: ?>
+              <div class="space-y-4 mt-6">
+                <?php foreach ($questionsList as $q): ?>
+                  <div class="rounded-lg border border-gray-100 p-3">
+                    <p class="font-medium"><?= h($q['question_text']) ?></p>
+                    <?php foreach (['A','B','C','D'] as $opt): ?>
+                      <p class="ml-4 mt-1 text-gray-700">
+                        <?= $opt ?>) <?= h($q['option_'.strtolower($opt)]) ?>
+                      </p>
+                    <?php endforeach; ?>
+                  </div>
+                <?php endforeach; ?>
+              </div>
+              <p class="text-xs text-gray-500 mt-2">
+                (Teacher preview – quiz submission is available only for students.)
+              </p>
+            <?php endif; ?>
+          <?php else: ?>
+            <p class="text-gray-600">No quiz questions found.</p>
           <?php endif; ?>
         <?php else: ?>
-          <p class="text-gray-600">No quiz questions found.</p>
+          <p class="text-gray-600">No quiz attached to this content.</p>
         <?php endif; ?>
-      <?php else: ?>
-        <p class="text-gray-600">No quiz attached to this content.</p>
       <?php endif; ?>
-    <?php endif; ?>
 
-    <!-- Forum -->
-    <?php if ($content_type === 'forum'): ?>
-      <h2 class="text-xl font-semibold mt-8 mb-3 inline-flex items-center gap-2">
-        <ion-icon name="chatbubbles-outline" class="text-indigo-600"></ion-icon> Forum Discussion
-      </h2>
-      <?php
-      // Fetch posts (secure)
-      $postsStmt = $conn->prepare("
-        SELECT p.post_id, p.body, u.username, p.posted_at 
-        FROM forum_posts p 
-        JOIN users u ON u.user_id = p.user_id 
-        WHERE p.content_id = ? AND p.parent_post_id IS NULL 
-        ORDER BY p.posted_at
-      ");
-      $postsStmt->bind_param("i", $content_id);
-      $postsStmt->execute();
-      $postsRes = $postsStmt->get_result();
+      <!-- Forum -->
+      <?php if ($content_type === 'forum'): ?>
+        <h2 class="text-xl font-semibold mt-8 mb-3 inline-flex items-center gap-2">
+          <ion-icon name="chatbubbles-outline" class="text-indigo-600"></ion-icon> Forum Discussion
+        </h2>
+        <?php
+        // Fetch posts (secure)
+        $postsStmt = $conn->prepare("
+          SELECT p.post_id, p.body, u.username, p.posted_at 
+          FROM forum_posts p 
+          JOIN users u ON u.user_id = p.user_id 
+          WHERE p.content_id = ? AND p.parent_post_id IS NULL 
+          ORDER BY p.posted_at
+        ");
+        $postsStmt->bind_param("i", $content_id);
+        $postsStmt->execute();
+        $postsRes = $postsStmt->get_result();
 
-      while ($post = $postsRes->fetch_assoc()):
-      ?>
-        <div class="border border-gray-200 rounded-xl p-4 mb-4 bg-white">
-          <div class="flex items-center justify-between mb-1">
-            <strong class="inline-flex items-center gap-1 text-gray-800">
-              <ion-icon name="person-circle-outline" class="text-slate-600"></ion-icon>
-              <?= h($post['username']) ?>
-            </strong>
-            <small class="inline-flex items-center gap-1 text-gray-500">
-              <ion-icon name="time-outline"></ion-icon> <?= h($post['posted_at']) ?>
-            </small>
-          </div>
-          <p class="text-gray-700"><?= nl2br(h($post['body'])) ?></p>
-
-          <?php
-          // Replies secure
-          $repStmt = $conn->prepare("
-            SELECT r.body, u.username, r.posted_at 
-            FROM forum_posts r 
-            JOIN users u ON u.user_id = r.user_id 
-            WHERE r.parent_post_id = ? 
-            ORDER BY r.posted_at
-          ");
-          $repStmt->bind_param("i", $post['post_id']);
-          $repStmt->execute();
-          $repliesRes = $repStmt->get_result();
-          while ($reply = $repliesRes->fetch_assoc()):
-          ?>
-            <div class="ml-6 mt-3 p-2 border-l-2 border-gray-200">
-              <div class="flex items-center justify-between">
-                <strong class="inline-flex items-center gap-1 text-gray-800">
-                  <ion-icon name="person-circle-outline" class="text-slate-600"></ion-icon>
-                  <?= h($reply['username']) ?>
-                </strong>
-                <small class="text-gray-500"><?= h($reply['posted_at']) ?></small>
-              </div>
-              <p class="text-gray-700"><?= nl2br(h($reply['body'])) ?></p>
+        while ($post = $postsRes->fetch_assoc()):
+        ?>
+          <div class="border border-gray-200 rounded-xl p-4 mb-4 bg-white">
+            <div class="flex items-center justify-between mb-1">
+              <strong class="inline-flex items-center gap-1 text-gray-800">
+                <ion-icon name="person-circle-outline" class="text-slate-600"></ion-icon>
+                <?= h($post['username']) ?>
+              </strong>
+              <small class="inline-flex items-center gap-1 text-gray-500">
+                <ion-icon name="time-outline"></ion-icon> <?= h($post['posted_at']) ?>
+              </small>
             </div>
-          <?php endwhile; $repStmt->close(); ?>
-        </div>
-      <?php endwhile; $postsStmt->close(); ?>
+            <p class="text-gray-700"><?= nl2br(h($post['body'])) ?></p>
 
-      <!-- New post (allowed for both students & teachers) -->
-      <form method="POST" class="mt-6">
-        <input type="hidden" name="csrf_token" value="<?= h($csrf) ?>">
-        <label class="block mb-1 font-medium">Add a reply</label>
-        <div class="flex gap-2">
-          <textarea name="forum_body" class="w-full border border-gray-200 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-200" rows="2" placeholder="Type your reply..." required></textarea>
-          <button type="submit" name="post_forum" class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded">
-            <ion-icon name="send-outline"></ion-icon> Post
-          </button>
-        </div>
-      </form>
-
-      <?php
-      if (isset($_POST['post_forum'])) {
-        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-          echo "<script>alert('Invalid session. Please refresh and try again.');</script>";
-        } else {
-          $msg = trim((string)($_POST['forum_body'] ?? ''));
-          if ($msg !== '') {
-            $stmt = $conn->prepare("
-                INSERT INTO forum_posts (content_id, user_id, body) 
-                VALUES (?, ?, ?)
+            <?php
+            // Replies secure
+            $repStmt = $conn->prepare("
+              SELECT r.body, u.username, r.posted_at 
+              FROM forum_posts r 
+              JOIN users u ON u.user_id = r.user_id 
+              WHERE r.parent_post_id = ? 
+              ORDER BY r.posted_at
             ");
-            $stmt->bind_param("iis", $content_id, $user_id, $msg);
-            $stmt->execute();
-            $stmt->close();
-            echo "<script>location.reload();</script>";
+            $repStmt->bind_param("i", $post['post_id']);
+            $repStmt->execute();
+            $repliesRes = $repStmt->get_result();
+            while ($reply = $repliesRes->fetch_assoc()):
+            ?>
+              <div class="ml-6 mt-3 p-2 border-l-2 border-gray-200">
+                <div class="flex items-center justify-between">
+                  <strong class="inline-flex items-center gap-1 text-gray-800">
+                    <ion-icon name="person-circle-outline" class="text-slate-600"></ion-icon>
+                    <?= h($reply['username']) ?>
+                  </strong>
+                  <small class="text-gray-500"><?= h($reply['posted_at']) ?></small>
+                </div>
+                <p class="text-gray-700"><?= nl2br(h($reply['body'])) ?></p>
+              </div>
+            <?php endwhile; $repStmt->close(); ?>
+          </div>
+        <?php endwhile; $postsStmt->close(); ?>
+
+        <!-- New post (allowed for both students & teachers) -->
+        <form method="POST" class="mt-6">
+          <input type="hidden" name="csrf_token" value="<?= h($csrf) ?>">
+          <label class="block mb-1 font-medium">Add a reply</label>
+          <div class="flex gap-2">
+            <textarea name="forum_body" class="w-full border border-gray-200 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-200" rows="2" placeholder="Type your reply..." required></textarea>
+            <button type="submit" name="post_forum" class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded">
+              <ion-icon name="send-outline"></ion-icon> Post
+            </button>
+          </div>
+        </form>
+
+        <?php
+        if (isset($_POST['post_forum'])) {
+          if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+            echo "<script>alert('Invalid session. Please refresh and try again.');</script>";
+          } else {
+            $msg = trim((string)($_POST['forum_body'] ?? ''));
+            if ($msg !== '') {
+              $stmt = $conn->prepare("
+                  INSERT INTO forum_posts (content_id, user_id, body) 
+                  VALUES (?, ?, ?)
+              ");
+              $stmt->bind_param("iis", $content_id, $user_id, $msg);
+              $stmt->execute();
+              $stmt->close();
+              echo "<script>location.reload();</script>";
+            }
           }
         }
-      }
-      ?>
-    <?php endif; ?>
-  </div>
+        ?>
+      <?php endif; ?>
+
+    </div><!-- /body card -->
+
+  </main>
 </div>
 </body>
 </html>
