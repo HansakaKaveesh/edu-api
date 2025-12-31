@@ -8,7 +8,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $role = $_SESSION['role'] ?? null;
-$allowedRoles = ['admin', 'ceo', 'accountant', 'coordinator'];
+$allowedRoles = ['coordinator'];
 
 if (!in_array($role, $allowedRoles, true)) {
     http_response_code(403);
@@ -495,8 +495,10 @@ if ($res = $conn->query($sql)) {
                           <i data-lucide="pen-square" class="w-3.5 h-3.5"></i> Edit
                         </button>
 
-                        <a href="course.php?course_id=<?= $cid ?>"
-                           class="inline-flex items-center gap-1 text-sky-700 hover:text-sky-900 px-2 py-0.5 rounded-md ring-1 ring-sky-200 bg-sky-50 text-[10px] font-medium">
+                        <a href="../course.php?course_id=<?= $cid ?>"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="inline-flex items-center gap-1 text-sky-700 hover:text-sky-900 px-2 py-0.5 rounded-md ring-1 ring-sky-200 bg-sky-50 text-[10px] font-medium">
                           <i data-lucide="external-link" class="w-3.5 h-3.5"></i> View
                         </a>
 

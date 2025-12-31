@@ -40,11 +40,11 @@ function tsb_initials($name): string {
 
 /* ---------- nav items ---------- */
 $items = [
-  ['key' => 'dashboard', 'label' => 'Dashboard',   'icon' => 'house',            'href' => 'teacher_dashboard.php', 'badge' => null],
-  ['key' => 'courses',   'label' => 'My Courses',  'icon' => 'books',            'href' => 'teacher_dashboard.php#courses',   'badge' => $counts['courses']  ?? null],
+  ['key' => 'dashboard', 'label' => 'Dashboard',   'icon' => 'house',            'href' => 'teacher_dashboard.php',             'badge' => null],
+  ['key' => 'courses',   'label' => 'My Courses',  'icon' => 'books',            'href' => 'teacher_dashboard.php#courses',     'badge' => $counts['courses']  ?? null],
   // ['key' => 'students',  'label' => 'My Students', 'icon' => 'users-three',      'href' => 'teacher_students.php',            'badge' => $counts['students'] ?? null],
-  ['key' => 'messages',  'label' => 'Messages',    'icon' => 'chat-circle-dots', 'href' => 'teacher_messages.php',            'badge' => $counts['messages'] ?? ($counts['messages_unread'] ?? null)],
-  ['key' => 'settings',  'label' => 'Settings',    'icon' => 'gear-six',         'href' => 'teacher_settings.php',            'badge' => null],
+  ['key' => 'messages',  'label' => 'Messages',    'icon' => 'chat-circle-dots', 'href' => 'teacher_messages.php',              'badge' => $counts['messages'] ?? ($counts['messages_unread'] ?? null)],
+  ['key' => 'settings',  'label' => 'Settings',    'icon' => 'gear-six',         'href' => 'teacher_settings.php',              'badge' => null],
 ];
 
 // small header stats (optional)
@@ -66,7 +66,7 @@ $cMsgs    = isset($counts['messages_unread']) ? (int)$counts['messages_unread'] 
 
     <?php if (!$compact): ?>
       <!-- Profile header -->
-      <div class="relative mb-4 flex items-center justify-between">
+      <div class="relative mb-4 flex items-center justify-start">
         <div class="flex items-center gap-3">
           <div class="h-11 w-11 rounded-full bg-gradient-to-br from-indigo-500 to-sky-500 p-[2px] shadow-sm">
             <div class="h-full w-full rounded-full bg-white ring-1 ring-slate-200 grid place-items-center">
@@ -88,16 +88,6 @@ $cMsgs    = isset($counts['messages_unread']) ? (int)$counts['messages_unread'] 
             <div class="mt-0.5 text-[11px] text-slate-500">Educator · SynapZ</div>
           </div>
         </div>
-
-        <a href="create_course.php"
-           class="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-sky-500 
-                  text-white px-3 py-1.5 text-xs font-semibold shadow-sm hover:shadow-md hover:from-indigo-700
-                  active:scale-[0.97] transition"
-           title="Create New Course">
-          <i class="ph ph-plus-circle ph-bold"></i>
-          <span class="hidden sm:inline">New Course</span>
-          <span class="sm:hidden">New</span>
-        </a>
       </div>
 
       <!-- Small stats row -->
@@ -200,7 +190,6 @@ $cMsgs    = isset($counts['messages_unread']) ? (int)$counts['messages_unread'] 
         </li>
       </ul>
     </div>
-
 
   </nav>
 </aside>

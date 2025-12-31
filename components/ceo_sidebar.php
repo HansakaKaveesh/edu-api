@@ -47,16 +47,36 @@ if (!isset($qs)) {
   $qs = $query ? ('?' . http_build_query($query)) : '';
 }
 
-// Default nav (includes Payments)
+// Default nav (includes Payments + Deletion Requests)
 if (!isset($navItems) || !is_array($navItems) || !$navItems) {
+
+  // Try to compute pending deletion count for badge (optional)
+  $pendingDelBadge = '';
+  @include_once __DIR__ . '/../db_connect.php';
+  if (isset($conn) && $conn instanceof mysqli) {
+    if ($res = $conn->query("SELECT COUNT(*) AS c FROM user_deletion_requests WHERE status = 'pending'")) {
+      if ($row = $res->fetch_assoc()) {
+        if ((int)$row['c'] > 0) $pendingDelBadge = (string)(int)$row['c'];
+      }
+      $res->free();
+    }
+  }
+
   $navItems = [
-    ['label' => 'Dashboard',     'href' => 'ceo_dashboard.php' . $qs, 'icon' => 'grid-outline'],
-    ['label' => 'Payments',      'href' => 'ceo_payments.php'  . $qs, 'icon' => 'card-outline'],
-    ['label' => 'Teachers',      'href' => 'ceo_teachers.php'  . $qs, 'icon' => 'easel-outline'],
-    ['label' => 'Students',      'href' => 'ceo_students.php'  . $qs, 'icon' => 'school-outline'],
-    ['label' => 'Top Courses',   'href' => 'ceo_courses.php'   . $qs, 'icon' => 'trophy-outline'],
-    ['label' => 'Settings',      'href' => 'ceo_settings.php',        'icon' => 'settings-outline'],
-    ['label' => 'Logout',        'href' => 'logout.php',              'icon' => 'log-out-outline'],
+    ['label' => 'Dashboard',     'href' => 'ceo_dashboard.php' . $qs,             'icon' => 'grid-outline'],
+    ['label' => 'Payments',      'href' => 'ceo_payments.php'  . $qs,             'icon' => 'card-outline'],
+    ['label' => 'Teachers',      'href' => 'ceo_teachers.php'  . $qs,             'icon' => 'easel-outline'],
+    ['label' => 'Students',      'href' => 'ceo_students.php'  . $qs,             'icon' => 'school-outline'],
+    [
+      'label'      => 'Deletion Requests',
+      'href'       => 'ceo_user_deletion_requests.php' . $qs,
+      'icon'       => 'trash-outline',
+      'badge'      => $pendingDelBadge,
+      'badgeClass' => 'bg-rose-50 text-rose-700 ring-1 ring-rose-200'
+    ],
+    ['label' => 'Top Courses',   'href' => 'ceo_courses.php'   . $qs,             'icon' => 'trophy-outline'],
+    ['label' => 'Settings',      'href' => 'ceo_settings.php',                    'icon' => 'settings-outline'],
+    ['label' => 'Logout',        'href' => 'logout.php',                          'icon' => 'log-out-outline'],
   ];
 }
 

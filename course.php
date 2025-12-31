@@ -7,8 +7,8 @@ const QUIZ_MAX_ATTEMPTS = 0;         // 0 = unlimited attempts
 const QUIZ_SHUFFLE_QUESTIONS = true; // shuffle the questions shown to students
 /* ==================================================== */
 
-// Allow both students and teachers
-if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'], ['student', 'teacher'], true)) {
+// Allow students, teachers, and coordinators
+if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'], ['student', 'teacher', 'coordinator'], true)) {
     http_response_code(403);
     die("Access Denied.");
 }
@@ -25,13 +25,16 @@ $course_id = isset($_GET['course_id']) ? (int)$_GET['course_id'] : 0;
 
 // Access checks (prepared)
 if ($role === 'student') {
+    // Students must be actively enrolled
     $check = $conn->prepare("SELECT 1 FROM enrollments WHERE user_id = ? AND course_id = ? AND status = 'active' LIMIT 1");
     $check->bind_param("ii", $user_id, $course_id);
     $check->execute();
     $r = $check->get_result();
     if (!$r || $r->num_rows === 0) die("⛔ You are not enrolled in this course.");
     $check->close();
-} else { // teacher
+
+} elseif ($role === 'teacher') {
+    // Teachers must be assigned to this course
     $trowStmt = $conn->prepare("SELECT teacher_id FROM teachers WHERE user_id = ? LIMIT 1");
     $trowStmt->bind_param("i", $user_id);
     $trowStmt->execute();
@@ -45,6 +48,13 @@ if ($role === 'student') {
     $r = $check->get_result();
     if (!$r || $r->num_rows === 0) die("⛔ You are not assigned to this course.");
     $check->close();
+
+} elseif ($role === 'coordinator') {
+    // Coordinators: currently allowed to access any course.
+    // If you want to restrict coordinators, add coordinator-specific checks here.
+} else {
+    http_response_code(403);
+    die("Access Denied.");
 }
 
 // Get course info

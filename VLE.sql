@@ -383,3 +383,15 @@ ALTER TABLE contents
   
 ALTER TABLE contents
   ADD COLUMN created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP AFTER resource_url;
+  
+CREATE TABLE user_deletion_requests (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    requested_by INT NOT NULL,
+    previous_status VARCHAR(50) NOT NULL,
+    reason VARCHAR(255) DEFAULT NULL,
+    status ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    decided_at TIMESTAMP NULL,
+    decided_by INT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

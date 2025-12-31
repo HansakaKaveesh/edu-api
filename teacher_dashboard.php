@@ -7,12 +7,6 @@ if (!isset($_SESSION['user_id']) || (($_SESSION['role'] ?? '') !== 'teacher')) {
     exit;
 }
 
-/* CSRF token for popup form */
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-$csrfToken = $_SESSION['csrf_token'];
-
 $user_id = (int)$_SESSION['user_id'];
 
 /* helpers */
@@ -234,10 +228,6 @@ $greet = ($hr < 12) ? 'Good morning' : (($hr < 18) ? 'Good afternoon' : 'Good ev
               <a href="#courses" class="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-lg font-medium text-sm transition">
                 <i class="ph ph-arrow-down"></i> Go to Courses
               </a>
-              <a href="create_course.php"
-                 class="js-open-create-course inline-flex items-center gap-2 bg-white text-indigo-700 px-3 py-2 rounded-lg font-semibold text-sm shadow hover:shadow-md transition">
-                <i class="ph ph-plus-circle"></i> Create Course
-              </a>
               <a href="teacher_sidebar.php?active=dashboard"
                  class="lg:hidden inline-flex items-center gap-2 bg-black/30 text-white px-3 py-2 rounded-lg border border-white/20 hover:bg-black/40 text-sm transition">
                 <i class="ph ph-list"></i> Menu
@@ -382,10 +372,6 @@ $greet = ($hr < 12) ? 'Good morning' : (($hr < 18) ? 'Good afternoon' : 'Good ev
             </button>
           </div>
 
-          <a href="create_course.php"
-             class="js-open-create-course inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow">
-            <i class="ph ph-plus-circle"></i> Create New
-          </a>
           <a href="logout.php"
              class="inline-flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg shadow">
              <i class="ph ph-sign-out"></i> Logout
@@ -434,158 +420,21 @@ $greet = ($hr < 12) ? 'Good morning' : (($hr < 18) ? 'Good afternoon' : 'Good ev
           </div>
           <h3 class="text-xl font-semibold"><?= $teacher_id ? 'No Courses Yet' : 'No Teacher Profile Found' ?></h3>
           <p class="text-slate-600 mt-1">
-            <?= $teacher_id ? 'Create your first course to get started.' : 'Please contact an administrator to set up your teacher profile.' ?>
+            <?= $teacher_id
+                ? 'No courses are assigned to you yet. Please contact an administrator.'
+                : 'Please contact an administrator to set up your teacher profile.' ?>
           </p>
-          <?php if ($teacher_id): ?>
-          <a href="create_course.php" class="js-open-create-course inline-flex items-center gap-2 mt-5 bg-indigo-600 text-white px-6 py-2.5 rounded-lg shadow hover:bg-indigo-700 transition">
-            <i class="ph ph-plus-circle"></i> Create Course
-          </a>
-          <?php endif; ?>
         </div>
       <?php endif; ?>
     </section>
   </main>
 </div>
 
-<!-- Floating quick-create (mobile) -->
-<?php if ($teacher_id): ?>
-<a href="create_course.php"
-   class="js-open-create-course fixed bottom-6 right-6 lg:hidden inline-flex items-center justify-center h-12 w-12 rounded-full bg-indigo-600 text-white shadow-lg hover:bg-indigo-700" aria-label="Create course">
-  <i class="ph ph-plus"></i>
-</a>
-<?php endif; ?>
-
 <!-- Toast -->
 <div id="toast" class="fixed bottom-6 right-6 hidden items-center gap-2 px-4 py-2 rounded-lg shadow-lg
   bg-slate-900 text-white z-50 transition-opacity duration-300" role="status" aria-live="polite">
   <i class="ph ph-check-circle"></i>
   <span id="toastMsg">Copied!</span>
-</div>
-
-<!-- Create Course Modal -->
-<div id="createCourseModal"
-     class="fixed inset-0 z-40 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm">
-  <div class="relative w-full max-w-xl rounded-2xl bg-white shadow-2xl ring-1 ring-slate-200">
-    <!-- Header -->
-    <div class="flex items-center justify-between border-b px-5 py-3">
-      <div>
-        <h3 class="text-lg font-semibold text-slate-900">Create New Course</h3>
-        <p class="text-xs text-slate-500">Fill in the details and click “Create”.</p>
-      </div>
-      <button type="button"
-              class="text-slate-400 hover:text-slate-600"
-              data-close-create-modal>
-        <i class="ph ph-x text-xl"></i>
-      </button>
-    </div>
-
-    <!-- Body -->
-    <form id="createCourseForm" class="px-5 py-4 space-y-4">
-      <input type="hidden" name="csrf_token" value="<?= h($csrfToken) ?>">
-      <input type="hidden" name="ajax" value="1">
-
-      <!-- Error box -->
-      <div id="createCourseErrors"
-           class="hidden rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700"></div>
-
-      <!-- Course name -->
-      <div>
-        <div class="flex items-center justify-between">
-          <label class="block text-sm font-medium text-slate-700">Course Name</label>
-          <span class="text-[11px] text-slate-400"><span id="ccNameCount">0</span>/120</span>
-        </div>
-        <input
-          id="ccName"
-          type="text"
-          name="name"
-          maxlength="120"
-          required
-          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-200"
-          placeholder="e.g., Physics for IGCSE"
-        >
-      </div>
-
-      <!-- Description -->
-      <div>
-        <div class="flex items-center justify-between">
-          <label class="block text-sm font-medium text-slate-700">Description</label>
-          <span class="text-[11px] text-slate-400"><span id="ccDescCount">0</span>/2000</span>
-        </div>
-        <textarea
-          id="ccDesc"
-          name="description"
-          rows="3"
-          maxlength="2000"
-          required
-          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-200"
-          placeholder="Briefly describe the course content and goals."
-        ></textarea>
-      </div>
-
-      <!-- Board -->
-      <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1">Board</label>
-        <select
-          id="ccBoard"
-          name="board"
-          required
-          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-200"
-        >
-          <option value="Cambridge">Cambridge</option>
-          <option value="Edexcel">Edexcel</option>
-          <option value="Local">Local</option>
-          <option value="Other">Other</option>
-        </select>
-        <input
-          type="text"
-          id="ccBoardOther"
-          name="board_other"
-          maxlength="60"
-          class="mt-2 hidden w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-200"
-          placeholder="Type the board name"
-        >
-      </div>
-
-      <!-- Level -->
-      <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1">Level</label>
-        <select
-          id="ccLevel"
-          name="level"
-          required
-          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-200"
-        >
-          <option value="O/L">O/L</option>
-          <option value="A/L">A/L</option>
-          <option value="IGCSE">IGCSE</option>
-          <option value="Other">Other</option>
-        </select>
-        <input
-          type="text"
-          id="ccLevelOther"
-          name="level_other"
-          maxlength="60"
-          class="mt-2 hidden w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-200"
-          placeholder="Type the level"
-        >
-      </div>
-
-      <!-- Footer -->
-      <div class="flex items-center justify-between pt-2">
-        <button type="button"
-                class="text-xs text-slate-500 hover:text-slate-700"
-                data-close-create-modal>
-          Cancel
-        </button>
-        <button type="submit"
-                id="createCourseSubmit"
-                class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-wait">
-          <i class="ph ph-plus-circle"></i>
-          <span>Create Course</span>
-        </button>
-      </div>
-    </form>
-  </div>
 </div>
 
 <script>
@@ -719,130 +568,6 @@ $greet = ($hr < 12) ? 'Good morning' : (($hr < 18) ? 'Good afternoon' : 'Good ev
 
     // Init once
     filter();
-  })();
-
-  // Create Course modal + AJAX
-  (function () {
-    const modal     = document.getElementById('createCourseModal');
-    if (!modal) return;
-
-    const openBtns  = document.querySelectorAll('.js-open-create-course');
-    const closeBtns = modal.querySelectorAll('[data-close-create-modal]');
-    const form      = document.getElementById('createCourseForm');
-    const errorBox  = document.getElementById('createCourseErrors');
-    const submitBtn = document.getElementById('createCourseSubmit');
-
-    const nameInput = document.getElementById('ccName');
-    const descInput = document.getElementById('ccDesc');
-    const nameCount = document.getElementById('ccNameCount');
-    const descCount = document.getElementById('ccDescCount');
-
-    const boardSel  = document.getElementById('ccBoard');
-    const boardOther= document.getElementById('ccBoardOther');
-    const levelSel  = document.getElementById('ccLevel');
-    const levelOther= document.getElementById('ccLevelOther');
-
-    function openModal(e) {
-      if (e) e.preventDefault();
-      form.reset();
-      hideErrors();
-      updateCounts();
-      toggleOther(boardSel, boardOther);
-      toggleOther(levelSel, levelOther);
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-      nameInput?.focus();
-    }
-
-    function closeModal() {
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-
-    function showErrors(list) {
-      if (!errorBox) return;
-      if (!list || list.length === 0) {
-        hideErrors();
-        return;
-      }
-      errorBox.innerHTML = '<ul class="list-disc pl-4 space-y-0.5">' +
-        list.map(e => '<li>' + e + '</li>').join('') + '</ul>';
-      errorBox.classList.remove('hidden');
-    }
-
-    function hideErrors() {
-      if (!errorBox) return;
-      errorBox.classList.add('hidden');
-      errorBox.innerHTML = '';
-    }
-
-    function updateCounts() {
-      if (nameInput && nameCount) nameCount.textContent = String(nameInput.value.length);
-      if (descInput && descCount) descCount.textContent = String(descInput.value.length);
-    }
-
-    function toggleOther(selectEl, otherEl) {
-      const isOther = selectEl?.value === 'Other';
-      if (!otherEl) return;
-      if (isOther) {
-        otherEl.classList.remove('hidden');
-        otherEl.setAttribute('required', 'true');
-      } else {
-        otherEl.classList.add('hidden');
-        otherEl.removeAttribute('required');
-      }
-    }
-
-    openBtns.forEach(btn => btn.addEventListener('click', openModal));
-    closeBtns.forEach(btn => btn.addEventListener('click', closeModal));
-
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) closeModal();
-    });
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-        closeModal();
-      }
-    });
-
-    nameInput?.addEventListener('input', updateCounts);
-    descInput?.addEventListener('input', updateCounts);
-
-    boardSel?.addEventListener('change', () => toggleOther(boardSel, boardOther));
-    levelSel?.addEventListener('change', () => toggleOther(levelSel, levelOther));
-
-    // AJAX submit
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      hideErrors();
-      submitBtn.disabled = true;
-
-      try {
-        const fd = new FormData(form);
-        const res = await fetch('create_course_ajax.php', {
-          method: 'POST',
-          body: fd,
-          headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        });
-
-        const data = await res.json().catch(() => null);
-
-        if (!res.ok || !data) {
-          showErrors(['Unexpected server error.']);
-        } else if (!data.ok) {
-          showErrors(data.errors || [data.message || 'Validation failed.']);
-        } else {
-          // success: reload to update course list and stats
-          window.location.reload();
-          return;
-        }
-      } catch (err) {
-        showErrors(['Network error. Please try again.']);
-      } finally {
-        submitBtn.disabled = false;
-      }
-    });
   })();
 </script>
 </body>

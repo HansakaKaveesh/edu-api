@@ -35,7 +35,7 @@ $ALLOWED_ROLES = ['admin','ceo','accountant','coordinator'];
 
 $ROLE_REDIRECT = [
   'admin'       => 'admin_dashboard.php',
-  'ceo'         => 'managment/ceo_dashboard.php',
+  'ceo'         => 'ceo_dashboard.php',
   'accountant'  => 'accountant_dashboard.php',
   'coordinator' => 'coordinator_dashboard.php', // adjust path if you use a different filename
 ];

@@ -11,7 +11,7 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-// Handle actions via POST (approve, suspend, delete) with CSRF and prepared statements
+// Handle actions via POST (approve, suspend, delete-request) with CSRF and prepared statements
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['user_id'])) {
     $action = $_POST['action'];
     $user_id = (int)$_POST['user_id'];
@@ -42,51 +42,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['use
             $msg = "Failed to suspend user #$user_id.";
         }
     } elseif ($action === 'delete') {
-        // Manual cascade delete in a transaction
-        $conn->begin_transaction();
-        try {
-            if ($stmt = $conn->prepare("DELETE FROM students WHERE user_id = ?")) {
-                $stmt->bind_param("i", $user_id);
-                $stmt->execute();
-                $stmt->close();
-            }
-            if ($stmt = $conn->prepare("DELETE FROM teachers WHERE user_id = ?")) {
-                $stmt->bind_param("i", $user_id);
-                $stmt->execute();
-                $stmt->close();
-            }
-            if ($stmt = $conn->prepare("DELETE FROM admins WHERE user_id = ?")) {
-                $stmt->bind_param("i", $user_id);
-                $stmt->execute();
-                $stmt->close();
-            }
-            if ($stmt = $conn->prepare("DELETE FROM ceo WHERE user_id = ?")) {
-                $stmt->bind_param("i", $user_id);
-                $stmt->execute();
-                $stmt->close();
-            }
-            if ($stmt = $conn->prepare("DELETE FROM accountants WHERE user_id = ?")) {
-                $stmt->bind_param("i", $user_id);
-                $stmt->execute();
-                $stmt->close();
-            }
-            // NEW: delete from course_coordinators
-            if ($stmt = $conn->prepare("DELETE FROM course_coordinators WHERE user_id = ?")) {
-                $stmt->bind_param("i", $user_id);
-                $stmt->execute();
-                $stmt->close();
-            }
-            if ($stmt = $conn->prepare("DELETE FROM users WHERE user_id = ?")) {
-                $stmt->bind_param("i", $user_id);
-                $stmt->execute();
-                $stmt->close();
-            }
+        // Instead of deleting immediately, create a deletion request for CEO
 
-            $conn->commit();
-            $msg = "User #$user_id and related records deleted.";
-        } catch (Throwable $e) {
-            $conn->rollback();
-            $msg = "Failed to delete user #$user_id. Please try again.";
+        // 1. Check that the user exists and get current status & role
+        if ($stmt = $conn->prepare("SELECT status, role FROM users WHERE user_id = ?")) {
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $stmt->bind_result($current_status, $target_role);
+            if (!$stmt->fetch()) {
+                $stmt->close();
+                $msg = "User #$user_id not found.";
+                header("Location: view_users.php?msg=" . urlencode($msg));
+                exit;
+            }
+            $stmt->close();
+        } else {
+            $msg = "Failed to look up user #$user_id.";
+            header("Location: view_users.php?msg=" . urlencode($msg));
+            exit;
+        }
+
+        // Optional: prevent requesting deletion of CEO accounts
+        if (strtolower($target_role) === 'ceo') {
+            $msg = "You cannot request deletion of a CEO account.";
+            header("Location: view_users.php?msg=" . urlencode($msg));
+            exit;
+        }
+
+        // 2. Check if there is already a pending delete request
+        if ($stmt = $conn->prepare("SELECT id FROM user_deletion_requests WHERE user_id = ? AND status = 'pending' LIMIT 1")) {
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $stmt->store_result();
+            if ($stmt->num_rows > 0) {
+                $stmt->close();
+                $msg = "A deletion request for user #$user_id is already pending CEO approval.";
+                header("Location: view_users.php?msg=" . urlencode($msg));
+                exit;
+            }
+            $stmt->close();
+        }
+
+        // 3. Insert a new deletion request
+        $requested_by = (int)($_SESSION['user_id'] ?? 0);
+        $reason = null; // later you can add a reason field to the form and send it here
+
+        if ($stmt = $conn->prepare("
+            INSERT INTO user_deletion_requests (user_id, requested_by, previous_status, reason)
+            VALUES (?, ?, ?, ?)
+        ")) {
+            $stmt->bind_param("iiss", $user_id, $requested_by, $current_status, $reason);
+            $stmt->execute();
+            $stmt->close();
+            $msg = "Deletion request for user #$user_id has been sent to the CEO for approval.";
+        } else {
+            $msg = "Failed to create deletion request for user #$user_id.";
         }
     } else {
         $msg = "Unknown action.";
@@ -94,6 +104,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['use
 
     header("Location: view_users.php?msg=" . urlencode($msg));
     exit;
+}
+
+// Load which users already have a pending deletion request
+$pendingDeleteUsers = [];
+if ($res = $conn->query("SELECT user_id FROM user_deletion_requests WHERE status = 'pending'")) {
+    while ($row = $res->fetch_assoc()) {
+        $pendingDeleteUsers[(int)$row['user_id']] = true;
+    }
+    $res->free();
 }
 
 // Fetch users with joined role info (added accountants as 'ac', coordinators as 'cc')
@@ -185,7 +204,7 @@ $query = $conn->query("
             All Registered Users
           </h1>
           <p class="text-xs sm:text-sm text-sky-100/90">
-            Approve, suspend or delete users. Filter by role and status, and export the current view.
+            Approve, suspend or request deletion of users. Filter by role and status, and export the current view.
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
@@ -347,6 +366,7 @@ $query = $conn->query("
 
                 $createdFmt = !empty($user['created_at']) ? date('M j, Y', strtotime($user['created_at'])) : '';
                 $searchKey = strtolower(trim($fullName . ' ' . $user['username'] . ' ' . ($user['email'] ?? '')));
+                $hasPendingDelete = !empty($pendingDeleteUsers[(int)$user['user_id']] ?? false);
               ?>
               <tr class="hover:bg-slate-50 even:bg-slate-50/40"
                   data-role="<?= htmlspecialchars($role) ?>"
@@ -422,17 +442,24 @@ $query = $conn->query("
                       </form>
                     <?php endif; ?>
 
-                    <form method="POST" class="inline-action"
-                          onsubmit="return confirm('Are you sure you want to delete this user and related records?');">
-                      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
-                      <input type="hidden" name="action" value="delete">
-                      <input type="hidden" name="user_id" value="<?= (int)$user['user_id'] ?>">
-                      <button type="submit"
-                        class="inline-flex items-center gap-1 text-rose-700 hover:text-rose-900 px-2.5 py-0.5 rounded-md ring-1 ring-rose-200 bg-rose-50 text-[10px] font-medium"
-                        title="Delete">
-                        <i class="fa-regular fa-trash-can"></i> Delete
-                      </button>
-                    </form>
+                    <?php if ($hasPendingDelete): ?>
+                      <span class="inline-flex items-center gap-1 text-rose-600 text-[10px] px-2.5 py-0.5 rounded-md bg-rose-50 ring-1 ring-rose-200"
+                            title="Awaiting CEO approval">
+                        <i class="fa-solid fa-hourglass-half"></i> Awaiting CEO
+                      </span>
+                    <?php else: ?>
+                      <form method="POST" class="inline-action"
+                            onsubmit="return confirm('Send a delete request for this user to the CEO for approval?');">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="user_id" value="<?= (int)$user['user_id'] ?>">
+                        <button type="submit"
+                          class="inline-flex items-center gap-1 text-rose-700 hover:text-rose-900 px-2.5 py-0.5 rounded-md ring-1 ring-rose-200 bg-rose-50 text-[10px] font-medium"
+                          title="Request deletion (CEO must approve)">
+                          <i class="fa-regular fa-trash-can"></i> Request delete
+                        </button>
+                      </form>
+                    <?php endif; ?>
                   </div>
                 </td>
               </tr>
