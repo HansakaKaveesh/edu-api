@@ -137,7 +137,7 @@ if ($isLoggedIn && isset($conn) && $conn instanceof mysqli) {
       <li><a href="index.php" class="<?= activeClass($isHome) ?> flex items-center gap-2 transition" <?= $isHome ? 'aria-current="page"' : '' ?>> <ion-icon name="home-outline" class="text-yellow-300/80"></ion-icon> Home</a></li>
       <li><a href="past_papers.php" class="flex items-center gap-2 <?= activeClass(false) ?>"><ion-icon name="information-circle-outline" class="text-yellow-300/80"></ion-icon> Past Papers</a></li>
       <li><a href="courseus.php" class="flex items-center gap-2 <?= activeClass(false) ?>"><ion-icon name="library-outline" class="text-yellow-300/80"></ion-icon> Courses</a></li>
-      <li><a href="#tutors" class="flex items-center gap-2 <?= activeClass(false) ?>"><ion-icon name="people-outline" class="text-yellow-300/80"></ion-icon> Tutors</a></li>
+      <li><a href="tutors.php" class="flex items-center gap-2 <?= activeClass(false) ?>"><ion-icon name="people-outline" class="text-yellow-300/80"></ion-icon> Tutors</a></li>
       <li><a href="#contact" class="flex items-center gap-2 <?= activeClass(false) ?>"><ion-icon name="mail-outline" class="text-yellow-300/80"></ion-icon> Contact</a></li>
     </ul>
 
@@ -210,13 +210,13 @@ if ($isLoggedIn && isset($conn) && $conn instanceof mysqli) {
     <a href="index.php" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50" role="menuitem">
       <ion-icon name="home-outline"></ion-icon> Home
     </a>
-    <a href="past-papers" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50" role="menuitem">
+    <a href="past_papers.php" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50" role="menuitem">
       <ion-icon name="information-circle-outline"></ion-icon> Past Papers
     </a>
-    <a href="#courses" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50" role="menuitem">
+    <a href="courses.php" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50" role="menuitem">
       <ion-icon name="library-outline"></ion-icon> Courses
     </a>
-    <a href="#tutors" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50" role="menuitem">
+    <a href="tutors.php" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50" role="menuitem">
       <ion-icon name="people-outline"></ion-icon> Tutors
     </a>
     <a href="#contact" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50" role="menuitem">
