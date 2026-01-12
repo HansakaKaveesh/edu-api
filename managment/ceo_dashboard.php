@@ -199,7 +199,7 @@ $qs = $_GET ? ('?' . http_build_query($_GET)) : '';
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
     <!-- Sidebar (reusable component) -->
     <aside class="lg:col-span-3 lg:sticky lg:top-28 self-start">
-      <?php include __DIR__ . '/../components/ceo_sidebar.php'; ?>
+      <?php include __DIR__ . '/components/ceo_sidebar.php'; ?>
     </aside>
 
     <!-- Content -->
