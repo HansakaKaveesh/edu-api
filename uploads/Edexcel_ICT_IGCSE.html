@@ -6,6 +6,11 @@
   <title>Unit 1: Digital Devices — Slide Lesson</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    /* Mobile safe area for iOS bottom bar */
+    #controls {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
     /* Print: one slide per page */
     @media print {
       .slide { page-break-after: always; }
@@ -15,23 +20,22 @@
   </style>
 </head>
 
-<body class="bg-slate-50 text-slate-900 min-h-screen">
-  <!-- Top bar -->
-
-
+<body class="bg-slate-100 text-slate-900">
   <!-- Slides -->
-  <main class="max-w-6xl mx-auto px-4 py-6">
+  <main class="max-w-8xl mx-auto px-4 pt-6 pb-28 sm:pb-10">
     <div id="deck" class="space-y-6">
 
       <!-- Slide 1 -->
-      <section class="slide relative rounded-2xl border border-slate-200 bg-white p-8 md:p-12" data-title="Title">
+      <section class="slide relative rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 md:p-8 lg:p-12" data-title="Title">
         <div class="flex flex-col gap-8">
           <div class="inline-flex items-center gap-2 w-fit px-3 py-1 rounded-full bg-cyan-50 border border-cyan-200 text-cyan-800 text-sm">
             CHAPTER 1: DIGITAL DEVICES
           </div>
 
           <div>
-            <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-slate-900">UNIT 1: DIGITAL DEVICES</h1>
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-slate-900">
+              UNIT 1: DIGITAL DEVICES
+            </h1>
             <p class="mt-3 text-slate-600 text-lg max-w-3xl">
               Classification of digital devices grouped by type and functionality:
               computers, mobile devices, key features, and peripheral devices.
@@ -71,12 +75,12 @@
       </section>
 
       <!-- Slide 2 -->
-      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Objectives">
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 md:p-8 lg:p-12 hidden" data-title="Objectives">
         <h2 class="text-3xl font-bold text-slate-900">Lesson objectives</h2>
         <div class="mt-6 grid md:grid-cols-2 gap-6">
           <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
             <div class="font-semibold text-slate-900">By the end, you can:</div>
-            <ul class="mt-4 space-y-2 text-slate-700 list-disc list-inside">
+            <ul class="mt-4 space-y-2 text-slate-700 list-disc list-inside text-sm">
               <li>Classify computers by <span class="text-slate-900">size</span>, <span class="text-slate-900">purpose</span>, or <span class="text-slate-900">architecture</span>.</li>
               <li>Describe mainframe, minicomputer, microcomputer, desktop, and workstation.</li>
               <li>Explain mobile device categories and <span class="text-slate-900">convergence</span>.</li>
@@ -102,7 +106,7 @@
       </section>
 
       <!-- Slide 3 -->
-      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Overview">
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 md:p-8 lg:p-12 hidden" data-title="Overview">
         <h2 class="text-3xl font-bold text-slate-900">What is a digital device?</h2>
         <p class="mt-4 text-slate-600 max-w-4xl">
           A digital device processes data using binary (0s and 1s). Devices can be grouped by
@@ -144,7 +148,7 @@
       </section>
 
       <!-- Slide 4 -->
-      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Computers: classification">
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 md:p-8 lg:p-12 hidden" data-title="Computers: classification">
         <h2 class="text-3xl font-bold text-slate-900">1. Computers</h2>
         <p class="mt-4 text-slate-600 max-w-4xl">
           Computers can be classified by <span class="text-slate-900">size</span>,
@@ -184,7 +188,7 @@
       </section>
 
       <!-- Slide 5 -->
-      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Computer types summary">
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 md:p-8 lg:p-12 hidden" data-title="Computer types summary">
         <h2 class="text-3xl font-bold text-slate-900">Computer types at a glance</h2>
 
         <div class="mt-6 overflow-x-auto rounded-xl border border-slate-200 bg-white">
@@ -257,7 +261,7 @@
       </section>
 
       <!-- Slide 6 -->
-      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Mainframes">
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 md:p-8 lg:p-12 hidden" data-title="Mainframes">
         <h2 class="text-3xl font-bold text-slate-900">Mainframe computers</h2>
 
         <div class="mt-6 grid md:grid-cols-2 gap-6">
@@ -291,7 +295,7 @@
       </section>
 
       <!-- Slide 7 -->
-      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Minicomputers">
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 md:p-8 lg:p-12 hidden" data-title="Minicomputers">
         <h2 class="text-3xl font-bold text-slate-900">Minicomputers</h2>
 
         <div class="mt-6 grid md:grid-cols-2 gap-6">
@@ -326,7 +330,7 @@
       </section>
 
       <!-- Slide 8 -->
-      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Microcomputers">
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 md:p-8 lg:p-12 hidden" data-title="Microcomputers">
         <h2 class="text-3xl font-bold text-slate-900">Microcomputers</h2>
 
         <div class="mt-6 grid md:grid-cols-2 gap-6">
@@ -357,7 +361,7 @@
       </section>
 
       <!-- Slide 9 -->
-      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Desktops">
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 md:p-8 lg:p-12 hidden" data-title="Desktops">
         <h2 class="text-3xl font-bold text-slate-900">Desktop computers</h2>
 
         <div class="mt-6 grid md:grid-cols-2 gap-6">
@@ -387,7 +391,7 @@
       </section>
 
       <!-- Slide 10 -->
-      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Workstations">
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 md:p-8 lg:p-12 hidden" data-title="Workstations">
         <h2 class="text-3xl font-bold text-slate-900">Workstations</h2>
 
         <div class="mt-6 grid md:grid-cols-2 gap-6">
@@ -418,7 +422,7 @@
       </section>
 
       <!-- Slide 11 -->
-      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Mobile devices">
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 md:p-8 lg:p-12 hidden" data-title="Mobile devices">
         <h2 class="text-3xl font-bold text-slate-900">2. Mobile devices</h2>
 
         <div class="mt-6 grid md:grid-cols-2 gap-6">
@@ -458,7 +462,7 @@
       </section>
 
       <!-- Slide 12 -->
-      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Phones">
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 md:p-8 lg:p-12 hidden" data-title="Phones">
         <h2 class="text-3xl font-bold text-slate-900">Mobile phones</h2>
 
         <div class="mt-6 grid md:grid-cols-2 gap-6">
@@ -484,7 +488,7 @@
       </section>
 
       <!-- Slide 13 -->
-      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Tablets & consumer devices">
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 md:p-8 lg:p-12 hidden" data-title="Tablets & consumer devices">
         <h2 class="text-3xl font-bold text-slate-900">Tablets, consumer electronics & navigation</h2>
 
         <div class="mt-6 grid lg:grid-cols-3 gap-6">
@@ -519,7 +523,7 @@
       </section>
 
       <!-- Slide 14 -->
-      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Portability">
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 md:p-8 lg:p-12 hidden" data-title="Portability">
         <h2 class="text-3xl font-bold text-slate-900">3. Features: portability</h2>
 
         <div class="mt-6 grid md:grid-cols-2 gap-6">
@@ -557,7 +561,7 @@
       </section>
 
       <!-- Slide 15 -->
-      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Performance">
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 md:p-8 lg:p-12 hidden" data-title="Performance">
         <h2 class="text-3xl font-bold text-slate-900">Performance</h2>
         <p class="mt-4 text-slate-600 max-w-4xl">
           A high-performance device runs tasks quickly and efficiently. Performance depends on hardware and software.
@@ -585,7 +589,7 @@
       </section>
 
       <!-- Slide 16 -->
-      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Calculations 1">
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 md:p-8 lg:p-12 hidden" data-title="Calculations 1">
         <h2 class="text-3xl font-bold text-slate-900">Performance practice: calculations</h2>
 
         <div class="mt-6 grid md:grid-cols-2 gap-6">
@@ -617,7 +621,7 @@
       </section>
 
       <!-- Slide 17 -->
-      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Calculations 2">
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 md:p-8 lg:p-12 hidden" data-title="Calculations 2">
         <h2 class="text-3xl font-bold text-slate-900">Virtual memory & storage speed</h2>
 
         <div class="mt-6 grid md:grid-cols-2 gap-6">
@@ -661,7 +665,7 @@
       </section>
 
       <!-- Slide 18 -->
-      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Storage">
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 md:p-8 lg:p-12 hidden" data-title="Storage">
         <h2 class="text-3xl font-bold text-slate-900">Storage</h2>
         <p class="mt-4 text-slate-600 max-w-4xl">
           Storage is where files, programs, and data are saved (non-volatile storage keeps data when power is off).
@@ -721,7 +725,7 @@
       </section>
 
       <!-- Slide 19 -->
-      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="User interface">
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 md:p-8 lg:p-12 hidden" data-title="User interface">
         <h2 class="text-3xl font-bold text-slate-900">User interfaces</h2>
         <p class="mt-4 text-slate-600 max-w-4xl">
           A user interface (UI) is how a person interacts with a device.
@@ -780,7 +784,7 @@
       </section>
 
       <!-- Slide 20 -->
-      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Connectivity, media, energy">
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 md:p-8 lg:p-12 hidden" data-title="Connectivity, media, energy">
         <h2 class="text-3xl font-bold text-slate-900">Connectivity, media support, energy</h2>
 
         <div class="mt-6 grid md:grid-cols-2 gap-6">
@@ -820,7 +824,7 @@
       </section>
 
       <!-- Slide 21 -->
-      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Expansion & security">
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 md:p-8 lg:p-12 hidden" data-title="Expansion & security">
         <h2 class="text-3xl font-bold text-slate-900">Expansion capability & security features</h2>
 
         <div class="mt-6 grid md:grid-cols-2 gap-6">
@@ -858,7 +862,7 @@
       </section>
 
       <!-- Slide 22 -->
-      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Peripherals overview">
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 md:p-8 lg:p-12 hidden" data-title="Peripherals overview">
         <h2 class="text-3xl font-bold text-slate-900">4. Peripheral devices</h2>
         <p class="mt-4 text-slate-600 max-w-4xl">
           Peripheral devices extend a computer’s functionality. They are grouped into:
@@ -885,7 +889,7 @@
       </section>
 
       <!-- Slide 23 -->
-      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Input devices">
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 md:p-8 lg:p-12 hidden" data-title="Input devices">
         <h2 class="text-3xl font-bold text-slate-900">Input devices</h2>
 
         <div class="mt-6 overflow-x-auto rounded-xl border border-slate-200 bg-white">
@@ -959,7 +963,7 @@
       </section>
 
       <!-- Slide 24 -->
-      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Output devices">
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 md:p-8 lg:p-12 hidden" data-title="Output devices">
         <h2 class="text-3xl font-bold text-slate-900">Output devices</h2>
 
         <div class="mt-6 grid lg:grid-cols-3 gap-6">
@@ -995,7 +999,7 @@
       </section>
 
       <!-- Slide 25 -->
-      <section class="slide rounded-2xl border border-slate-200 bg-white p-8 md:p-12 hidden" data-title="Review">
+      <section class="slide rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 md:p-8 lg:p-12 hidden" data-title="Review">
         <h2 class="text-3xl font-bold text-slate-900">Review & exit ticket</h2>
 
         <div class="mt-6 grid md:grid-cols-2 gap-6">
@@ -1030,29 +1034,38 @@
   </main>
 
   <!-- Controls -->
-  <div id="controls" class="fixed bottom-4 left-0 right-0 z-50">
-    <div class="max-w-6xl mx-auto px-4">
-      <div class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white/85 backdrop-blur px-4 py-3">
-        <div class="flex items-center gap-3">
-          <button id="prevBtn" class="px-3 py-2 rounded-xl bg-slate-100 border border-slate-300 hover:bg-slate-200 transition text-sm">
-            Prev
-          </button>
-          <button id="nextBtn" class="px-3 py-2 rounded-xl bg-cyan-50 border border-cyan-200 hover:bg-cyan-100 transition text-sm text-cyan-900">
-            Next
-          </button>
+  <div id="controls" class="fixed bottom-2 sm:bottom-4 left-0 right-0 z-50">
+    <div class="max-w-5xl mx-auto px-4">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white/90 backdrop-blur px-3 sm:px-4 py-3 shadow-sm">
+        <!-- Left: navigation + status -->
+        <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+          <div class="flex items-center gap-2">
+            <button id="prevBtn"
+                    class="px-3 py-2 rounded-xl bg-slate-100 border border-slate-300 hover:bg-slate-200 transition text-sm">
+              Prev
+            </button>
+            <button id="nextBtn"
+                    class="px-3 py-2 rounded-xl bg-cyan-50 border border-cyan-200 hover:bg-cyan-100 transition text-sm text-cyan-900">
+              Next
+            </button>
+          </div>
 
-          <div class="hidden sm:flex items-center gap-2 text-sm text-slate-600">
-            <span id="counter" class="font-medium text-slate-900">1 / 1</span>
-            <span class="text-slate-400">•</span>
-            <span id="title" class="text-slate-600">Title</span>
+          <div class="flex items-center gap-2 text-xs sm:text-sm text-slate-600 min-w-0">
+            <span id="counter" class="font-medium text-slate-900 whitespace-nowrap">1 / 1</span>
+            <span class="text-slate-400 hidden sm:inline">•</span>
+            <span id="title" class="text-slate-600 truncate max-w-[8rem] sm:max-w-[12rem]">
+              Title
+            </span>
           </div>
         </div>
 
-        <div class="flex items-center gap-3">
-          <div class="w-44 sm:w-64 h-2 rounded-full bg-slate-200 overflow-hidden border border-slate-300">
+        <!-- Right: progress + print -->
+        <div class="flex items-center gap-3 w-full sm:w-auto">
+          <div class="flex-1 sm:flex-none w-full sm:w-64 h-2 rounded-full bg-slate-200 overflow-hidden border border-slate-300">
             <div id="progress" class="h-full bg-cyan-400 w-0"></div>
           </div>
-          <button id="printBtn" class="px-3 py-2 rounded-xl bg-slate-100 border border-slate-300 hover:bg-slate-200 transition text-sm">
+          <button id="printBtn"
+                  class="hidden sm:inline-flex px-3 py-2 rounded-xl bg-slate-100 border border-slate-300 hover:bg-slate-200 transition text-sm">
             Print
           </button>
         </div>
@@ -1087,16 +1100,23 @@
 
       prevBtn.classList.toggle("opacity-50", prevBtn.disabled);
       nextBtn.classList.toggle("opacity-50", nextBtn.disabled);
+      prevBtn.classList.toggle("cursor-not-allowed", prevBtn.disabled);
+      nextBtn.classList.toggle("cursor-not-allowed", nextBtn.disabled);
     }
 
     prevBtn.addEventListener("click", () => show(index - 1));
     nextBtn.addEventListener("click", () => show(index + 1));
-    printBtn.addEventListener("click", () => window.print());
+    if (printBtn) {
+      printBtn.addEventListener("click", () => window.print());
+    }
 
     window.addEventListener("keydown", (e) => {
       if (e.key === "ArrowLeft") show(index - 1);
       if (e.key === "ArrowRight") show(index + 1);
-      if (e.key.toLowerCase() === "p") window.print();
+      if (e.key && e.key.toLowerCase() === "p" && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        window.print();
+      }
     });
 
     show(0);

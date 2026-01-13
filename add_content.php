@@ -189,8 +189,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // File upload: optional for ALL types
-        // For lessons: allowed extensions = pdf, html
-        // For other types: pdf, mp4, html
+        // For lessons: allowed extensions = pdf, html, ppt, pptx
+        // For other types: pdf, mp4, html, ppt, pptx
         if (isset($_FILES['upload_file']) && is_array($_FILES['upload_file']) && $_FILES['upload_file']['error'] !== UPLOAD_ERR_NO_FILE) {
             $fileErr = $_FILES['upload_file']['error'];
 
@@ -200,16 +200,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $ext         = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
 
                 if ($type === 'lesson') {
-                    $allowedExtensions = ['pdf', 'html'];
+                    // Lessons: PDF, HTML, PowerPoint
+                    $allowedExtensions = ['pdf', 'html', 'ppt', 'pptx'];
                 } else {
-                    $allowedExtensions = ['pdf', 'mp4', 'html'];
+                    // Other content types: PDF, MP4, HTML, PowerPoint
+                    $allowedExtensions = ['pdf', 'mp4', 'html', 'ppt', 'pptx'];
                 }
 
                 if (!in_array($ext, $allowedExtensions, true)) {
                     if ($type === 'lesson') {
-                        $errors[] = "Invalid file type. For lessons only PDF and HTML files are allowed.";
+                        $errors[] = "Invalid file type. For lessons only PDF, HTML, and PowerPoint (PPT, PPTX) files are allowed.";
                     } else {
-                        $errors[] = "Invalid file type. Only PDF, MP4, and HTML allowed.";
+                        $errors[] = "Invalid file type. Only PDF, MP4, HTML, and PowerPoint (PPT, PPTX) are allowed.";
                     }
                 } else {
                     $uploadFolder = __DIR__ . '/uploads/';
@@ -310,7 +312,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $html .= '</article>';
 
                 $body = sanitize_html($html);
-                // keep $url as uploaded/manual attachment (PDF/HTML)
+                // keep $url as uploaded/manual attachment (PDF/HTML/PPT)
             } else {
                 $body = trim($postedGenericBody); // for non-lessons
             }
@@ -399,7 +401,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 Course ID: <span class="font-semibold">#<?= e($course_id) ?></span>
               </p>
               <p class="mt-2 text-xs sm:text-sm text-blue-100/90 max-w-2xl">
-                Create rich lessons with text, images, tables, and attachments, or upload PDFs, videos, quizzes, and forums for your students.
+                Create rich lessons with text, images, tables, and attachments, or upload PDFs, videos, PowerPoints, quizzes, and forums for your students.
               </p>
             </div>
           </div>
@@ -683,18 +685,23 @@ val1,val2"></textarea>
             <!-- File upload (ALL types) -->
             <div id="fileUpload" class="pt-1">
               <label id="fileUploadLabel" class="block text-sm font-medium text-slate-700 mb-1">
-                Upload File (PDF, Video, or HTML)
+                Upload File (PDF, Video, PowerPoint, or HTML)
               </label>
               <input type="hidden" name="MAX_FILE_SIZE" value="220200960" />
               <input
                 type="file"
                 name="upload_file"
                 id="uploadFileInput"
-                accept=".pdf,.mp4,.html,text/html,application/pdf,video/mp4"
+                accept=".pdf,.mp4,.html,.ppt,.pptx,
+                        text/html,
+                        application/pdf,
+                        application/vnd.ms-powerpoint,
+                        application/vnd.openxmlformats-officedocument.presentationml.presentation,
+                        video/mp4"
                 class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-800 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200/70"
               />
               <p id="fileUploadHelp" class="mt-1 text-xs text-slate-500">
-                For lessons: PDF or HTML attachments only. For other types: PDF, MP4, or HTML files.
+                For lessons: PDF, HTML, or PowerPoint attachments only. For other types: PDF, MP4, HTML, or PowerPoint files.
               </p>
             </div>
           </section>
@@ -756,16 +763,26 @@ val1,val2"></textarea>
     titleLabel.textContent = isLesson ? 'Topic:' : 'Title:';
 
     if (isLesson) {
-      fileUploadLabel.textContent = 'Upload Attachment (PDF or HTML, optional)';
-      fileUploadHelp.textContent  = 'For lessons you can attach a PDF or HTML handout. For videos, choose the "Video" content type instead.';
+      fileUploadLabel.textContent = 'Upload Attachment (PDF, HTML, or PowerPoint, optional)';
+      fileUploadHelp.textContent  =
+        'For lessons you can attach a PDF, HTML handout, or a PowerPoint file. For videos, choose the "Video" content type instead.';
       if (fileInput) {
-        fileInput.accept = '.pdf,.html,text/html,application/pdf';
+        fileInput.accept =
+          '.pdf,.html,.ppt,.pptx,' +
+          'text/html,application/pdf,' +
+          'application/vnd.ms-powerpoint,' +
+          'application/vnd.openxmlformats-officedocument.presentationml.presentation';
       }
     } else {
-      fileUploadLabel.textContent = 'Upload File (PDF, Video, or HTML)';
-      fileUploadHelp.textContent  = 'Allowed types: .pdf, .mp4, .html';
+      fileUploadLabel.textContent = 'Upload File (PDF, Video, PowerPoint, or HTML)';
+      fileUploadHelp.textContent  =
+        'Allowed types: .pdf, .mp4, .ppt, .pptx, .html';
       if (fileInput) {
-        fileInput.accept = '.pdf,.mp4,.html,text/html,application/pdf,video/mp4';
+        fileInput.accept =
+          '.pdf,.mp4,.html,.ppt,.pptx,' +
+          'text/html,application/pdf,video/mp4,' +
+          'application/vnd.ms-powerpoint,' +
+          'application/vnd.openxmlformats-officedocument.presentationml.presentation';
       }
     }
   }

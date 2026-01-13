@@ -2,17 +2,19 @@
 // expects: $contents, $role, $badgeMap, $typeIconName, $viewedIds, $student_id, $csrf, $course_id, $conn
 ?>
 <div class="lg:col-span-8 xl:col-span-9">
-  <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 p-6">
+  <div class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 p-4 sm:p-6">
     <div class="flex items-center justify-between mb-4">
       <h3 class="text-2xl font-semibold text-gray-900 inline-flex items-center gap-2">
         <ion-icon name="folder-open-outline" class="text-blue-700"></ion-icon>
         Course Contents
       </h3>
-      <div class="hidden sm:flex items-center gap-2">
-        <button id="expandAll" class="text-sm rounded-md border px-2 py-1 hover:bg-gray-50">
+      <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+        <button id="expandAll"
+                class="text-sm rounded-md border px-2 py-1 hover:bg-gray-50 w-full sm:w-auto text-center">
           <ion-icon name="chevron-down-outline"></ion-icon> Expand all
         </button>
-        <button id="collapseAll" class="text-sm rounded-md border px-2 py-1 hover:bg-gray-50">
+        <button id="collapseAll"
+                class="text-sm rounded-md border px-2 py-1 hover:bg-gray-50 w-full sm:w-auto text-center">
           <ion-icon name="chevron-up-outline"></ion-icon> Collapse all
         </button>
       </div>
@@ -63,16 +65,27 @@
               </div>
 
               <!-- Modal -->
-              <div x-show="showModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center" aria-modal="true" role="dialog">
-                <div @click="showModal = false" class="absolute inset-0 bg-slate-100/60 backdrop-blur-sm"></div>
+              <div x-show="showModal" x-cloak
+                   class="fixed inset-0 z-50 flex items-start sm:items-center justify-center px-2 sm:px-0"
+                   aria-modal="true" role="dialog">
+                <div @click="showModal = false"
+                     class="absolute inset-0 bg-slate-100/60 backdrop-blur-sm"></div>
                 <div x-transition:enter="transition ease-out duration-200"
                      x-transition:enter-start="opacity-0 translate-y-2 scale-95"
                      x-transition:enter-end="opacity-100 translate-y-0 scale-100"
                      x-transition:leave="transition ease-in duration-150"
                      x-transition:leave-start="opacity-100 translate-y-0 scale-100"
                      x-transition:leave-end="opacity-0 translate-y-2 scale-95"
-                     class="relative bg-white rounded-2xl shadow-xl ring-1 ring-gray-200 max-w-6xl w-[95%] p-6">
-                  <button @click="showModal = false" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-2xl leading-none" aria-label="Close">&times;</button>
+                     class="relative bg-white shadow-xl ring-1 ring-gray-200
+                            w-full sm:w-[95%] sm:max-w-6xl
+                            h-full sm:h-auto sm:max-h-[90vh]
+                            rounded-none sm:rounded-2xl
+                            p-4 sm:p-6
+                            mt-4 sm:mt-0
+                            overflow-y-auto">
+                  <button @click="showModal = false"
+                          class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-2xl leading-none"
+                          aria-label="Close">&times;</button>
                   <h2 class="text-2xl font-bold text-blue-700 mb-4 inline-flex items-center gap-2">
                     <ion-icon name="book-outline"></ion-icon> <?= h($title) ?>
                   </h2>
@@ -86,13 +99,14 @@
                   <?php if (!empty($c['file_url'])):
                     $pathPart = parse_url($c['file_url'], PHP_URL_PATH);
                     $ext = strtolower(pathinfo($pathPart, PATHINFO_EXTENSION));
-                    $isVideo = $ext === 'mp4' || $ext === 'webm' || $ext === 'ogg';
-                    $isPdf   = $ext === 'pdf';
+                    $isVideo = in_array($ext, ['mp4','webm','ogg'], true);
+                    $isPdf   = ($ext === 'pdf');
+                    $isPpt   = in_array($ext, ['ppt','pptx'], true);
                   ?>
                     <div class="mt-6">
                       <?php if ($isVideo): ?>
                         <video controls playsinline preload="metadata" controlsList="nodownload"
-                               class="w-full max-h-[520px] rounded-lg ring-1 ring-gray-200"
+                               class="w-full max-h-[60vh] sm:max-h-[520px] rounded-lg ring-1 ring-gray-200"
                                oncontextmenu="return false;">
                           <source src="<?= h($c['file_url']) ?>">
                           Your browser does not support the video tag.
@@ -101,13 +115,24 @@
                         <iframe
                           src="<?= h($c['file_url']) ?>"
                           loading="lazy"
-                          class="w-full h-[550px] rounded-lg ring-1 ring-gray-200"
+                          class="w-full h-[60vh] sm:h-[550px] rounded-lg ring-1 ring-gray-200"
                           frameborder="0"
                           oncontextmenu="return false"></iframe>
+                      <?php elseif ($isPpt): ?>
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-2">
+                          <p class="text-sm text-gray-600">
+                            This lesson has a PowerPoint attachment.
+                          </p>
+                          <a href="<?= h($c['file_url']) ?>" target="_blank" rel="noopener"
+                             class="inline-flex items-center gap-1 text-sm text-blue-700 hover:underline">
+                            <ion-icon name="open-outline"></ion-icon>
+                            Open / download PowerPoint
+                          </a>
+                        </div>
                       <?php else: ?>
                         <iframe src="<?= h($c['file_url']) ?>"
                                 loading="lazy"
-                                class="w-full h-[550px] rounded-lg ring-1 ring-gray-200"
+                                class="w-full h-[60vh] sm:h-[550px] rounded-lg ring-1 ring-gray-200"
                                 frameborder="0"></iframe>
                       <?php endif; ?>
                     </div>
@@ -157,24 +182,26 @@
                 <?php if (!empty($c['file_url'])):
                   $pathPart = parse_url($c['file_url'], PHP_URL_PATH);
                   $ext = strtolower(pathinfo($pathPart, PATHINFO_EXTENSION));
-                  $isVideo = $content_type === 'video' || $ext === 'mp4' || $ext === 'webm' || $ext === 'ogg';
-                  $isPdf   = $ext === 'pdf';
+                  $isVideo = $content_type === 'video' || in_array($ext, ['mp4','webm','ogg'], true);
+                  $isPdf   = ($ext === 'pdf');
+                  $isPpt   = in_array($ext, ['ppt','pptx'], true);
                 ?>
                   <div>
-                    <div class="flex items-center justify-between mb-2">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-2">
                       <h4 class="font-semibold inline-flex items-center gap-2">
                         <ion-icon name="attach-outline"></ion-icon> Attached File
                       </h4>
                       <?php if (!$isPdf): ?>
                         <a href="<?= h($c['file_url']) ?>" target="_blank" rel="noopener"
                            class="text-sm text-blue-700 hover:underline inline-flex items-center gap-1">
-                          <ion-icon name="open-outline"></ion-icon> Open in new tab
+                          <ion-icon name="open-outline"></ion-icon>
+                          <?= $isPpt ? 'Open PowerPoint' : 'Open in new tab' ?>
                         </a>
                       <?php endif; ?>
                     </div>
                     <?php if ($isVideo): ?>
                       <video controls playsinline preload="metadata" controlsList="nodownload"
-                             class="w-full max-h-[520px] rounded-lg ring-1 ring-gray-200"
+                             class="w-full max-h-[60vh] sm:max-h-[520px] rounded-lg ring-1 ring-gray-200"
                              oncontextmenu="return false;">
                         <source src="<?= h($c['file_url']) ?>">
                         Your browser does not support the video tag.
@@ -183,13 +210,17 @@
                       <iframe
                         src="<?= h($c['file_url']) ?>"
                         loading="lazy"
-                        class="w-full h-[600px] rounded-lg ring-1 ring-gray-200"
+                        class="w-full h-[60vh] sm:h-[600px] rounded-lg ring-1 ring-gray-200"
                         frameborder="0"
                         oncontextmenu="return false"></iframe>
+                    <?php elseif ($isPpt): ?>
+                      <p class="text-sm text-gray-600">
+                        This is a PowerPoint file. Use the button above to open or download it.
+                      </p>
                     <?php else: ?>
                       <iframe src="<?= h($c['file_url']) ?>"
                               loading="lazy"
-                              class="w-full h-[600px] rounded-lg ring-1 ring-gray-200"
+                              class="w-full h-[60vh] sm:h-[600px] rounded-lg ring-1 ring-gray-200"
                               frameborder="0"></iframe>
                     <?php endif; ?>
                   </div>
@@ -402,9 +433,9 @@
                                 <?php endforeach; ?>
                               </div>
                             <?php endforeach; ?>
-                            <div class="flex items-center justify-between">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                               <button type="submit" name="submit_quiz" value="<?= (int)$assignmentRow['assignment_id'] ?>"
-                                      class="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 shadow-sm">
+                                      class="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 shadow-sm justify-center">
                                 <ion-icon name="send-outline"></ion-icon> Submit Quiz
                               </button>
                               <p class="text-sm text-gray-500">
@@ -484,7 +515,8 @@
                       <form method="post" class="mt-3">
                         <input type="hidden" name="csrf" value="<?= h($csrf) ?>">
                         <input type="hidden" name="forum_content_id" value="<?= (int)$c['content_id'] ?>">
-                        <textarea name="forum_body" class="w-full border border-gray-200 focus:border-blue-300 focus:ring-2 focus:ring-blue-200 outline-none p-3 rounded-lg text-gray-800"
+                        <textarea name="forum_body"
+                                  class="w-full border border-gray-200 focus:border-blue-300 focus:ring-2 focus:ring-blue-200 outline-none p-3 rounded-lg text-gray-800"
                                   rows="2" placeholder="Type your comment..." required></textarea>
                         <button type="submit" name="post_forum"
                                 class="mt-2 inline-flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 shadow-sm">
