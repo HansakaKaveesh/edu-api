@@ -193,7 +193,7 @@ $greet = ($hr < 12) ? 'Good morning' : (($hr < 18) ? 'Good afternoon' : 'Good ev
 <?php include 'components/navbar.php'; ?>
 
 <!-- Content Grid -->
-<div class="max-w-8xl mx-auto px-6 mt-24 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-y-8 lg:gap-x-10 mb-24">
+<div class="max-w-8xl mx-auto px-4 sm:px-6 mt-24 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-y-8 lg:gap-x-10 mb-24">
   
   <!-- Sidebar (desktop only) -->
   <aside class="hidden lg:block lg:col-span-3">
@@ -217,7 +217,7 @@ $greet = ($hr < 12) ? 'Good morning' : (($hr < 18) ? 'Good afternoon' : 'Good ev
       <div class="max-w-7xl mx-auto px-5 pt-12 pb-8">
         <div class="flex items-start justify-between gap-3">
           <div>
-            <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white flex items-center gap-2">
+            <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white flex items-center gap-2 flex-wrap sm:flex-nowrap">
               <i class="ph ph-chalkboard-teacher ph-bold"></i>
               <?= h($greet) ?>, <span class="underline decoration-white/30 underline-offset-4"><?= h($teacher_name) ?></span>
             </h1>
@@ -349,14 +349,16 @@ $greet = ($hr < 12) ? 'Good morning' : (($hr < 18) ? 'Good afternoon' : 'Good ev
           </h2>
         </div>
 
-        <div class="flex items-center gap-3">
-          <div class="relative">
+        <!-- Updated, mobile-friendly toolbar -->
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 w-full md:w-auto">
+          <!-- Search -->
+          <div class="relative flex-1 min-w-0">
             <input id="courseSearch" type="text" placeholder="Search courses..."
-                   class="w-64 pl-9 pr-3 py-2 rounded-lg border-slate-300 bg-white focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm">
+                   class="w-full md:w-64 pl-9 pr-3 py-2 rounded-lg border-slate-300 bg-white focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm">
             <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
           </div>
 
-          <!-- Sort and density controls -->
+          <!-- Sort and density controls (desktop only) -->
           <div class="hidden md:flex items-center gap-2">
             <button id="sortAZ" type="button"
                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm">
@@ -372,8 +374,9 @@ $greet = ($hr < 12) ? 'Good morning' : (($hr < 18) ? 'Good afternoon' : 'Good ev
             </button>
           </div>
 
+          <!-- Logout -->
           <a href="logout.php"
-             class="inline-flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg shadow">
+             class="inline-flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg shadow sm:w-auto">
              <i class="ph ph-sign-out"></i> Logout
           </a>
         </div>

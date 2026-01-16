@@ -197,342 +197,394 @@ $lastActivity  = $activityCount ? date('M j, Y g:i A', strtotime($logsArr[0]['ti
   <!-- Main Content -->
   <main class="w-full space-y-10 animate-fadeUp">
 
-    <!-- HERO SECTION -->
-    <section class="relative overflow-hidden rounded-[2rem] glass-card">
-      <!-- Background image & overlays -->
-      <div class="absolute inset-0">
-        <img src="https://www.vedamo.com/wp-content/uploads/cache/2017/06/what-is-virtual-learning-1/4148946552.png"
-             alt="Campus" class="w-full h-full object-cover object-center scale-[1.02]" loading="eager" decoding="async">
-        <div class="absolute inset-0 bg-gradient-to-br from-slate-900/80 via-blue-500/90 to-sky-800/60 mix-blend-multiply"></div>
-        <div class="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-slate-900/75 to-transparent"></div>
+<!-- HERO SECTION -->
+<section class="relative overflow-hidden rounded-[2rem] glass-card">
+  <!-- Background image & overlays -->
+  <div class="absolute inset-0">
+    <img
+      src="https://www.vedamo.com/wp-content/uploads/cache/2017/06/what-is-virtual-learning-1/4148946552.png"
+      alt="Campus"
+      class="w-full h-full object-cover object-center scale-[1.02]"
+      loading="lazy"
+      decoding="async"
+    >
+    <div class="absolute inset-0 bg-gradient-to-br from-slate-900/80 via-blue-500/90 to-sky-800/60 mix-blend-multiply"></div>
+    <div class="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-slate-900/75 to-transparent"></div>
+  </div>
+
+  <!-- Content -->
+  <div class="relative z-10 px-4 sm:px-6 lg:px-10 py-5 sm:py-7 lg:py-8 text-white space-y-5">
+    <!-- Top row -->
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div id="datetime" class="text-xs sm:text-sm italic opacity-90 drop-shadow-sm" aria-live="polite"></div>
+
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-2 rounded-full bg-white/10 ring-1 ring-white/25 px-3 py-1.5 text-xs uppercase tracking-wide">
+          <i data-lucide="graduation-cap" class="w-4 h-4"></i>
+          <span>Student Dashboard</span>
+        </span>
       </div>
+    </div>
 
-      <!-- Content -->
-      <div class="relative z-10 px-4 sm:px-6 lg:px-10 py-6 sm:py-7 lg:py-8 text-white space-y-5">
-        <!-- Top row -->
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <div id="datetime" class="text-xs sm:text-sm italic opacity-90 drop-shadow-sm" aria-live="polite"></div>
-
-          <div class="flex items-center gap-2">
-            <span class="inline-flex items-center gap-2 rounded-full bg-white/10 ring-1 ring-white/25 px-3 py-1.5 text-xs uppercase tracking-wide">
-              <i data-lucide="graduation-cap" class="w-4 h-4"></i>
-              <span>Student Dashboard</span>
-            </span>
-          </div>
-        </div>
-
-        <!-- Main greeting -->
-        <div class="text-center space-y-3 sm:space-y-4 mt-1">
-          <h1 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold leading-tight drop-shadow-xl">
-            <span class="block ">Welcome back,</span>
-            <span class="inline-flex flex-wrap items-center gap-2 justify-center">
-              <span class="underline decoration-white/30 underline-offset-4">
-                <?php echo htmlspecialchars($full_name); ?>
-              </span>
-              <span class="text-xs sm:text-sm md:text-base font-light italic text-white/90">
-                (<?php echo htmlspecialchars($role); ?>)
-              </span>
-              <span class="inline-block animate-wave" aria-hidden="true">👋</span>
-            </span>
-          </h1>
-
-          <p class="text-sm sm:text-base md:text-lg font-light text-white/95 max-w-3xl mx-auto">
-            Continue your learning journey, track your progress, and stay on top of what matters most—
-            from courses and quizzes to announcements and activity.
-          </p>
-        </div>
-
-        <!-- Actions & metrics -->
-        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5 mt-2">
-          <!-- Actions -->
-          <div class="flex flex-wrap items-center justify-center gap-3">
-            <a href="enroll_course.php"
-               class="inline-flex items-center gap-2 rounded-full bg-white text-indigo-700 font-semibold px-4 sm:px-5 py-2.5 shadow-lg shadow-slate-900/25 hover-raise">
-              <i data-lucide="plus-circle" class="w-5 h-5" aria-hidden="true"></i>
-              <span>Enroll in a course</span>
-            </a>
-            <a href="#courses"
-               class="inline-flex items-center gap-2 rounded-full bg-indigo-900/40 text-white font-medium px-4 sm:px-5 py-2.5 ring-1 ring-white/30 hover:bg-indigo-900/55 hover-raise">
-              <i data-lucide="compass" class="w-5 h-5" aria-hidden="true"></i>
-              <span>Browse your courses</span>
-            </a>
-          </div>
-
-          <!-- Quick metrics -->
-          <div class="grid grid-cols-3 gap-2 sm:gap-3 max-w-md mx-auto lg:mx-0">
-            <div class="rounded-2xl bg-white/10 ring-1 ring-white/20 p-3 sm:p-4 backdrop-blur">
-              <div class="text-xs text-white/85 inline-flex items-center gap-1">
-                <i data-lucide="book-open" class="w-4 h-4"></i>
-                <span>Courses</span>
-              </div>
-              <div class="mt-1 text-2xl font-semibold tracking-tight">
-                <?php echo (int)$coursesCount; ?>
-              </div>
-              <p class="mt-0.5 text-[11px] text-white/80">Actively enrolled</p>
-            </div>
-            <div class="rounded-2xl bg-white/10 ring-1 ring-white/20 p-3 sm:p-4 backdrop-blur">
-              <div class="text-xs text-white/85 inline-flex items-center gap-1">
-                <i data-lucide="megaphone" class="w-4 h-4"></i>
-                <span>Announcements</span>
-              </div>
-              <div class="mt-1 text-2xl font-semibold tracking-tight">
-                <?php echo (int)$annCount; ?>
-              </div>
-              <p class="mt-0.5 text-[11px] text-white/80">Latest updates</p>
-            </div>
-            <div class="rounded-2xl bg-white/10 ring-1 ring-white/20 p-3 sm:p-4 backdrop-blur">
-              <div class="text-xs text-white/85 inline-flex items-center gap-1">
-                <i data-lucide="activity" class="w-4 h-4"></i>
-                <span>Recent</span>
-              </div>
-              <div class="mt-1 text-[13px] font-medium leading-tight">
-                <?php echo $lastActivity ? htmlspecialchars($lastActivity) : 'No activity yet'; ?>
-              </div>
-              <p class="mt-0.5 text-[11px] text-white/80">Last interaction</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ANNOUNCEMENTS -->
-    <section class="soft-card rounded-2xl p-6 sm:p-8">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-        <div class="flex items-center gap-2">
-          <span class="inline-flex items-center justify-center rounded-2xl bg-indigo-100 text-indigo-700 p-2">
-            <i data-lucide="megaphone" class="w-5 h-5"></i>
+    <!-- Main greeting -->
+    <div class="text-center space-y-3 sm:space-y-4 mt-1">
+      <h1 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold leading-tight drop-shadow-xl">
+        <span class="block">Welcome back,</span>
+        <span class="inline-flex flex-wrap items-center gap-2 justify-center">
+          <span class="underline decoration-white/30 underline-offset-4">
+            <?php echo htmlspecialchars($full_name); ?>
           </span>
-          <div>
-            <h3 class="text-xl sm:text-2xl font-semibold text-slate-800">
-              Announcements
-            </h3>
-            <p class="text-xs sm:text-sm text-slate-500">
-              Stay in sync with important updates and deadlines.
-            </p>
-          </div>
-        </div>
+          <span class="text-xs sm:text-sm md:text-base font-light italic text-white/90">
+            (<?php echo htmlspecialchars($role); ?>)
+          </span>
+          <span class="inline-block animate-wave" aria-hidden="true">👋</span>
+        </span>
+      </h1>
+
+      <p class="text-sm sm:text-base md:text-lg font-light text-white/95 max-w-3xl mx-auto">
+        Continue your learning journey, track your progress, and stay on top of what matters most—
+        from courses and quizzes to announcements and activity.
+      </p>
+    </div>
+
+    <!-- Actions & metrics -->
+    <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5 mt-2">
+      <!-- Actions -->
+      <div class="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 w-full lg:w-auto">
+        <a href="enroll_course.php"
+           class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-white text-indigo-700 font-semibold px-4 sm:px-5 py-2.5 sm:py-3 shadow-lg shadow-slate-900/25 hover-raise text-sm sm:text-base">
+          <i data-lucide="plus-circle" class="w-5 h-5" aria-hidden="true"></i>
+          <span>Enroll in a course</span>
+        </a>
+        <a href="#courses"
+           class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-indigo-900/40 text-white font-medium px-4 sm:px-5 py-2.5 sm:py-3 ring-1 ring-white/30 hover:bg-indigo-900/55 hover-raise text-sm sm:text-base">
+          <i data-lucide="compass" class="w-5 h-5" aria-hidden="true"></i>
+          <span>Browse your courses</span>
+        </a>
       </div>
 
-      <?php if (!empty($announcements)): ?>
-        <ul class="space-y-4">
-          <?php foreach ($announcements as $index => $a): ?>
-            <li class="rounded-2xl bg-white/90 border border-indigo-100/80 px-4 py-4 sm:px-5 sm:py-4 shadow-sm hover-raise relative overflow-hidden">
-              <div class="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-indigo-500 to-sky-400"></div>
-              <div class="pl-4 sm:pl-5 flex flex-col gap-1.5">
-                <div class="flex flex-wrap items-start justify-between gap-2">
-                  <div class="flex items-center gap-2">
-                    <span class="inline-flex h-2.5 w-2.5 rounded-full bg-blue-500 ring-4 ring-blue-200/50"></span>
+      <!-- Quick metrics -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md w-full mx-auto lg:mx-0 text-center sm:text-left">
+        <div class="rounded-2xl bg-white/10 ring-1 ring-white/20 p-3 sm:p-4 backdrop-blur">
+          <div class="text-xs text-white/85 inline-flex items-center gap-1">
+            <i data-lucide="book-open" class="w-4 h-4"></i>
+            <span>Courses</span>
+          </div>
+          <div class="mt-1 text-2xl font-semibold tracking-tight">
+            <?php echo (int)$coursesCount; ?>
+          </div>
+          <p class="mt-0.5 text-[11px] text-white/80">Actively enrolled</p>
+        </div>
+        <div class="rounded-2xl bg-white/10 ring-1 ring-white/20 p-3 sm:p-4 backdrop-blur">
+          <div class="text-xs text-white/85 inline-flex items-center gap-1">
+            <i data-lucide="megaphone" class="w-4 h-4"></i>
+            <span>Announcements</span>
+          </div>
+          <div class="mt-1 text-2xl font-semibold tracking-tight">
+            <?php echo (int)$annCount; ?>
+          </div>
+          <p class="mt-0.5 text-[11px] text-white/80">Latest updates</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ANNOUNCEMENTS -->
+<section class="soft-card rounded-2xl p-6 sm:p-8">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+    <div class="flex items-center gap-2">
+      <span class="inline-flex items-center justify-center rounded-2xl bg-indigo-100 text-indigo-700 p-2">
+        <i data-lucide="megaphone" class="w-5 h-5"></i>
+      </span>
+      <div>
+        <h3 class="text-xl sm:text-2xl font-semibold text-slate-800">
+          Announcements
+        </h3>
+        <p class="text-xs sm:text-sm text-slate-500">
+          Stay in sync with important updates and deadlines.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <?php if (!empty($announcements)): ?>
+    <ul class="space-y-4">
+      <?php foreach ($announcements as $index => $a): ?>
+        <li class="rounded-2xl bg-white/95 border border-indigo-100/80 px-3 py-3 sm:px-5 sm:py-4 shadow-sm hover-raise relative overflow-hidden">
+          <!-- Left accent bar -->
+          <div class="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-indigo-500 to-sky-400"></div>
+
+          <div class="pl-4 sm:pl-5 flex flex-col gap-1.5">
+            <div class="flex flex-wrap items-start justify-between gap-2">
+              <div class="flex items-start gap-2">
+                <span class="mt-1 inline-flex h-2.5 w-2.5 rounded-full bg-blue-500 ring-4 ring-blue-200/50"></span>
+                <div class="flex flex-col gap-1">
+                  <div class="flex flex-wrap items-center gap-2">
                     <span class="font-semibold text-slate-800 flex items-center gap-2">
                       <i data-lucide="speaker" class="w-4 h-4 text-indigo-600"></i>
-                      <?= htmlspecialchars($a['title']) ?>
+                      <span class="break-words">
+                        <?= htmlspecialchars($a['title']) ?>
+                      </span>
                     </span>
+
+                    <?php if ($index === 0): ?>
+                      <span class="text-[10px] uppercase tracking-wide text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                        New
+                      </span>
+                    <?php endif; ?>
                   </div>
-                  <span class="shrink-0 text-[11px] sm:text-xs text-slate-500 inline-flex items-center gap-1 bg-slate-50 border border-slate-200/80 px-2 py-1 rounded-full">
-                    <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
-                    <?= date('M d, Y', strtotime($a['created_at'])) ?>
-                  </span>
-                </div>
-                <div class="text-sm text-slate-700 leading-relaxed">
-                  <?= nl2br(htmlspecialchars($a['message'])) ?>
                 </div>
               </div>
-            </li>
-          <?php endforeach; ?>
-        </ul>
-      <?php else: ?>
-        <div class="flex items-center gap-3 text-slate-600 text-sm sm:text-base">
-          <span class="inline-flex items-center justify-center h-9 w-9 rounded-2xl bg-indigo-50 text-indigo-600">
-            <i data-lucide="info" class="w-5 h-5"></i>
-          </span>
-          <div>
-            <p class="font-medium">No announcements right now.</p>
-            <p class="text-xs text-slate-500">You’ll see important updates from your instructors and school here.</p>
+
+              <span class="shrink-0 text-[11px] sm:text-xs text-slate-500 inline-flex items-center gap-1 bg-slate-50 border border-slate-200/80 px-2 py-1 rounded-full">
+                <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+                <?= date('M d, Y', strtotime($a['created_at'])) ?>
+              </span>
+            </div>
+
+            <div class="text-sm text-slate-700 leading-relaxed break-words">
+              <?= nl2br(htmlspecialchars($a['message'])) ?>
+            </div>
           </div>
-        </div>
-      <?php endif; ?>
-    </section>
+        </li>
+      <?php endforeach; ?>
+    </ul>
+  <?php else: ?>
+    <div class="flex items-start gap-3 text-slate-600 text-sm sm:text-base">
+      <span class="inline-flex items-center justify-center h-9 w-9 rounded-2xl bg-indigo-50 text-indigo-600 mt-0.5">
+        <i data-lucide="info" class="w-5 h-5"></i>
+      </span>
+      <div>
+        <p class="font-medium">No announcements right now.</p>
+        <p class="text-xs text-slate-500">
+          You’ll see important updates from your instructors and school here.
+        </p>
+      </div>
+    </div>
+  <?php endif; ?>
+</section>
 
     <!-- COURSES -->
-    <section id="courses" class="soft-card rounded-2xl p-6 sm:p-8">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div class="flex items-center gap-2">
-          <span class="inline-flex items-center justify-center rounded-2xl bg-sky-100 text-sky-700 p-2">
-            <i data-lucide="book-open" class="w-5 h-5"></i>
-          </span>
-          <div>
-            <h3 class="text-xl sm:text-2xl font-semibold text-slate-800">
-              Your Enrolled Courses
-            </h3>
-            <p class="text-xs sm:text-sm text-slate-500">
-              Access all the courses you’re currently taking.
-            </p>
-          </div>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-2">
-          <form action="courses.php" method="get" class="relative w-full sm:w-auto">
-            <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-            <input
-              name="q"
-              type="text"
-              placeholder="Search your courses..."
-              class="w-full sm:w-72 rounded-full bg-white border border-gray-200/80 px-4 py-2.5 pl-10 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500/40 focus:outline-none">
-          </form>
-          <div class="hidden sm:flex items-center gap-1 rounded-full border border-gray-200/80 bg-white/70 px-1 shadow-sm">
-            <button id="gridView" type="button"
-                    class="px-2.5 py-1 text-xs rounded-full bg-indigo-600 text-white">
-              Grid
-            </button>
-            <button id="listView" type="button"
-                    class="px-2.5 py-1 text-xs rounded-full text-gray-700 hover:bg-gray-100">
-              List
-            </button>
-          </div>
-        </div>
+<section id="courses" class="soft-card rounded-2xl p-6 sm:p-8">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <div class="flex items-center gap-2">
+      <span class="inline-flex items-center justify-center rounded-2xl bg-sky-100 text-sky-700 p-2">
+        <i data-lucide="book-open" class="w-5 h-5"></i>
+      </span>
+      <div>
+        <h3 class="text-xl sm:text-2xl font-semibold text-slate-800">
+          Your Enrolled Courses
+        </h3>
+        <p class="text-xs sm:text-sm text-slate-500">
+          Access all the courses you’re currently taking.
+        </p>
       </div>
+    </div>
 
-      <?php if (!empty($coursesArr)): ?>
-        <div id="courseContainer" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <?php foreach ($coursesArr as $course): ?>
-            <?php
-              $courseId = (int)$course['course_id'];
-              $cover    = $course['cover_image'] ?? '';
-            ?>
-            <a href="course.php?course_id=<?= $courseId ?>"
-               class="group relative block rounded-2xl bg-white/95 border border-indigo-100/70 p-5 shadow-sm hover-raise overflow-hidden">
-              <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition bg-gradient-to-br from-indigo-500/[0.05] via-sky-500/[0.04] to-cyan-500/[0.06]"></div>
-              <div class="relative z-10 flex flex-col gap-3">
+    <div class="flex flex-col sm:flex-row flex-1 sm:flex-none items-stretch sm:items-center gap-2">
+      <form action="courses.php" method="get" class="relative w-full sm:w-72">
+        <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+        <input
+          name="q"
+          type="text"
+          placeholder="Search your courses..."
+          class="w-full rounded-full bg-white border border-gray-200/80 px-4 py-2.5 pl-10 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500/40 focus:outline-none"
+          aria-label="Search your courses">
+      </form>
 
-                <!-- Cover image / fallback banner -->
-                <?php if (!empty($cover)): ?>
-                  <div class="relative mb-3 -mx-3 -mt-3 rounded-xl overflow-hidden">
-                    <img
-                      src="<?= htmlspecialchars($cover, ENT_QUOTES) ?>"
-                      alt="Cover image for <?= htmlspecialchars($course['name'], ENT_QUOTES) ?>"
-                      class="w-full h-32 sm:h-36 object-cover"
-                    >
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-black/5 to-transparent"></div>
-                  </div>
-                <?php else: ?>
-                  <div class="relative mb-3 -mx-3 -mt-3 h-16 rounded-xl bg-gradient-to-r from-indigo-500/15 via-sky-400/15 to-emerald-400/15"></div>
-                <?php endif; ?>
+      <div class="hidden sm:flex items-center gap-1 rounded-full border border-gray-200/80 bg-white/70 px-1 shadow-sm">
+        <button id="gridView" type="button"
+                class="px-2.5 py-1 text-xs rounded-full bg-indigo-600 text-white">
+          Grid
+        </button>
+        <button id="listView" type="button"
+                class="px-2.5 py-1 text-xs rounded-full text-gray-700 hover:bg-gray-100">
+          List
+        </button>
+      </div>
+    </div>
+  </div>
 
-                <div class="flex items-start justify-between gap-3">
-                  <div class="flex items-center gap-3">
-                    <span class="inline-flex items-center justify-center h-11 w-11 rounded-2xl bg-indigo-50 ring-1 ring-indigo-100">
-                      <i data-lucide="bookmark" class="w-5 h-5 text-indigo-700"></i>
-                    </span>
-                    <div class="space-y-0.5">
-                      <h4 class="text-base sm:text-lg font-semibold text-indigo-800 group-hover:text-indigo-900 group-hover:underline">
-                        <?= htmlspecialchars($course['name']) ?>
-                      </h4>
-                      <p class="text-[11px] uppercase tracking-wide text-indigo-500 font-semibold">
-                        Active course
-                      </p>
-                    </div>
-                  </div>
-                  <span class="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-1 rounded-full">
-                    <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
-                    <span>Enrolled</span>
-                  </span>
-                </div>
+  <?php if (!empty($coursesArr)): ?>
+    <div id="courseContainer" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <?php foreach ($coursesArr as $course): ?>
+        <?php
+          $courseId = (int)$course['course_id'];
+          $cover    = $course['cover_image'] ?? '';
+        ?>
+        <a href="course.php?course_id=<?= $courseId ?>"
+           class="group relative block rounded-2xl bg-white/95 border border-indigo-100/70 p-5 shadow-sm hover-raise overflow-hidden">
+          <!-- Hover overlay -->
+          <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition bg-gradient-to-br from-indigo-500/[0.05] via-sky-500/[0.04] to-cyan-500/[0.06]"></div>
 
-                <p class="text-sm text-slate-600 line-clamp-3">
-                  <?= htmlspecialchars($course['description'] ?? 'No description available.') ?>
-                </p>
+          <div class="relative z-10 flex flex-col gap-3 h-full">
+            <!-- Cover image / fallback banner -->
+            <?php if (!empty($cover)): ?>
+              <div class="relative mb-3 -mx-3 -mt-3 rounded-xl overflow-hidden">
+                <img
+                  src="<?= htmlspecialchars($cover, ENT_QUOTES) ?>"
+                  alt="Cover image for <?= htmlspecialchars($course['name'], ENT_QUOTES) ?>"
+                  class="w-full h-32 sm:h-36 object-cover"
+                  loading="lazy"
+                  decoding="async"
+                >
+                <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-black/5 to-transparent"></div>
+              </div>
+            <?php else: ?>
+              <div class="relative mb-3 -mx-3 -mt-3 h-16 rounded-xl bg-gradient-to-r from-indigo-500/15 via-sky-400/15 to-emerald-400/15"></div>
+            <?php endif; ?>
 
-                <div class="mt-2 flex items-center justify-between text-xs text-slate-500">
-                  <span class="inline-flex items-center gap-1.5">
-                    <i data-lucide="layers" class="w-3.5 h-3.5 text-indigo-500"></i>
-                    <span>View lessons & resources</span>
-                  </span>
-                  <span class="text-indigo-600 text-sm inline-flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
-                    View course
-                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                  </span>
+            <!-- Title + status -->
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                <span class="inline-flex items-center justify-center h-11 w-11 rounded-2xl bg-indigo-50 ring-1 ring-indigo-100">
+                  <i data-lucide="bookmark" class="w-5 h-5 text-indigo-700"></i>
+                </span>
+                <div class="space-y-0.5 min-w-0">
+                  <h4 class="text-base sm:text-lg font-semibold text-indigo-800 group-hover:text-indigo-900 group-hover:underline break-words">
+                    <?= htmlspecialchars($course['name']) ?>
+                  </h4>
+                  <p class="text-[11px] uppercase tracking-wide text-indigo-500 font-semibold">
+                    Active course
+                  </p>
                 </div>
               </div>
-            </a>
-          <?php endforeach; ?>
-        </div>
-      <?php else: ?>
-        <div class="flex items-center gap-3 text-slate-600 text-sm sm:text-base">
-          <span class="inline-flex items-center justify-center h-9 w-9 rounded-2xl bg-indigo-50 text-indigo-600">
-            <i data-lucide="info" class="w-5 h-5"></i>
-          </span>
-          <div>
-            <p class="font-medium">You’re not enrolled in any courses yet.</p>
-            <p class="text-xs text-slate-500 mt-0.5">
-              Start learning by enrolling in your first course.
-              <a href="enroll_course.php" class="text-indigo-600 font-semibold hover:underline inline-flex items-center gap-1">
-                Enroll now
+              <span class="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-1 rounded-full shrink-0">
+                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+                <span>Enrolled</span>
+              </span>
+            </div>
+
+            <!-- Description -->
+            <p class="text-sm text-slate-600 line-clamp-3 break-words">
+              <?= htmlspecialchars($course['description'] ?? 'No description available.') ?>
+            </p>
+
+            <!-- Footer -->
+            <div class="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+              <span class="inline-flex items-center gap-1.5">
+                <i data-lucide="layers" class="w-3.5 h-3.5 text-indigo-500"></i>
+                <span>View lessons & resources</span>
+              </span>
+              <span class="text-indigo-600 text-sm inline-flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                View course
                 <i data-lucide="arrow-right" class="w-4 h-4"></i>
-              </a>
-            </p>
+              </span>
+            </div>
           </div>
-        </div>
-      <?php endif; ?>
-    </section>
-
-    <!-- ACTIVITY TIMELINE -->
-    <section class="soft-card rounded-2xl p-6 sm:p-8">
-      <div class="flex items-center gap-2 mb-6">
-        <span class="inline-flex items-center justify-center rounded-2xl bg-violet-100 text-violet-700 p-2">
-          <i data-lucide="activity" class="w-5 h-5"></i>
-        </span>
-        <div>
-          <h3 class="text-xl sm:text-2xl font-semibold text-slate-800">
-            Your Recent Activity
-          </h3>
-          <p class="text-xs sm:text-sm text-slate-500">
-            A quick timeline of what you’ve been working on.
-          </p>
-        </div>
+        </a>
+      <?php endforeach; ?>
+    </div>
+  <?php else: ?>
+    <div class="flex items-start gap-3 text-slate-600 text-sm sm:text-base">
+      <span class="inline-flex items-center justify-center h-9 w-9 rounded-2xl bg-indigo-50 text-indigo-600 mt-0.5">
+        <i data-lucide="info" class="w-5 h-5"></i>
+      </span>
+      <div>
+        <p class="font-medium">You’re not enrolled in any courses yet.</p>
+        <p class="text-xs text-slate-500 mt-0.5">
+          Start learning by enrolling in your first course.
+          <a href="enroll_course.php" class="text-indigo-600 font-semibold hover:underline inline-flex items-center gap-1">
+            Enroll now
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </a>
+        </p>
       </div>
+    </div>
+  <?php endif; ?>
+</section>
 
-      <?php if (!empty($logsArr)): ?>
-        <div class="relative pl-4 sm:pl-5 timeline">
-          <ul class="space-y-4">
-            <?php foreach ($logsArr as $log): ?>
-              <?php $when = date('F j, Y, g:i A', strtotime($log['timestamp'])); ?>
-              <li class="relative flex gap-3">
-                <!-- Dot -->
-                <span class="absolute left-[-2px] top-2 h-3 w-3 rounded-full bg-indigo-500 ring-4 ring-indigo-200/60 shadow-sm"></span>
+ <!-- ACTIVITY TIMELINE -->
+<section class="soft-card rounded-2xl p-6 sm:p-8">
+  <div class="flex items-center gap-2 mb-6">
+    <span class="inline-flex items-center justify-center rounded-2xl bg-violet-100 text-violet-700 p-2">
+      <i data-lucide="activity" class="w-5 h-5"></i>
+    </span>
+    <div>
+      <h3 class="text-xl sm:text-2xl font-semibold text-slate-800">
+        Your Recent Activity
+      </h3>
+      <p class="text-xs sm:text-sm text-slate-500">
+        A quick timeline of what you’ve been working on.
+      </p>
+    </div>
+  </div>
 
-                <div class="ml-3 sm:ml-4 rounded-xl bg-white/95 border border-slate-100 px-3.5 py-2.5 shadow-sm w-full">
-                  <div class="flex flex-wrap items-center gap-1.5 text-sm text-slate-800">
-                    <span class="inline-flex items-center gap-1.5 font-semibold text-indigo-700">
-                      <i data-lucide="dot" class="w-4 h-4 text-indigo-600"></i>
-                      <?= htmlspecialchars($log['action']) ?>
-                    </span>
-                    <span class="text-slate-400 text-xs sm:text-[13px] mx-1">on</span>
-                    <span class="font-medium text-slate-800">
-                      <?= htmlspecialchars($log['title']) ?>
-                    </span>
-                  </div>
-                  <div class="mt-1 text-[11px] sm:text-xs text-slate-500 italic flex items-center gap-1.5">
-                    <i data-lucide="clock" class="w-3.5 h-3.5"></i>
-                    <span><?= htmlspecialchars($when) ?></span>
-                  </div>
-                </div>
-              </li>
-            <?php endforeach; ?>
-          </ul>
-        </div>
-      <?php else: ?>
-        <div class="flex items-center gap-3 text-slate-600 text-sm sm:text-base">
-          <span class="inline-flex items-center justify-center h-9 w-9 rounded-2xl bg-indigo-50 text-indigo-600">
-            <i data-lucide="info" class="w-5 h-5"></i>
-          </span>
-          <div>
-            <p class="font-medium">No activity yet.</p>
-            <p class="text-xs text-slate-500">
-              As you explore courses, take quizzes, and interact with content, your recent activity will appear here.
-            </p>
-          </div>
-        </div>
-      <?php endif; ?>
-    </section>
+  <?php if (!empty($logsArr)): ?>
+    <div class="relative pl-4 sm:pl-5 timeline">
+      <ul class="space-y-4">
+        <?php
+          $currentDateLabel = null;
+          $today     = date('Y-m-d');
+          $yesterday = date('Y-m-d', strtotime('-1 day'));
+        ?>
+
+        <?php foreach ($logsArr as $log): ?>
+          <?php
+            $timestamp = strtotime($log['timestamp']);
+            $logDate   = date('Y-m-d', $timestamp);
+
+            if ($logDate === $today) {
+              $dateLabel = 'Today';
+            } elseif ($logDate === $yesterday) {
+              $dateLabel = 'Yesterday';
+            } else {
+              $dateLabel = date('M j, Y', $timestamp);
+            }
+
+            $when = date('g:i A', $timestamp); // only time here, date is in the group label
+          ?>
+
+          <?php if ($dateLabel !== $currentDateLabel): ?>
+            <!-- Date group label -->
+            <li class="relative">
+              <div class="ml-4 sm:ml-5 mb-1 text-[11px] sm:text-xs font-semibold uppercase tracking-wide text-slate-400">
+                <?= htmlspecialchars($dateLabel) ?>
+              </div>
+            </li>
+            <?php $currentDateLabel = $dateLabel; ?>
+          <?php endif; ?>
+
+          <!-- Activity item -->
+          <li class="relative">
+            <!-- Dot -->
+            <span class="absolute left-[-2px] top-4 h-3 w-3 rounded-full bg-indigo-500 ring-4 ring-indigo-200/60 shadow-sm"></span>
+
+            <div class="ml-4 sm:ml-5 rounded-xl bg-white/95 border border-slate-100 px-3.5 py-3 shadow-sm w-full">
+              <div class="flex flex-wrap items-center gap-1.5 text-sm sm:text-[13px] text-slate-800">
+                <span class="inline-flex items-center gap-1.5 font-semibold text-indigo-700">
+                  <i data-lucide="dot" class="w-4 h-4 text-indigo-600"></i>
+                  <?= htmlspecialchars($log['action']) ?>
+                </span>
+                <span class="text-slate-400 text-xs sm:text-[13px] mx-1">on</span>
+                <span class="font-medium text-slate-800 break-words">
+                  <?= htmlspecialchars($log['title']) ?>
+                </span>
+              </div>
+              <div class="mt-1 text-[11px] sm:text-xs text-slate-500 italic flex items-center gap-1.5">
+                <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                <span><?= htmlspecialchars($when) ?></span>
+              </div>
+            </div>
+          </li>
+        <?php endforeach; ?>
+      </ul>
+    </div>
+  <?php else: ?>
+    <div class="flex items-start gap-3 text-slate-600 text-sm sm:text-base">
+      <span class="inline-flex items-center justify-center h-9 w-9 rounded-2xl bg-indigo-50 text-indigo-600 mt-0.5">
+        <i data-lucide="info" class="w-5 h-5"></i>
+      </span>
+      <div>
+        <p class="font-medium">No activity yet.</p>
+        <p class="text-xs text-slate-500">
+          As you explore courses, take quizzes, and interact with content, your recent activity will appear here.
+        </p>
+      </div>
+    </div>
+  <?php endif; ?>
+</section>
 
   </main>
 </div>

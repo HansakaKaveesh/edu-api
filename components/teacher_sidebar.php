@@ -43,7 +43,7 @@ $items = [
   ['key' => 'dashboard', 'label' => 'Dashboard',   'icon' => 'house',            'href' => 'teacher_dashboard.php',             'badge' => null],
   ['key' => 'courses',   'label' => 'My Courses',  'icon' => 'books',            'href' => 'teacher_dashboard.php#courses',     'badge' => $counts['courses']  ?? null],
   // ['key' => 'students',  'label' => 'My Students', 'icon' => 'users-three',      'href' => 'teacher_students.php',            'badge' => $counts['students'] ?? null],
-  ['key' => 'messages',  'label' => 'Messages',    'icon' => 'chat-circle-dots', 'href' => 'teacher_messages.php',              'badge' => $counts['messages'] ?? ($counts['messages_unread'] ?? null)],
+  // ['key' => 'messages',  'label' => 'Messages',    'icon' => 'chat-circle-dots', 'href' => 'teacher_messages.php',              'badge' => $counts['messages'] ?? ($counts['messages_unread'] ?? null)],
   ['key' => 'settings',  'label' => 'Settings',    'icon' => 'gear-six',         'href' => 'teacher_settings.php',              'badge' => null],
 ];
 

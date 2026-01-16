@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit 1: Digital Devices - Full Notes</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --highlight-bg: #e8f6f3;
+            --highlight-border: #1abc9c;
+            --warning-bg: #fcf3cf;
+            --warning-border: #f1c40f;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        /* Headers */
+        h1 {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-top: 50px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        h3 {
+            color: #2980b9;
+            margin-top: 30px;
+            font-size: 1.4em;
+        }
+
+        h4 {
+            color: #16a085;
+            margin-bottom: 10px;
+        }
+
+        /* Layout Containers */
+        .device-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-left: 5px solid var(--accent-color);
+        }
+
+        .section-intro {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        /* Images */
+        .img-container {
+            text-align: center;
+            margin: 20px auto;
+            max-width: 80%;
+        }
+
+        .responsive-img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border: 1px solid #ddd;
+        }
+
+        .caption {
+            display: block;
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        /* Special Boxes */
+        .convergence-box {
+            background-color: var(--highlight-bg);
+            border: 2px solid var(--highlight-border);
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .math-box {
+            background-color: var(--warning-bg);
+            border: 1px solid var(--warning-border);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .math-title {
+            font-weight: bold;
+            color: #d35400;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .debate-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .debate-col {
+            flex: 1;
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            min-width: 300px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .debate-col.pros { border-top: 4px solid #27ae60; }
+        .debate-col.cons { border-top: 4px solid #c0392b; }
+
+        ul { margin-top: 0; }
+    </style>
+</head>
+<body>
+
+    <h1>UNIT 1: DIGITAL DEVICES</h1>
+
+    <!-- CHAPTER 1 -->
+    <h2>1. COMPUTERS</h2>
+    <div class="section-intro">
+        <p>Computers can be classified by <strong>Size</strong> (laptop vs mainframe), <strong>Purpose</strong> (server vs supercomputer), or <strong>Architecture</strong> (memory organization).</p>
+    </div>
+
+    <!-- Mainframe -->
+    <div class="device-card">
+        <h3>1. Mainframe Computers</h3>
+        <div class="img-container">
+            <img src="https://www.entrepreneurshipinabox.com/wp-content/uploads/Mainframe-Computers.webp" alt="Mainframe" class="responsive-img">
+            <span class="caption">Large, expensive systems used by banks and governments.</span>
+        </div>
+        <p><strong>Use:</strong> Large scale data processing (Banks, Governments, Airlines).</p>
+        <p><strong>Processing Power:</strong> Exceptionally high. Processes <em>Billions of Instructions Per Second (BIPS)</em>.</p>
+        <p><strong>Size:</strong> Room-sized or large cabinet-sized.</p>
+        <p><strong>Operating Systems:</strong> IBM z/OS, Linux on zSystems.</p>
+        <ul>
+            <li><strong>Advantages:</strong> Handles enormous workloads, superior security, ideal for mission-critical tasks.</li>
+            <li><strong>Disadvantages:</strong> Very expensive ($500k - $10m+), requires highly trained personnel.</li>
+        </ul>
+    </div>
+
+    <!-- Minicomputer -->
+    <div class="device-card">
+        <h3>2. Minicomputers (Midrange)</h3>
+        <p><strong>Use:</strong> Small to medium businesses (Database management, ERP).</p>
+        <p><strong>Processing Power:</strong> Moderate to high. Processes <em>Millions of Instructions Per Second (MIPS)</em>.</p>
+        <p><strong>Size:</strong> Cabinet-sized, smaller than mainframes.</p>
+        <ul>
+            <li><strong>Advantages:</strong> Affordable compared to mainframes, multi-user capability.</li>
+            <li><strong>Disadvantages:</strong> Limited scalability, becoming less common.</li>
+            <li><strong>Price:</strong> $5,000 - $200,000.</li>
+        </ul>
+    </div>
+
+    <!-- Microcomputer -->
+    <div class="device-card">
+        <h3>3. Microcomputers</h3>
+        <div class="img-container">
+            <img src="https://computerguidehub.com/wp-content/uploads/microcomputer.webp" alt="Microcomputer" class="responsive-img">
+        </div>
+        <p><strong>Use:</strong> Personal tasks (Browsing, Office, Gaming).</p>
+        <p><strong>Technology:</strong> Microprocessor-based (Intel Core, AMD Ryzen).</p>
+        <p><strong>OS:</strong> Windows, macOS, Linux.</p>
+        <ul>
+            <li><strong>Advantages:</strong> Affordable, easy to use, widely available.</li>
+            <li><strong>Disadvantages:</strong> Limited power for resource-intensive tasks.</li>
+            <li><strong>Price:</strong> $300 - $2,000.</li>
+        </ul>
+    </div>
+
+    <!-- Desktop -->
+    <div class="device-card">
+        <h3>4. Desktop Computers</h3>
+        <p><strong>Use:</strong> Professional and personal tasks, fits on/under a desk.</p>
+        <p><strong>Processing Power:</strong> Moderate to high (BIPS). Good for multitasking.</p>
+        <ul>
+            <li><strong>Advantages:</strong> Customizable, upgradable, long lifespan.</li>
+            <li><strong>Disadvantages:</strong> Stationary (not portable), requires external peripherals.</li>
+        </ul>
+    </div>
+
+    <!-- Workstation -->
+    <div class="device-card">
+        <h3>5. Workstations</h3>
+        <div class="img-container">
+            <img src="https://bridgeit.com.au/wp-content/uploads/2022/06/hp-desktop-vs-hp-workstation-scaled.jpg" alt="Workstation" class="responsive-img">
+        </div>
+        <p><strong>Use:</strong> High performance tasks (Video editing, CAD, Scientific modeling).</p>
+        <p><strong>Specs:</strong> Multi-core CPUs (Xeon), ECC Memory, Professional GPUs.</p>
+        <ul>
+            <li><strong>Advantages:</strong> Reliable, multi-monitor support, high performance.</li>
+            <li><strong>Disadvantages:</strong> High cost ($2k - $10k+).</li>
+        </ul>
+    </div>
+
+    <!-- CHAPTER 2 -->
+    <h2>2. MOBILE DEVICES</h2>
+
+    <div class="convergence-box">
+        <h3>Technological Convergence</h3>
+        <div class="img-container">
+            <img src="https://www.advancedtech.com/wp-content/uploads/2022/04/iStock-1164509580-2-scaled.jpg" alt="Convergence" class="responsive-img">
+            <span class="caption">A single device performing the functions of many.</span>
+        </div>
+        <p><strong>Definition:</strong> Combining the functions of several devices into a single device.</p>
+        <p><strong>Example (Smartphone):</strong> Combines Telephone, Camera, Music Player, GPS, Computer, Gaming Console, and Calendar.</p>
+        <p><strong>Importance:</strong> Saves carrying multiple devices, reduces cost, easier data management.</p>
+    </div>
+
+    <h3>Device Categories</h3>
+    <ul>
+        <li><strong>Smartphones:</strong> Versatile (Apps, GPS, Internet). Essential but fragile with short battery life.</li>
+        <li><strong>Tablets:</strong> Bridge between phone and laptop. Good for media, less powerful than laptops.</li>
+        <li><strong>Specialist Phones:</strong> Rugged or simple (elderly users). Long battery, durable, limited features.</li>
+        <li><strong>Phablets:</strong> Large smartphones.</li>
+    </ul>
+
+    <h3>Consumer Electronics</h3>
+    <ul>
+        <li><strong>Cameras/Camcorders:</strong> Higher quality than phones (Optical zoom, 4K). Bulky.</li>
+        <li><strong>Game Consoles:</strong> Optimized for gaming (PlayStation, Xbox).</li>
+        <li><strong>Home Entertainment:</strong> Smart TVs, Surround Sound.</li>
+        <li><strong>Navigation (GPS):</strong> Dedicated guidance (Garmin), accurate but often replaced by phones.</li>
+    </ul>
+
+    <!-- CHAPTER 3 -->
+    <h2>3. FEATURES OF DIGITAL DEVICES</h2>
+
+    <h3>Portability</h3>
+    <p>How easy it is to carry and move a device.</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Device</th>
+                <th>Scenario</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Laptop</strong></td>
+                <td>Student carries to school for notes.</td>
+            </tr>
+            <tr>
+                <td><strong>Tablet</strong></td>
+                <td>Businessperson presents slides at a meeting.</td>
+            </tr>
+            <tr>
+                <td><strong>Smartphone</strong></td>
+                <td>Tourist navigates with maps.</td>
+            </tr>
+            <tr>
+                <td><strong>Desktop PC</strong></td>
+                <td><strong>(Non-portable)</strong> Fixed at a desk.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Performance</h3>
+    <p><strong>Key Factors:</strong> CPU Speed, RAM Capacity, Storage Speed (SSD vs HDD), Software Efficiency.</p>
+
+    <div class="math-box">
+        <span class="math-title">Question 1: Processor Speed</span>
+        <p>Processor: 3 GHz (3 billion instructions/sec). Time: 10 seconds.</p>
+        <p><em>Calculation:</em> 3 Billion × 10 = <strong>30 Billion Instructions</strong>.</p>
+    </div>
+
+    <div class="math-box">
+        <span class="math-title">Question 2: RAM Capacity</span>
+        <p>Total RAM: 8 GB. RAM per program: 500 MB.</p>
+        <p><em>Calculation:</em> 8 GB = 8192 MB. 8192 / 500 = <strong>16.38 (16 programs)</strong>.</p>
+    </div>
+
+    <div class="math-box">
+        <span class="math-title">Question 4: Storage Transfer Speed</span>
+        <p>SSD Speed: 550 MB/s. File Size: 4 GB.</p>
+        <p><em>Calculation:</em> 4 GB = 4096 MB. 4096 / 550 = <strong>7.44 seconds</strong>.</p>
+    </div>
+
+    <h3>User Interface (UI)</h3>
+    <div class="img-container">
+        <img src="https://datasave.qsfptek.com/upload/2023-10-17/1697513068466.jpg" alt="UI Types" class="responsive-img">
+    </div>
+    <ol>
+        <li><strong>CLI (Command Line):</strong> Text commands. Fast for experts, low memory. (e.g., Linux Terminal).</li>
+        <li><strong>Menu-Driven:</strong> Select options. Simple but slow. (e.g., ATM).</li>
+        <li><strong>GUI (Graphical):</strong> WIMP (Windows, Icons, Menus, Pointers). Intuitive. (e.g., Windows).</li>
+        <li><strong>Voice:</strong> Spoken commands. Hands-free. (e.g., Siri).</li>
+        <li><strong>Gesture:</strong> Movements. Intuitive. (e.g., Touchscreens, VR).</li>
+    </ol>
+
+    <h3>Other Features</h3>
+    <ul>
+        <li><strong>Connectivity:</strong> Linking to other devices/networks.</li>
+        <li><strong>Media Support:</strong> Compatibility with files (.mp3, .jpg) and codecs.</li>
+        <li><strong>Energy Consumption:</strong> Power usage. Green computing minimizes e-waste and power use.</li>
+        <li><strong>Expansion:</strong> Adding hardware (RAM, GPU) or using ports (USB, HDMI).</li>
+        <li><strong>Security:</strong>
+            <ul>
+                <li><em>Software:</em> Passwords, Biometrics, Encryption.</li>
+                <li><em>Physical:</em> Kensington locks, tamper-resistant screws.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <!-- CHAPTER 4 -->
+    <h2>4. PERIPHERAL DEVICES</h2>
+    
+    <h3>i) Input Devices</h3>
+    <div class="img-container">
+        <img src="https://computerguidehub.com/wp-content/uploads/input-devices-of-computer.webp" alt="Input Devices" class="responsive-img">
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Device</th>
+                <th>Use</th>
+                <th>Pros / Cons</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Keyboard</strong></td>
+                <td>Typing text.</td>
+                <td>+ Accurate <br> - RSI risk</td>
+            </tr>
+            <tr>
+                <td><strong>Mouse</strong></td>
+                <td>Pointing/Selecting.</td>
+                <td>+ Precise <br> - Needs flat surface</td>
+            </tr>
+            <tr>
+                <td><strong>Microphone</strong></td>
+                <td>Audio input.</td>
+                <td>+ Hands-free <br> - Background noise</td>
+            </tr>
+            <tr>
+                <td><strong>Scanner</strong></td>
+                <td>Digitizing docs.</td>
+                <td>+ Archiving <br> - Slow</td>
+            </tr>
+            <tr>
+                <td><strong>Biometric</strong></td>
+                <td>Security (Face/Finger).</td>
+                <td>+ Unique, Secure <br> - Privacy, dirty fingers fail</td>
+            </tr>
+            <tr>
+                <td><strong>Sensors</strong></td>
+                <td>Detect environment.</td>
+                <td>+ Automatic <br> - Needs calibration</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>ii) Output Devices</h3>
+
+    <h4>Monitors</h4>
+    <p><strong>Types:</strong> LCD, LED, OLED. <br><strong>Resolution:</strong> Measured in pixels (HD, 4K). Higher resolution = sharper image.</p>
+
+    <h4>Printers</h4>
+    <ul>
+        <li><strong>Inkjet:</strong> Liquid ink, good for photos, slower.</li>
+        <li><strong>Laser:</strong> Toner, fast, good for text/office.</li>
+        <li><strong>3D Printer:</strong> Builds objects layer by layer.</li>
+    </ul>
+
+    <div class="debate-container">
+        <div class="debate-col pros">
+            <h4>3D Printing: FOR</h4>
+            <ul>
+                <li>Encourages creativity & innovation</li>
+                <li>Medical uses (prosthetics)</li>
+                <li>Supports small-scale business</li>
+            </ul>
+        </div>
+        <div class="debate-col cons">
+            <h4>3D Printing: AGAINST</h4>
+            <ul>
+                <li>Safety risks (weapons)</li>
+                <li>IP/Copyright issues</li>
+                <li>High cost & maintenance</li>
+            </ul>
+        </div>
+    </div>
+
+    <h4>Other Output</h4>
+    <ul>
+        <li><strong>Plotter:</strong> Draws high-quality blueprints/maps (used by cartographers/architects).</li>
+        <li><strong>Projector:</strong> Displays on large surfaces (LCD/DLP).</li>
+        <li><strong>Control Devices (Actuators):</strong> Motors, valves, heaters. Converts signals into physical movement.</li>
+    </ul>
+
+    <h3>iii) Storage Devices</h3>
+    <div class="img-container">
+        <img src="https://soum.sa/blog/wp-content/uploads/2025/02/Types-of-Storage-Devices.webp" alt="Storage Types" class="responsive-img">
+    </div>
+
+    <h4>Primary Storage (Main Memory)</h4>
+    <ul>
+        <li><strong>RAM (Volatile):</strong> Temporary, fast, loses data when power is off.</li>
+        <li><strong>ROM (Non-volatile):</strong> Permanent instructions (BIOS).</li>
+    </ul>
+
+    <h4>Secondary Storage</h4>
+    <p>Permanent storage for files and software. <strong>Media</strong> = the material (disk). <strong>Device</strong> = the machine (drive).</p>
+
+    <div class="device-card">
+        <h4>1. Hard Disk Drive (HDD) - Magnetic</h4>
+        <p><strong>How it works:</strong> Spinning magnetic platters with a read/write head. Magnetizes regions to represent 0s and 1s.</p>
+        <p><strong>Deletion:</strong> Data isn't removed immediately; the sector is marked "available" until overwritten.</p>
+    </div>
+
+    <div class="device-card">
+        <h4>2. Optical Discs (CD/DVD/Blu-ray)</h4>
+        <p><strong>How it works:</strong> Laser reads "pits" (indentations) and "lands" (flat areas). Reflection = 1, Scatter = 0.</p>
+        <p><strong>Types:</strong> ROM (Read only), R (Write once), RW (Rewritable - uses reheat-able dye).</p>
+    </div>
+
+    <div class="device-card">
+        <h4>3. Solid State Drive (SSD) - Flash</h4>
+        <p><strong>How it works:</strong> Uses flash memory chips (transistors) with electrical charges. No moving parts.</p>
+        <p><strong>Pros:</strong> Much faster, silent, more durable than HDDs.</p>
+    </div>
+
+</body>
+</html>

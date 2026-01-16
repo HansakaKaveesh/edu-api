@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit 1: Principles of Chemistry - States of Matter</title>
+    <style>
+        :root {
+            --primary-color: #2980b9; /* Science Blue */
+            --accent-color: #e67e22;  /* Orange for energy/heat */
+            --highlight-bg: #eaf2f8;
+            --border-color: #bdc3c7;
+            --text-color: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        /* Headers */
+        h1 {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-bottom: 5px solid #1a5276;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-top: 40px;
+            text-transform: uppercase;
+        }
+
+        h3 {
+            color: #d35400;
+            margin-top: 25px;
+        }
+
+        /* Cards and Containers */
+        .content-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .state-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .state-card {
+            flex: 1;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            min-width: 250px;
+        }
+
+        .state-card h4 {
+            color: var(--primary-color);
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        /* Images */
+        .img-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .responsive-img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .caption {
+            display: block;
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background-color: white;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        /* Lists */
+        ul {
+            padding-left: 20px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+
+        /* Highlight Boxes */
+        .highlight-box {
+            background-color: #fcf3cf;
+            border-left: 5px solid #f1c40f;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .experiment-box {
+            background-color: #e8f8f5;
+            border-left: 5px solid #1abc9c;
+            padding: 15px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>UNIT 01: PRINCIPLES OF CHEMISTRY</h1>
+
+    <h2>1. STATES OF MATTER</h2>
+
+    <h3>1.1 Arrangement of Particles</h3>
+    
+    <div class="img-container">
+        <img src="https://www.datocms-assets.com/117510/1746075560-beta_large-img-particle-nature-of-matter-model.jpg" alt="Particle Arrangement" class="responsive-img">
+        <span class="caption">The arrangement and energy of particles differs in Solids, Liquids, and Gases.</span>
+    </div>
+
+    <div class="state-container">
+        <!-- Solid -->
+        <div class="state-card">
+            <h4>Solid</h4>
+            <ul>
+                <li><strong>Arrangement:</strong> Regular, packed closely together.</li>
+                <li><strong>Movement:</strong> Vibrate in fixed positions.</li>
+                <li><strong>Forces:</strong> Strong attraction forces keep particles together.</li>
+                <li><strong>Energy:</strong> Lowest kinetic energy.</li>
+            </ul>
+        </div>
+
+        <!-- Liquid -->
+        <div class="state-card">
+            <h4>Liquid</h4>
+            <ul>
+                <li><strong>Arrangement:</strong> Random, mostly touching but with small gaps. Less dense than solids.</li>
+                <li><strong>Movement:</strong> Move around past each other.</li>
+                <li><strong>Forces:</strong> Less attraction than solids.</li>
+                <li><strong>Energy:</strong> More kinetic energy than solids, less than gas.</li>
+            </ul>
+        </div>
+
+        <!-- Gas -->
+        <div class="state-card">
+            <h4>Gas</h4>
+            <ul>
+                <li><strong>Arrangement:</strong> Random, particles are far apart.</li>
+                <li><strong>Movement:</strong> Moving rapidly.</li>
+                <li><strong>Forces:</strong> No forces of attraction.</li>
+                <li><strong>Energy:</strong> Highest kinetic energy.</li>
+            </ul>
+        </div>
+    </div>
+
+    <h3>1.2 Interconversions (Changing States)</h3>
+
+    <div class="content-card">
+        <h4>1. Solid ↔ Liquid</h4>
+        <p><strong>Melting (Solid to Liquid):</strong></p>
+        <ul>
+            <li>When heated, particles vibrate faster.</li>
+            <li>Energy breaks the strong attraction forces.</li>
+            <li>Occurs at the <strong>Melting Point</strong>.</li>
+        </ul>
+        <p><strong>Freezing (Liquid to Solid):</strong></p>
+        <ul>
+            <li>When cooled, particles move slower.</li>
+            <li>Attraction forces hold them in fixed positions.</li>
+            <li>Occurs at the <strong>Freezing Point</strong>.</li>
+        </ul>
+    </div>
+
+    <div class="content-card">
+        <h4>2. Liquid ↔ Gas</h4>
+        <p>This can happen in two ways: Boiling or Evaporation.</p>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>Boiling</th>
+                    <th>Evaporation</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Heat Source</strong></td>
+                    <td>Liquid is heated strongly</td>
+                    <td>Liquid is not heated directly</td>
+                </tr>
+                <tr>
+                    <td><strong>Visual</strong></td>
+                    <td>Bubbles are seen</td>
+                    <td>No bubbles</td>
+                </tr>
+                <tr>
+                    <td><strong>Speed</strong></td>
+                    <td>Happens quickly</td>
+                    <td>Happens slowly</td>
+                </tr>
+                <tr>
+                    <td><strong>Temperature</strong></td>
+                    <td>Fixed temperature (Boiling Point)</td>
+                    <td>Can occur at any temperature</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="content-card">
+        <h4>3. Solid ↔ Gas (Sublimation)</h4>
+        <p>Conversion directly from solid to gas (Sublimation) or gas to solid (Deposition/De-sublimation).</p>
+        <p><strong>Example: Carbon Dioxide ($CO_2$)</strong></p>
+        <ul>
+            <li>Solid $CO_2$ is called <strong>Dry Ice</strong> (White solid).</li>
+            <li>At ordinary pressure, it turns directly into gas.</li>
+            <li><em>Reaction:</em> $CO_2(s) \rightarrow CO_2(g)$</li>
+            <li><strong>Note:</strong> $CO_2$ gas is invisible. The "white cloud" seen is water vapour from the air condensing because the $CO_2$ is so cold.</li>
+        </ul>
+    </div>
+
+    <h3>1.3 Physical State at Temperature</h3>
+    <div class="highlight-box">
+        <p><strong>Example: Water</strong></p>
+        <ul>
+            <li><strong>Melting Point:</strong> 0°C (Below 0°C = Solid Ice).</li>
+            <li><strong>Boiling Point:</strong> 100°C (Above 100°C = Gas/Steam).</li>
+            <li>Between 0°C and 100°C = Liquid Water.</li>
+        </ul>
+    </div>
+
+    <h3>1.4 Diffusion</h3>
+    <p><strong>Definition:</strong> The movement of particles from an area of high concentration to an area of low concentration.</p>
+
+    <!-- Experiment 1 -->
+    <div class="experiment-box">
+        <h4>Experiment 1: Diffusion in Gases (Bromine)</h4>
+        <div class="img-container">
+            <img src="https://leavingbio.net/wp-content/uploads/2017/11/diffusion-2.gif" alt="Bromine Diffusion" class="responsive-img">
+        </div>
+        <ul>
+            <li><strong>Setup:</strong> A jar of air (colorless) is placed on top of a jar of Bromine gas (Brown).</li>
+            <li><strong>Observation:</strong> The brown color slowly spreads upwards until both jars are uniformly brown.</li>
+            <li><strong>Explanation:</strong> Particles move randomly and bounce off air particles, eventually mixing completely.</li>
+        </ul>
+    </div>
+
+    <!-- Experiment 2 -->
+    <div class="experiment-box">
+        <h4>Experiment 2: Reaction of Ammonia and Hydrogen Chloride</h4>
+        <div class="img-container">
+            <img src="https://www.kofastudy.com/wp-content/uploads/2021/02/Screenshot-2024-01-31-at-08.10.06.png" alt="White Ring Experiment" class="responsive-img">
+        </div>
+        <p><strong>Reaction:</strong> $NH_3 (gas) + HCl (gas) \rightarrow NH_4Cl (white\ solid)$</p>
+        <ul>
+            <li>Cotton wool soaked in Ammonia ($NH_3$) is placed at one end of a tube.</li>
+            <li>Cotton wool soaked in Hydrochloric Acid ($HCl$) is placed at the other end.</li>
+            <li><strong>Observation:</strong> A white ring of Ammonium Chloride forms.</li>
+            <li><strong>Location:</strong> The ring forms closer to the $HCl$ end.</li>
+            <li><strong>Conclusion:</strong> Ammonia particles are <strong>lighter</strong> than HCl particles, so they diffuse (travel) <strong>faster</strong>.</li>
+        </ul>
+    </div>
+
+    <!-- Experiment 3 -->
+    <div class="experiment-box">
+        <h4>Experiment 3: Diffusion in Liquids & Dilution</h4>
+        <p><strong>Observation:</strong> Diffusion in liquids is much slower than in gases because liquid particles are closer together and collide more often.</p>
+        
+        <h5>Potassium Manganate(VII) Dilution</h5>
+        <div class="img-container">
+            <img src="https://cdn.savemyexams.com/uploads/2021/08/1.1.2-Dilution-of-potassium-managanteVII.png" alt="Dilution" class="responsive-img">
+        </div>
+        <ul>
+            <li>A tiny crystal (0.01g) creates a deep purple solution in water.</li>
+            <li>Even after diluting 10,000 times, the solution remains pink/purple.</li>
+            <li><strong>Conclusion:</strong> Particles (atoms/molecules) must be extremely small. A single crystal contains millions of particles to be able to spread out that much.</li>
+        </ul>
+    </div>
+
+    <h3>1.5 Solubility</h3>
+    <div class="content-card">
+        <p><strong>Key Terms:</strong></p>
+        <ul>
+            <li><strong>Solute:</strong> The solid that dissolves (e.g., Salt).</li>
+            <li><strong>Solvent:</strong> The liquid it dissolves in (e.g., Water).</li>
+            <li><strong>Solution:</strong> The mixture formed (e.g., Saltwater).</li>
+            <li><strong>Saturated Solution:</strong> A solution where no more solute can dissolve at that temperature.</li>
+        </ul>
+    </div>
+
+    <h4>Solubility Curve</h4>
+    <p>Solubility is measured as the grams of solute per 100g of solvent.</p>
+    
+    <div class="img-container">
+        <img src="https://o.quizlet.com/iEw4p1mV.wkt1vU4LPr17Q.png" alt="Solubility Curve" class="responsive-img">
+        <span class="caption">Graph showing how solubility changes with temperature for KNO3 and KCl.</span>
+    </div>
+
+    <div class="highlight-box">
+        <h4>Calculation Example: Crystallization</h4>
+        <p><strong>Scenario:</strong></p>
+        <ul>
+            <li>At 90°C, the solubility of $KNO_3$ is <strong>200g</strong> per 100g water.</li>
+            <li>At 30°C, the solubility of $KNO_3$ is <strong>50g</strong> per 100g water.</li>
+        </ul>
+        <p><strong>Question:</strong> If a saturated solution is cooled from 90°C to 30°C, how much solid crystallizes?</p>
+        <p><strong>Answer:</strong> $200g - 50g = \mathbf{150g}$ of crystals formed.</p>
+    </div>
+
+    <h2>REVISION SUMMARY</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Process</th>
+                <th>State Change</th>
+                <th>Depends On</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Boiling</strong></td>
+                <td>Liquid to Gas</td>
+                <td>Boiling Point</td>
+            </tr>
+            <tr>
+                <td><strong>Freezing</strong></td>
+                <td>Liquid to Solid</td>
+                <td>Freezing Point</td>
+            </tr>
+            <tr>
+                <td><strong>Melting</strong></td>
+                <td>Solid to Liquid</td>
+                <td>Melting Point</td>
+            </tr>
+            <tr>
+                <td><strong>Evaporation</strong></td>
+                <td>Liquid to Gas</td>
+                <td>Any Temperature</td>
+            </tr>
+            <tr>
+                <td><strong>Sublimation</strong></td>
+                <td>Solid to Gas</td>
+                <td>N/A</td>
+            </tr>
+        </tbody>
+    </table>
+
+</body>
+</html>

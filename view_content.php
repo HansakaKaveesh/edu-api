@@ -158,12 +158,7 @@ if (
     }
 
     // Assignment by lesson/content link
-    $asStmt = $conn->prepare("
-        SELECT assignment_id 
-        FROM assignments 
-        WHERE lesson_id = ? 
-        LIMIT 1
-    ");
+    $asStmt = $conn->prepare("SELECT assignment_id FROM assignments WHERE lesson_id = ? LIMIT 1");
     $asStmt->bind_param("i", $content_id);
     $asStmt->execute();
     $rowA = $asStmt->get_result()->fetch_assoc();
@@ -173,12 +168,7 @@ if (
 
     if ($assignment_id) {
         // Resolve student
-        $su = $conn->prepare("
-            SELECT student_id 
-            FROM students 
-            WHERE user_id = ? 
-            LIMIT 1
-        ");
+        $su = $conn->prepare("SELECT student_id FROM students WHERE user_id = ? LIMIT 1");
         $su->bind_param("i", $user_id);
         $su->execute();
         $rowS = $su->get_result()->fetch_assoc();
@@ -187,22 +177,13 @@ if (
         $student_id = (int)($rowS['student_id'] ?? 0);
         if ($student_id) {
             // Fetch questions
-            $qs = $conn->prepare("
-                SELECT question_id, question_text, option_a, option_b, option_c, option_d, correct_option 
-                FROM assignment_questions 
-                WHERE assignment_id = ?
-            ");
+            $qs = $conn->prepare("SELECT question_id, correct_option FROM assignment_questions WHERE assignment_id = ?");
             $qs->bind_param("i", $assignment_id);
             $qs->execute();
             $questionsRes = $qs->get_result();
 
             // Assignment meta (for pass score)
-            $am = $conn->prepare("
-                SELECT passing_score 
-                FROM assignments 
-                WHERE assignment_id = ? 
-                LIMIT 1
-            ");
+            $am = $conn->prepare("SELECT passing_score FROM assignments WHERE assignment_id = ? LIMIT 1");
             $am->bind_param("i", $assignment_id);
             $am->execute();
             $assignment = $am->get_result()->fetch_assoc();
@@ -212,21 +193,14 @@ if (
             $score   = 0;
 
             // Create attempt
-            $insAttempt = $conn->prepare("
-                INSERT INTO student_assignment_attempts (student_id, assignment_id, score, passed) 
-                VALUES (?, ?, 0, 0)
-            ");
+            $insAttempt = $conn->prepare("INSERT INTO student_assignment_attempts (student_id, assignment_id, score, passed) VALUES (?, ?, 0, 0)");
             $insAttempt->bind_param("ii", $student_id, $assignment_id);
             $insAttempt->execute();
             $attempt_id = (int)$conn->insert_id;
             $insAttempt->close();
 
             // Insert answers
-            $insQ = $conn->prepare("
-                INSERT INTO assignment_attempt_questions 
-                    (attempt_id, question_id, selected_option, is_correct) 
-                VALUES (?, ?, ?, ?)
-            ");
+            $insQ = $conn->prepare("INSERT INTO assignment_attempt_questions (attempt_id, question_id, selected_option, is_correct) VALUES (?, ?, ?, ?)");
 
             while ($q = $questionsRes->fetch_assoc()) {
                 $qid      = (int)$q['question_id'];
@@ -244,19 +218,13 @@ if (
             $passScore = (int)($assignment['passing_score'] ?? 0);
             $passed    = ($score >= $passScore) ? 1 : 0;
 
-            $up = $conn->prepare("
-                UPDATE student_assignment_attempts 
-                SET score = ?, passed = ? 
-                WHERE attempt_id = ?
-            ");
+            $up = $conn->prepare("UPDATE student_assignment_attempts SET score = ?, passed = ? WHERE attempt_id = ?");
             $up->bind_param("iii", $score, $passed, $attempt_id);
             $up->execute();
             $up->close();
 
-            echo "<script>
-                alert('✅ Quiz submitted! Score: " . (int)$score . "');
-                location.href = location.href;
-            </script>";
+            // Redirect to self to show results
+            header("Location: " . $_SERVER['REQUEST_URI']);
             exit;
         }
     }
@@ -287,13 +255,8 @@ $questions_review = null;
 $attempts         = 0;
 
 if ($role === 'student' && $content_type === 'quiz') {
-    // Assignment id again (prepared)
-    $asStmt = $conn->prepare("
-        SELECT assignment_id 
-        FROM assignments 
-        WHERE lesson_id = ? 
-        LIMIT 1
-    ");
+    // Get Assignment ID
+    $asStmt = $conn->prepare("SELECT assignment_id FROM assignments WHERE lesson_id = ? LIMIT 1");
     $asStmt->bind_param("i", $content_id);
     $asStmt->execute();
     $rowA = $asStmt->get_result()->fetch_assoc();
@@ -302,12 +265,7 @@ if ($role === 'student' && $content_type === 'quiz') {
     $assignment_id = (int)($rowA['assignment_id'] ?? 0);
 
     if ($assignment_id) {
-        $stuStmt = $conn->prepare("
-            SELECT student_id 
-            FROM students 
-            WHERE user_id = ? 
-            LIMIT 1
-        ");
+        $stuStmt = $conn->prepare("SELECT student_id FROM students WHERE user_id = ? LIMIT 1");
         $stuStmt->bind_param("i", $user_id);
         $stuStmt->execute();
         $rowS = $stuStmt->get_result()->fetch_assoc();
@@ -315,16 +273,14 @@ if ($role === 'student' && $content_type === 'quiz') {
         $student_id = (int)($rowS['student_id'] ?? 0);
 
         if ($student_id) {
-            $cntAtt = $conn->prepare("
-                SELECT COUNT(*) as cnt 
-                FROM student_assignment_attempts 
-                WHERE student_id = ? AND assignment_id = ?
-            ");
+            // Count attempts
+            $cntAtt = $conn->prepare("SELECT COUNT(*) as cnt FROM student_assignment_attempts WHERE student_id = ? AND assignment_id = ?");
             $cntAtt->bind_param("ii", $student_id, $assignment_id);
             $cntAtt->execute();
             $attempts = (int)($cntAtt->get_result()->fetch_assoc()['cnt'] ?? 0);
             $cntAtt->close();
 
+            // Get Last attempt
             $lastAtt = $conn->prepare("
                 SELECT attempt_id, score, passed, attempted_at 
                 FROM student_assignment_attempts 
@@ -339,11 +295,8 @@ if ($role === 'student' && $content_type === 'quiz') {
 
             if ($latest_attempt) {
                 $aid = (int)$latest_attempt['attempt_id'];
-                $ans = $conn->prepare("
-                    SELECT question_id, selected_option, is_correct 
-                    FROM assignment_attempt_questions 
-                    WHERE attempt_id = ?
-                ");
+                // Get user answers
+                $ans = $conn->prepare("SELECT question_id, selected_option, is_correct FROM assignment_attempt_questions WHERE attempt_id = ?");
                 $ans->bind_param("i", $aid);
                 $ans->execute();
                 $ansRes = $ans->get_result();
@@ -352,6 +305,7 @@ if ($role === 'student' && $content_type === 'quiz') {
                 }
                 $ans->close();
 
+                // Get questions for review
                 $qrev = $conn->prepare("
                     SELECT question_id, question_text, option_a, option_b, option_c, option_d, correct_option 
                     FROM assignment_questions 
@@ -360,7 +314,6 @@ if ($role === 'student' && $content_type === 'quiz') {
                 $qrev->bind_param("i", $assignment_id);
                 $qrev->execute();
                 $questions_review = $qrev->get_result();
-                // not closing here; rely on end-of-request cleanup
             }
         }
     }
@@ -391,7 +344,6 @@ if ($role === 'student' && $content_type === 'quiz') {
     <?php include 'components/sidebar_student.php'; ?>
   <?php elseif ($role === 'teacher'): ?>
     <?php
-      // Change the path/file name if your teacher sidebar is named differently
       if (file_exists(__DIR__ . '/components/sidebar_teacher.php')) {
           include 'components/sidebar_teacher.php';
       }
@@ -454,6 +406,7 @@ if ($role === 'student' && $content_type === 'quiz') {
         </div>
       <?php endif; ?>
 
+      <!-- File Attachment / Modal Button -->
       <?php if (!empty($content['file_url'])): ?>
         <?php
           $extPath = parse_url($content['file_url'], PHP_URL_PATH) ?? '';
@@ -488,8 +441,6 @@ if ($role === 'student' && $content_type === 'quiz') {
                 <source src="<?= h($content['file_url']) ?>">
                 Your browser does not support the video tag.
               </video>
-            <?php elseif ($isPdf): ?>
-              <iframe src="<?= h($content['file_url']) ?>" class="w-full h-[75vh] rounded" frameborder="0"></iframe>
             <?php else: ?>
               <iframe src="<?= h($content['file_url']) ?>" class="w-full h-[75vh] rounded" frameborder="0"></iframe>
             <?php endif; ?>
@@ -499,9 +450,6 @@ if ($role === 'student' && $content_type === 'quiz') {
 
       <!-- Linked Assignment (for lessons) -->
       <?php if ($content_type === 'lesson'): ?>
-        <h2 class="text-xl font-semibold mt-8 mb-3 inline-flex items-center gap-2">
-          <ion-icon name="create-outline" class="text-amber-600"></ion-icon> Linked Assignment
-        </h2>
         <?php
           $assStmt = $conn->prepare("
               SELECT assignment_id, title, description, due_date, total_marks, passing_score 
@@ -515,6 +463,9 @@ if ($role === 'student' && $content_type === 'quiz') {
           $assStmt->close();
         ?>
         <?php if ($assignment): ?>
+          <h2 class="text-xl font-semibold mt-8 mb-3 inline-flex items-center gap-2">
+             <ion-icon name="create-outline" class="text-amber-600"></ion-icon> Linked Assignment
+          </h2>
           <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
             <p class="mb-2 font-semibold"><?= h($assignment['title']) ?></p>
             <p class="text-gray-700"><?= nl2br(h($assignment['description'])) ?></p>
@@ -540,179 +491,270 @@ if ($role === 'student' && $content_type === 'quiz') {
               </p>
             <?php endif; ?>
           </div>
-        <?php else: ?>
-          <p class="text-gray-600"><em>No assignment linked.</em></p>
         <?php endif; ?>
       <?php endif; ?>
 
-      <!-- Quiz (Unlimited attempts) with Summary/Review -->
+      <!-- QUIZ ASSESSMENT (MODERN REDESIGN) -->
       <?php if ($content_type === 'quiz'): ?>
-        <h2 class="text-xl font-semibold mt-8 mb-3 inline-flex items-center gap-2">
-          <ion-icon name="trophy-outline" class="text-emerald-600"></ion-icon> Quiz
-        </h2>
+        
         <?php
-          // For rendering the quiz questions (fresh)
-          $aidStmt = $conn->prepare("
-              SELECT assignment_id 
-              FROM assignments 
-              WHERE lesson_id = ? 
-              LIMIT 1
-          ");
+          // 1. Get Assignment ID (Logic reused for safety in display block)
+          $aidStmt = $conn->prepare("SELECT assignment_id FROM assignments WHERE lesson_id = ? LIMIT 1");
           $aidStmt->bind_param("i", $content_id);
           $aidStmt->execute();
           $aidRow = $aidStmt->get_result()->fetch_assoc();
           $aidStmt->close();
           $assignment_id = (int)($aidRow['assignment_id'] ?? 0);
 
+          // 2. Fetch Questions (for the form)
           $questionsList = null;
           if ($assignment_id) {
-              $qList = $conn->prepare("
-                  SELECT question_id, question_text, option_a, option_b, option_c, option_d 
-                  FROM assignment_questions 
-                  WHERE assignment_id = ?
-              ");
+              $qList = $conn->prepare("SELECT question_id, question_text, option_a, option_b, option_c, option_d FROM assignment_questions WHERE assignment_id = ?");
               $qList->bind_param("i", $assignment_id);
               $qList->execute();
               $questionsList = $qList->get_result();
           }
         ?>
 
-        <?php if (!empty($assignment_id)): ?>
-          <div x-data="{ showSummary:false, showReview:false }" class="space-y-4">
-            <?php if ($role === 'student' && $latest_attempt): ?>
-              <div class="flex flex-wrap items-center gap-2">
-                <button @click="showSummary = !showSummary"
-                        class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition">
-                  <ion-icon name="clipboard-outline"></ion-icon> Last Attempt Summary
-                </button>
-                <button @click="showReview = !showReview"
-                        class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition">
-                  <ion-icon name="eye-outline"></ion-icon> Review Answers
-                </button>
-              </div>
-
-              <!-- Summary -->
-              <div x-show="showSummary" x-cloak
-                   x-transition:enter="transition ease-out duration-200"
-                   x-transition:enter-start="opacity-0 -translate-y-1"
-                   x-transition:enter-end="opacity-100 translate-y-0"
-                   class="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
-                <h3 class="text-lg font-bold mb-2 text-emerald-700 inline-flex items-center gap-1">
-                  <ion-icon name="checkmark-done-outline"></ion-icon> Your Last Attempt
-                </h3>
-                <?php
-                  $totalQ   = $questions_review ? $questions_review->num_rows : 0;
-                  $attemptDt= $latest_attempt['attempted_at'] ? date('Y-m-d H:i:s', strtotime($latest_attempt['attempted_at'])) : '';
-                  $passedTxt= $latest_attempt['passed'] ? '<span class="text-emerald-700 font-bold">Pass</span>' : '<span class="text-rose-600 font-bold">Fail</span>';
-                ?>
-                <p class="text-sm mb-2">
-                  Score: <span class="font-semibold text-blue-700"><?= (int)$latest_attempt['score'] ?></span> /
-                  <span class="font-semibold text-blue-700"><?= (int)$totalQ ?></span> |
-                  Result: <?= $passedTxt ?>
-                </p>
-                <p class="text-xs text-gray-600 inline-flex items-center gap-1">
-                  <ion-icon name="time-outline"></ion-icon> <?= h($attemptDt) ?> · Attempts so far: <?= (int)$attempts ?>
-                </p>
-              </div>
-
-              <!-- Review -->
-              <div x-show="showReview" x-cloak
-                   x-transition:enter="transition ease-out duration-200"
-                   x-transition:enter-start="opacity-0 -translate-y-1"
-                   x-transition:enter-end="opacity-100 translate-y-0"
-                   class="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
-                <h3 class="text-lg font-bold mb-3 text-indigo-700 inline-flex items-center gap-1">
-                  <ion-icon name="document-text-outline"></ion-icon> Answer Review
-                </h3>
-                <?php if ($questions_review && $questions_review->num_rows > 0): ?>
-                  <div class="space-y-3">
-                    <?php foreach ($questions_review as $q):
-                      $qid       = (int)$q['question_id'];
-                      $selected  = $answersMap[$qid]['selected_option'] ?? null;
-                      $is_correct= (int)($answersMap[$qid]['is_correct'] ?? 0);
-                      $correct   = $q['correct_option'];
-                    ?>
-                      <div class="p-3 rounded border <?= $is_correct ? 'border-emerald-300 bg-emerald-50' : 'border-rose-300 bg-rose-50' ?>">
-                        <div class="font-medium mb-1"><?= h($q['question_text']) ?></div>
-                        <?php foreach (['A','B','C','D'] as $opt):
-                          $txt = h($q['option_'.strtolower($opt)]);
-                          $isUser   = ($selected === $opt);
-                          $isAnswer = ($correct === $opt);
-                        ?>
-                          <div class="ml-4 flex items-center text-sm">
-                            <?php if ($isUser && $isAnswer): ?>
-                              <ion-icon name="checkmark-circle-outline" class="text-emerald-600 mr-2"></ion-icon>
-                            <?php elseif ($isUser && !$isAnswer): ?>
-                              <ion-icon name="close-circle-outline" class="text-rose-600 mr-2"></ion-icon>
-                            <?php else: ?>
-                              <span class="w-5 inline-block"></span>
-                            <?php endif; ?>
-                            <span class="<?= $isAnswer ? 'font-semibold underline text-emerald-700' : ($isUser ? 'text-rose-700' : '') ?>">
-                              <?= $opt ?>) <?= $txt ?>
-                            </span>
-                            <?php if ($isUser): ?><span class="ml-2 text-xs text-gray-500">(Your answer)</span><?php endif; ?>
-                            <?php if ($isAnswer): ?><span class="ml-2 text-xs text-emerald-700">(Correct answer)</span><?php endif; ?>
-                          </div>
-                        <?php endforeach; ?>
-                      </div>
-                    <?php endforeach; ?>
-                  </div>
-                <?php else: ?>
-                  <p class="text-gray-600">No questions to review.</p>
-                <?php endif; ?>
-              </div>
-            <?php elseif ($role === 'teacher'): ?>
-              <p class="text-xs text-gray-500">
-                (Teacher preview – students will see attempt summary and review here.)
-              </p>
-            <?php endif; ?>
+        <div class="mt-8 border-t border-gray-100 pt-8">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="p-2 bg-indigo-100 text-indigo-600 rounded-lg">
+              <ion-icon name="trophy" class="text-xl"></ion-icon>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800">Quiz Assessment</h2>
           </div>
 
-          <!-- Submission form / preview of questions -->
-          <?php if ($questionsList && $questionsList->num_rows > 0): ?>
+          <?php if (!empty($assignment_id)): ?>
+            
+            <!-- Student View -->
             <?php if ($role === 'student'): ?>
-              <form method="post" class="space-y-4 mt-6">
-                <input type="hidden" name="csrf_token" value="<?= h($csrf) ?>">
-                <?php foreach ($questionsList as $q): ?>
-                  <div class="rounded-lg border border-gray-100 p-3">
-                    <p class="font-medium"><?= h($q['question_text']) ?></p>
-                    <?php foreach (['A','B','C','D'] as $opt): ?>
-                      <label class="block ml-4 mt-1 text-gray-700">
-                        <input type="radio" name="quiz[<?= (int)$q['question_id'] ?>]" value="<?= $opt ?>" required class="mr-2 accent-blue-600">
-                        <?= $opt ?>) <?= h($q['option_'.strtolower($opt)]) ?>
-                      </label>
-                    <?php endforeach; ?>
+              <div x-data="{ showReview: false }">
+                
+                <!-- 1. Stats / Summary Dashboard -->
+                <?php if ($latest_attempt): 
+                    $totalQ = $questions_review ? $questions_review->num_rows : 0;
+                    $score = (int)$latest_attempt['score'];
+                    $passed = (bool)$latest_attempt['passed'];
+                    $percentage = $totalQ > 0 ? round(($score / $totalQ) * 100) : 0;
+                ?>
+                  <div class="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl shadow-lg p-6 text-white mb-8 relative overflow-hidden">
+                    <!-- Background decoration -->
+                    <div class="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                    
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+                      <div>
+                        <p class="text-slate-300 text-sm font-medium uppercase tracking-wider mb-1">Last Result</p>
+                        <h3 class="text-3xl font-bold flex items-center gap-3">
+                          <?= $passed ? '<span class="text-emerald-400">Passed</span>' : '<span class="text-rose-400">Failed</span>' ?>
+                          <span class="text-lg font-normal text-slate-400">
+                             (<?= $score ?>/<?= $totalQ ?> Correct)
+                          </span>
+                        </h3>
+                        <p class="text-sm text-slate-400 mt-2 flex items-center gap-2">
+                           <ion-icon name="calendar-outline"></ion-icon> 
+                           <?= date('M d, Y h:i A', strtotime($latest_attempt['attempted_at'])) ?>
+                           <span class="w-1 h-1 bg-slate-500 rounded-full"></span>
+                           Attempt #<?= (int)$attempts ?>
+                        </p>
+                      </div>
+
+                      <div class="flex items-center gap-4">
+                        <!-- Circular Progress Visual -->
+                        <div class="relative w-16 h-16 flex items-center justify-center rounded-full border-4 <?= $passed ? 'border-emerald-500' : 'border-rose-500' ?> bg-slate-800">
+                           <span class="font-bold text-sm"><?= $percentage ?>%</span>
+                        </div>
+                        
+                        <button @click="showReview = !showReview" 
+                                class="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 transition flex items-center gap-2 text-sm font-medium backdrop-blur-sm">
+                          <ion-icon :name="showReview ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+                          <span x-text="showReview ? 'Hide Review' : 'Review Answers'"></span>
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                <?php endforeach; ?>
-                <button type="submit" name="submit_quiz"
-                        class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
-                  <ion-icon name="send-outline"></ion-icon> Submit Quiz
-                </button>
-                <p class="text-sm text-gray-500 mt-1">Attempts so far: <?= (int)$attempts ?></p>
-              </form>
-            <?php else: ?>
-              <div class="space-y-4 mt-6">
-                <?php foreach ($questionsList as $q): ?>
-                  <div class="rounded-lg border border-gray-100 p-3">
-                    <p class="font-medium"><?= h($q['question_text']) ?></p>
-                    <?php foreach (['A','B','C','D'] as $opt): ?>
-                      <p class="ml-4 mt-1 text-gray-700">
-                        <?= $opt ?>) <?= h($q['option_'.strtolower($opt)]) ?>
-                      </p>
-                    <?php endforeach; ?>
+
+                  <!-- 2. Review Section (Toggleable) -->
+                  <div x-show="showReview" x-cloak 
+                       x-transition:enter="transition ease-out duration-300"
+                       x-transition:enter-start="opacity-0 translate-y-2"
+                       x-transition:enter-end="opacity-100 translate-y-0"
+                       class="space-y-6 mb-10">
+                    
+                    <h3 class="font-bold text-gray-700 text-lg border-b pb-2">Answer Breakdown</h3>
+
+                    <?php if ($questions_review && $questions_review->num_rows > 0): ?>
+                      <?php foreach ($questions_review as $index => $q): 
+                          $qid = (int)$q['question_id'];
+                          $selected = $answersMap[$qid]['selected_option'] ?? null;
+                          $correct = $q['correct_option'];
+                          $is_correct = ($selected === $correct);
+                          
+                          // Styling Logic
+                          $cardBorder = $is_correct ? 'border-emerald-200' : 'border-rose-200';
+                          $cardBg = $is_correct ? 'bg-emerald-50/30' : 'bg-rose-50/30';
+                          $icon = $is_correct ? 'checkmark-circle' : 'close-circle';
+                          $iconColor = $is_correct ? 'text-emerald-500' : 'text-rose-500';
+                      ?>
+                        <div class="rounded-xl border <?= $cardBorder ?> <?= $cardBg ?> p-5 transition hover:shadow-md bg-white">
+                          <div class="flex gap-4">
+                            <div class="flex-shrink-0 mt-1">
+                               <ion-icon name="<?= $icon ?>" class="text-2xl <?= $iconColor ?>"></ion-icon>
+                            </div>
+                            <div class="flex-grow">
+                              <p class="font-semibold text-gray-800 text-lg mb-3">
+                                <span class="text-gray-400 mr-1"><?= sprintf("%02d", $index + 1) ?>.</span> 
+                                <?= h($q['question_text']) ?>
+                              </p>
+                              
+                              <div class="grid gap-2 sm:grid-cols-2">
+                                <?php foreach (['A','B','C','D'] as $opt): 
+                                    $txt = h($q['option_'.strtolower($opt)]);
+                                    $isUser = ($selected === $opt);
+                                    $isAns = ($correct === $opt);
+                                    
+                                    // Option Styles
+                                    $optClass = "border-gray-200 text-gray-600";
+                                    $badge = "";
+
+                                    if ($isAns) {
+                                        $optClass = "border-emerald-500 bg-emerald-50 text-emerald-800 ring-1 ring-emerald-500";
+                                        $badge = "<span class='ml-auto text-xs font-bold text-emerald-600 uppercase tracking-wider'>Correct</span>";
+                                    } elseif ($isUser && !$is_correct) {
+                                        $optClass = "border-rose-300 bg-rose-50 text-rose-800";
+                                        $badge = "<span class='ml-auto text-xs font-bold text-rose-600 uppercase tracking-wider'>Your Answer</span>";
+                                    } elseif ($isUser && $is_correct) {
+                                        $badge = "<span class='ml-auto text-xs font-bold text-emerald-600 uppercase tracking-wider'>You & Correct</span>";
+                                    }
+                                ?>
+                                  <div class="relative flex items-center p-3 rounded-lg border <?= $optClass ?> text-sm">
+                                    <span class="w-6 font-bold opacity-60"><?= $opt ?>.</span>
+                                    <span><?= $txt ?></span>
+                                    <?= $badge ?>
+                                  </div>
+                                <?php endforeach; ?>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      <?php endforeach; ?>
+                    <?php else: ?>
+                      <div class="text-center py-8 text-gray-500 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                        No review data available.
+                      </div>
+                    <?php endif; ?>
                   </div>
-                <?php endforeach; ?>
+                <?php endif; ?>
+
+                <!-- 3. New Submission Form -->
+                <?php if ($questionsList && $questionsList->num_rows > 0): ?>
+                  <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                      <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                        <ion-icon name="pencil" class="text-blue-600"></ion-icon> Take Quiz
+                      </h3>
+                      <span class="text-xs font-medium px-2 py-1 bg-white border rounded text-gray-500">
+                        Attempting now
+                      </span>
+                    </div>
+
+                    <form method="post" class="p-6 md:p-8 space-y-10">
+                      <input type="hidden" name="csrf_token" value="<?= h($csrf) ?>">
+                      
+                      <?php 
+                        // Reset pointer in case it was used before
+                        $questionsList->data_seek(0);
+                        $qCount = 0;
+                      ?>
+                      <?php while($q = $questionsList->fetch_assoc()): $qCount++; ?>
+                        <!-- Single Question Block -->
+                        <div class="group" x-data="{ selected: '' }">
+                          <div class="flex items-start gap-4 mb-4">
+                            <span class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-bold text-sm">
+                              <?= $qCount ?>
+                            </span>
+                            <h4 class="text-lg font-medium text-gray-900 leading-snug pt-0.5">
+                              <?= h($q['question_text']) ?>
+                            </h4>
+                          </div>
+
+                          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pl-0 md:pl-12">
+                            <?php foreach (['A','B','C','D'] as $opt): ?>
+                              <label class="relative flex cursor-pointer rounded-xl border p-4 shadow-sm focus:outline-none transition-all duration-200"
+                                     :class="selected === '<?= $opt ?>' 
+                                        ? 'border-blue-600 ring-1 ring-blue-600 bg-blue-50/50 z-10' 
+                                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'">
+                                <input type="radio" 
+                                       name="quiz[<?= (int)$q['question_id'] ?>]" 
+                                       value="<?= $opt ?>" 
+                                       class="sr-only" 
+                                       required
+                                       x-model="selected">
+                                <span class="flex flex-1">
+                                  <span class="flex flex-col">
+                                    <span class="block text-sm font-medium text-gray-900 flex gap-2">
+                                      <span class="text-gray-400 font-normal"><?= $opt ?>.</span> 
+                                      <?= h($q['option_'.strtolower($opt)]) ?>
+                                    </span>
+                                  </span>
+                                </span>
+                                <!-- Checkmark Icon (Visible when selected) -->
+                                <ion-icon name="checkmark-circle" 
+                                          class="text-blue-600 text-xl ml-3"
+                                          x-show="selected === '<?= $opt ?>'"
+                                          x-transition:enter="transition ease-out duration-200"
+                                          x-transition:enter-start="opacity-0 scale-50"
+                                          x-transition:enter-end="opacity-100 scale-100"></ion-icon>
+                                <!-- Empty Circle (Visible when NOT selected) -->
+                                <div class="h-5 w-5 rounded-full border border-gray-300 ml-3"
+                                     x-show="selected !== '<?= $opt ?>'"></div>
+                              </label>
+                            <?php endforeach; ?>
+                          </div>
+                        </div>
+                      <?php endwhile; ?>
+
+                      <div class="pt-6 border-t border-gray-100 flex items-center justify-between">
+                         <span class="text-sm text-gray-500">
+                           Total Attempts: <span class="font-medium text-gray-800"><?= (int)$attempts ?></span>
+                         </span>
+                         <button type="submit" name="submit_quiz"
+                                 class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold shadow-lg shadow-blue-200 transition transform hover:-translate-y-0.5">
+                           <span>Submit Assessment</span>
+                           <ion-icon name="arrow-forward"></ion-icon>
+                         </button>
+                      </div>
+                    </form>
+                  </div>
+                <?php endif; ?>
+
               </div>
-              <p class="text-xs text-gray-500 mt-2">
-                (Teacher preview – quiz submission is available only for students.)
-              </p>
+            <?php else: // Not Student (Teacher/Admin) ?>
+               <div class="bg-amber-50 border border-amber-200 rounded-xl p-6 text-center">
+                  <ion-icon name="eye-off-outline" class="text-4xl text-amber-400 mb-2"></ion-icon>
+                  <p class="text-amber-800 font-medium">Teacher View Mode</p>
+                  <p class="text-sm text-amber-700 mt-1">
+                    You can manage quiz questions in the course manager. The interactive quiz interface above is visible only to enrolled students.
+                  </p>
+                  <?php if ($questionsList && $questionsList->num_rows > 0): ?>
+                    <div class="mt-6 text-left max-w-2xl mx-auto space-y-4">
+                       <h4 class="font-bold text-gray-700">Preview Questions:</h4>
+                       <?php $questionsList->data_seek(0); while($q = $questionsList->fetch_assoc()): ?>
+                         <div class="p-3 bg-white border rounded">
+                           <?= h($q['question_text']) ?>
+                         </div>
+                       <?php endwhile; ?>
+                    </div>
+                  <?php endif; ?>
+               </div>
             <?php endif; ?>
+
           <?php else: ?>
-            <p class="text-gray-600">No quiz questions found.</p>
+            <div class="text-center py-10 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+               <ion-icon name="document-text-outline" class="text-4xl text-gray-300 mb-2"></ion-icon>
+               <p class="text-gray-500 font-medium">No quiz questions have been assigned to this content yet.</p>
+            </div>
           <?php endif; ?>
-        <?php else: ?>
-          <p class="text-gray-600">No quiz attached to this content.</p>
-        <?php endif; ?>
+        </div>
       <?php endif; ?>
 
       <!-- Forum -->

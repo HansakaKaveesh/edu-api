@@ -314,7 +314,7 @@ $totalEnrolled = count($enrollments);
         <!-- Quick stats -->
         <div class="grid grid-cols-3 gap-2 sm:gap-3 max-w-xs ml-auto">
           <div class="rounded-2xl bg-white/80 border border-slate-100 px-3 py-3 text-center shadow-sm">
-            <p class="text-[11px] text-slate-500 uppercase tracking-wide font-semibold">Total Courses</p>
+            <p class="text-[11px] text-slate-500 uppercase tracking-wide font-semibold">Courses</p>
             <p class="mt-1 text-xl font-semibold text-slate-900"><?= (int)$totalCourses ?></p>
           </div>
           <div class="rounded-2xl bg-emerald-50/80 border border-emerald-100 px-3 py-3 text-center shadow-sm">

@@ -65,13 +65,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['newsletter_email'])) 
       </h4>
       <ul class="space-y-2">
         <li>
-          <a href="/index.php" class="group flex items-center gap-2 hover:text-yellow-300 transition">
+          <a href="./index.php" class="group flex items-center gap-2 hover:text-yellow-300 transition">
             <ion-icon name="home-outline" class="text-yellow-300"></ion-icon> Home
             <ion-icon name="chevron-forward-outline" class="ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition"></ion-icon>
           </a>
         </li>
         <li>
-          <a href="#courses" class="group flex items-center gap-2 hover:text-yellow-300 transition">
+          <a href="./courseus.php" class="group flex items-center gap-2 hover:text-yellow-300 transition">
             <ion-icon name="library-outline" class="text-yellow-300"></ion-icon> Courses
             <ion-icon name="chevron-forward-outline" class="ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition"></ion-icon>
           </a>
