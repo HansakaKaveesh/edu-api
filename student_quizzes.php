@@ -541,7 +541,7 @@ if (!empty($courses)) {
                                         <?php endif; ?>
                                       </td>
                                       <td class="px-4 py-3 border-t text-center align-middle">
-                                          <a href="view_content.php?id=<?= $content_id ?>"
+                                          <a href="view_content.php?content_id=<?= $content_id ?>"
                                              class="inline-flex items-center gap-2 bg-indigo-600 text-white px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium hover:bg-indigo-700 shadow-md shadow-indigo-500/25 transition">
                                               <ion-icon name="<?= $status === 'completed' ? 'refresh-outline' : 'play-outline' ?>"></ion-icon>
                                               <?= $status === 'completed' ? 'Retake Quiz' : 'Start Quiz' ?>
